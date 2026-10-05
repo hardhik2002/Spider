@@ -138,6 +138,46 @@ async def test_robots_denial_is_skipped(tmp_path):
 
 
 @pytest.mark.asyncio
+async def test_external_crawl_requires_explicit_opt_in(tmp_path):
+    pages = {
+        "https://example.com/robots.txt": robots(),
+        "https://external.test/robots.txt": robots(),
+        "https://example.com/": html('<main>Start <a href="https://external.test/">Next</a></main>'),
+        "https://external.test/": html("<main>External useful content</main>"),
+    }
+    result, rows, links, hits = await run_crawl(
+        tmp_path,
+        pages,
+        {
+            "start_url": "https://example.com",
+            "max_depth": 1,
+            "allow_external_domains": True,
+        },
+    )
+    assert result["pages_crawled"] == 2
+    assert "https://external.test/" in hits
+    assert len(rows) == 2
+    assert links == [("https://external.test/", False)]
+
+
+@pytest.mark.asyncio
+async def test_redirect_out_of_scope_is_skipped(tmp_path):
+    pages = {
+        "https://example.com/robots.txt": robots(),
+        "https://example.com/": httpx.Response(
+            302, headers={"location": "https://external.test/secret"}
+        ),
+    }
+    result, rows, _, hits = await run_crawl(
+        tmp_path, pages, {"start_url": "https://example.com"}
+    )
+    assert result["status"] == "COMPLETED"
+    assert result["pages_skipped"] == 1
+    assert rows[0][1] == "SKIPPED"
+    assert "https://external.test/secret" not in hits
+
+
+@pytest.mark.asyncio
 async def test_api_health_ready_and_invalid_start(tmp_path):
     app = create_app(
         Settings(database_url=f"sqlite+aiosqlite:///{(tmp_path / 'api.db').as_posix()}")
