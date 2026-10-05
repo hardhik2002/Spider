@@ -1,12 +1,11 @@
 import asyncio
 import json
 import logging
-import time
 
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from app.crawler.deduplicator import ContentDeduplicator, content_hash
-from app.crawler.fetcher import FetchError, FetchSkipped, Fetcher
+from app.crawler.fetcher import Fetcher, FetchError, FetchSkipped
 from app.crawler.frontier import Frontier
 from app.crawler.models import FrontierItem, JobStatus, PageStatus
 from app.crawler.normalizer import hostname, normalize_url
@@ -66,8 +65,7 @@ class Crawler:
         frontier.push(FrontierItem(job.start_url, job.start_url, 0))
         seen = {job.start_url}
         job.pages_discovered = 1
-        deduplicator = ContentDeduplicator()
-        deduplicator._hashes.update(await self.repository.existing_hashes(session, job.id))
+        deduplicator = ContentDeduplicator(await self.repository.existing_hashes(session, job.id))
         attempts = 0
 
         def in_scope(url: str) -> bool:
@@ -152,7 +150,9 @@ class Crawler:
                 if isinstance(exc, FetchError):
                     page.status_code = exc.status_code
                 job.pages_failed += 1
-                logger.warning("URL failed: %s: %s", item.normalized_url, exc, extra={"job_id": job.id})
+                logger.warning(
+                    "URL failed: %s: %s", item.normalized_url, exc, extra={"job_id": job.id}
+                )
             except Exception:
                 page.crawl_status = PageStatus.FAILED
                 page.error_message = "Unexpected page error"

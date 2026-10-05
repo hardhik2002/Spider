@@ -77,10 +77,16 @@ class Fetcher:
                             continue
                         if status >= 400:
                             raise FetchError(f"HTTP {status}", status)
-                        content_type = response.headers.get("content-type", "").split(";")[0].lower()
-                        allowed = {"text/plain"} if robots else {"text/html", "application/xhtml+xml"}
+                        content_type = (
+                            response.headers.get("content-type", "").split(";")[0].lower()
+                        )
+                        allowed = (
+                            {"text/plain"} if robots else {"text/html", "application/xhtml+xml"}
+                        )
                         if content_type not in allowed:
-                            raise FetchError(f"Unsupported content type: {content_type or 'missing'}", status)
+                            raise FetchError(
+                                f"Unsupported content type: {content_type or 'missing'}", status
+                            )
                         length = response.headers.get("content-length")
                         if length and length.isdigit() and int(length) > max_size:
                             raise FetchError("Response exceeds maximum size", status)

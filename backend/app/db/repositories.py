@@ -4,7 +4,7 @@ from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.crawler.models import JobStatus, PageStatus
-from app.db.models import CrawlJob, CrawledPage, DiscoveredLink, utc_now
+from app.db.models import CrawledPage, CrawlJob, DiscoveredLink, utc_now
 from app.schemas.crawl import CrawlRequest
 
 
@@ -57,9 +57,7 @@ class CrawlRepository:
         await session.commit()
         return page
 
-    async def add_links(
-        self, session: AsyncSession, job_id: str, page: CrawledPage, links
-    ) -> None:
+    async def add_links(self, session: AsyncSession, job_id: str, page: CrawledPage, links) -> None:
         session.add_all(
             DiscoveredLink(
                 crawl_job_id=job_id,

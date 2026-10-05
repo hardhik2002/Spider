@@ -3,9 +3,8 @@ import socket
 
 import httpx
 import pytest
-
 from app.crawler.deduplicator import ContentDeduplicator, content_hash
-from app.crawler.fetcher import FetchError, Fetcher
+from app.crawler.fetcher import Fetcher, FetchError
 from app.crawler.frontier import Frontier
 from app.crawler.models import FrontierItem
 from app.crawler.normalizer import InvalidURL, normalize_url
@@ -27,7 +26,17 @@ def test_normalize(url, base, expected):
     assert normalize_url(url, base) == expected
 
 
-@pytest.mark.parametrize("url", ["mailto:a@b.com", "tel:123", "javascript:alert(1)", "http://", "ftp://example.com", "https://u:p@example.com"])
+@pytest.mark.parametrize(
+    "url",
+    [
+        "mailto:a@b.com",
+        "tel:123",
+        "javascript:alert(1)",
+        "http://",
+        "ftp://example.com",
+        "https://u:p@example.com",
+    ],
+)
 def test_invalid_url(url):
     with pytest.raises(InvalidURL):
         normalize_url(url)
@@ -64,7 +73,13 @@ def test_parser_extracts_content_metadata_and_links():
 @pytest.mark.asyncio
 async def test_private_ips_and_dns_rebinding(monkeypatch):
     validator = TargetValidator()
-    for url in ["http://localhost", "http://127.1", "http://10.0.0.1", "http://[::1]", "http://169.254.169.254"]:
+    for url in [
+        "http://localhost",
+        "http://127.1",
+        "http://10.0.0.1",
+        "http://[::1]",
+        "http://169.254.169.254",
+    ]:
         with pytest.raises(UnsafeTarget):
             await validator.validate(url)
 
@@ -96,7 +111,14 @@ async def test_fetcher_rejects_content_type_size_and_permanent_error():
         return httpx.Response(404)
 
     async with httpx.AsyncClient(transport=httpx.MockTransport(responder)) as client:
-        fetcher = Fetcher(client, PublicValidator(), DomainRateLimiter(0), timeout=1, max_redirects=1, max_retries=2)
+        fetcher = Fetcher(
+            client,
+            PublicValidator(),
+            DomainRateLimiter(0),
+            timeout=1,
+            max_redirects=1,
+            max_retries=2,
+        )
         for path in ["pdf", "large", "missing"]:
             with pytest.raises(FetchError):
                 await fetcher.fetch("https://example.com/" + path, 20)
@@ -109,7 +131,14 @@ async def test_redirect_to_private_target_is_blocked():
         return httpx.Response(302, headers={"location": "http://127.0.0.1/secret"})
 
     async with httpx.AsyncClient(transport=httpx.MockTransport(responder)) as client:
-        fetcher = Fetcher(client, TargetValidator(), DomainRateLimiter(0), timeout=1, max_redirects=2, max_retries=0)
+        fetcher = Fetcher(
+            client,
+            TargetValidator(),
+            DomainRateLimiter(0),
+            timeout=1,
+            max_redirects=2,
+            max_retries=0,
+        )
         # Avoid a real DNS lookup only for the initial host.
         original = fetcher.validator.validate
 

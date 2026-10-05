@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, String, Text, UniqueConstraint
@@ -8,7 +8,7 @@ from app.crawler.models import JobStatus, PageStatus
 
 
 def utc_now() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 class Base(DeclarativeBase):
@@ -68,7 +68,9 @@ class CrawledPage(Base):
 
 class DiscoveredLink(Base):
     __tablename__ = "discovered_links"
-    __table_args__ = (Index("ix_discovered_links_job_target", "crawl_job_id", "normalized_target_url"),)
+    __table_args__ = (
+        Index("ix_discovered_links_job_target", "crawl_job_id", "normalized_target_url"),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     crawl_job_id: Mapped[str] = mapped_column(ForeignKey("crawl_jobs.id"), index=True)

@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import StrEnum
 
 
@@ -26,7 +26,7 @@ class FrontierItem:
     normalized_url: str
     depth: int
     parent_url: str | None = None
-    discovered_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    discovered_at: datetime = field(default_factory=lambda: datetime.now(UTC))
     priority: float = 0.0
 
 

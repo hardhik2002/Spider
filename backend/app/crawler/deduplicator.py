@@ -7,8 +7,8 @@ def content_hash(text: str) -> str:
 
 
 class ContentDeduplicator:
-    def __init__(self) -> None:
-        self._hashes: dict[str, int] = {}
+    def __init__(self, existing: dict[str, int] | None = None) -> None:
+        self._hashes: dict[str, int] = dict(existing or {})
 
     def find_or_add(self, digest: str, page_id: int) -> int | None:
         existing = self._hashes.get(digest)

@@ -3,12 +3,11 @@ from pathlib import Path
 
 import httpx
 import pytest
-from sqlalchemy import select
-
 from app.core.config import Settings
 from app.crawler.normalizer import normalize_url
 from app.db.models import CrawledPage, DiscoveredLink
 from app.main import create_app
+from sqlalchemy import select
 
 
 class PublicValidator:
@@ -34,7 +33,11 @@ async def run_crawl(tmp_path: Path, pages: dict[str, httpx.Response], payload: d
         async with httpx.AsyncClient(transport=httpx.MockTransport(responder)) as source_client:
             app.state.crawl_service.client = source_client
             app.state.crawl_service.validator = PublicValidator()
-            async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as api:
+            app.state.crawl_service.fetcher.client = source_client
+            app.state.crawl_service.fetcher.validator = app.state.crawl_service.validator
+            async with httpx.AsyncClient(
+                transport=httpx.ASGITransport(app=app), base_url="http://test"
+            ) as api:
                 created = await api.post("/api/v1/crawl", json=payload)
                 assert created.status_code == 202, created.text
                 job_id = created.json()["job_id"]
@@ -48,7 +51,16 @@ async def run_crawl(tmp_path: Path, pages: dict[str, httpx.Response], payload: d
                 async with app.state.crawl_service.session_factory() as session:
                     rows = (await session.execute(select(CrawledPage))).scalars().all()
                     links = (await session.execute(select(DiscoveredLink))).scalars().all()
-                    rows_data = [(r.normalized_url, r.crawl_status, r.content_hash, r.duplicate_of_page_id, r.text_content) for r in rows]
+                    rows_data = [
+                        (
+                            r.normalized_url,
+                            r.crawl_status,
+                            r.content_hash,
+                            r.duplicate_of_page_id,
+                            r.text_content,
+                        )
+                        for r in rows
+                    ]
                     links_data = [(r.normalized_target_url, r.is_internal) for r in links]
                 return result.json(), rows_data, links_data, hits
 
@@ -65,12 +77,25 @@ def robots(body: str = "User-agent: *\nAllow: /\n") -> httpx.Response:
 async def test_depth_scope_links_failures_duplicates_and_persistence(tmp_path):
     pages = {
         "https://example.com/robots.txt": robots(),
-        "https://example.com/": html('<main>Root unique content <a href="/a">A</a><a href="/a#fragment">again</a><a href="https://external.test/">ext</a><a href="mailto:x@y">bad</a><a href="/broken">broken</a></main>'),
-        "https://example.com/a": html('<main>Child useful content <a href="/deep">Deep</a><a href="/copy">Copy</a></main>'),
-        "https://example.com/copy": html("<main>Child useful content</main>"),
+        "https://example.com/": html(
+            '<main>Root unique content <a href="/a">A</a>'
+            '<a href="/a#fragment">again</a>'
+            '<a href="https://external.test/">ext</a>'
+            '<a href="mailto:x@y">bad</a>'
+            '<a href="/broken">broken</a>'
+            '<a href="/copy">copy</a></main>'
+        ),
+        "https://example.com/a": html(
+            '<main>Child useful content <a href="/deep">Deep</a><a href="/copy">Copy</a></main>'
+        ),
+        "https://example.com/copy": html(
+            '<main>Child useful content <a href="/deep">Deep</a><a href="/copy">Copy</a></main>'
+        ),
         "https://example.com/broken": httpx.Response(500),
     }
-    result, rows, links, hits = await run_crawl(tmp_path, pages, {"start_url": "https://example.com", "max_depth": 1, "max_pages": 10})
+    result, rows, links, hits = await run_crawl(
+        tmp_path, pages, {"start_url": "https://example.com", "max_depth": 1, "max_pages": 10}
+    )
     assert result["status"] == "COMPLETED"
     assert result["pages_discovered"] == 6  # root, a, external, broken, deep, copy
     assert result["pages_failed"] == 1
@@ -79,7 +104,9 @@ async def test_depth_scope_links_failures_duplicates_and_persistence(tmp_path):
     assert "https://external.test/" not in hits
     assert "https://example.com/deep" not in hits
     assert any(duplicate_id is not None and text is None for _, _, _, duplicate_id, text in rows)
-    assert all(digest for _, status, digest, _, _ in rows if status in {"COMPLETED", "SKIPPED"} and digest)
+    assert all(
+        digest for _, status, digest, _, _ in rows if status in {"COMPLETED", "SKIPPED"} and digest
+    )
 
 
 @pytest.mark.asyncio
@@ -90,7 +117,9 @@ async def test_max_pages_terminates_and_marks_pending(tmp_path):
         "https://example.com/a": html("<main>a text</main>"),
         "https://example.com/b": html("<main>b text</main>"),
     }
-    result, rows, _, hits = await run_crawl(tmp_path, pages, {"start_url": "https://example.com", "max_pages": 1})
+    result, rows, _, hits = await run_crawl(
+        tmp_path, pages, {"start_url": "https://example.com", "max_pages": 1}
+    )
     assert result["status"] == "COMPLETED"
     assert result["pages_crawled"] == 1
     assert result["pages_skipped"] == 2
@@ -110,10 +139,18 @@ async def test_robots_denial_is_skipped(tmp_path):
 
 @pytest.mark.asyncio
 async def test_api_health_ready_and_invalid_start(tmp_path):
-    app = create_app(Settings(database_url=f"sqlite+aiosqlite:///{(tmp_path / 'api.db').as_posix()}"))
+    app = create_app(
+        Settings(database_url=f"sqlite+aiosqlite:///{(tmp_path / 'api.db').as_posix()}")
+    )
     async with app.router.lifespan_context(app):
-        async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as api:
+        async with httpx.AsyncClient(
+            transport=httpx.ASGITransport(app=app), base_url="http://test"
+        ) as api:
             assert (await api.get("/health")).json() == {"status": "ok"}
             assert (await api.get("/ready")).json() == {"status": "ok"}
-            assert (await api.post("/api/v1/crawl", json={"start_url": "mailto:a@b"})).status_code == 422
-            assert (await api.post("/api/v1/crawl", json={"start_url": "http://127.0.0.1"})).status_code == 422
+            assert (
+                await api.post("/api/v1/crawl", json={"start_url": "mailto:a@b"})
+            ).status_code == 422
+            assert (
+                await api.post("/api/v1/crawl", json={"start_url": "http://127.0.0.1"})
+            ).status_code == 422
