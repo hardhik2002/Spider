@@ -62,9 +62,9 @@ backend/
     services/        # crawl job lifecycle
     main.py
   tests/             # component and API/integration tests
+    fixtures/research_site/
   requirements.txt
   requirements-intelligent.txt
-  tests/fixtures/research_site/
 docs/architecture.md
 docs/phase2-demo-results.json
 pyproject.toml
@@ -153,7 +153,8 @@ The script creates FIFO and intelligent jobs with the same query, scope, and fou
 FIFO crawled seed → About → Careers → RAG Evaluation. Intelligent crawled seed → Hallucination → RAG Evaluation → Embeddings. This is evidence for this small fixture, not a general performance claim. Evaluation definitions and a CLI for comparing any two completed jobs are in [compare.py](backend/app/evaluation/compare.py). For example:
 
 ```powershell
-.\.venv\Scripts\python.exe -m app.evaluation.compare --fifo-job <fifo-id> --intelligent-job <intelligent-id> --labels-file backend\tests\fixtures\research_site\labels.json
+$demo = Get-Content docs\phase2-demo-results.json -Raw | ConvertFrom-Json
+.\.venv\Scripts\python.exe -m app.evaluation.compare --database-url sqlite+aiosqlite:///./spidermind-demo.db --fifo-job $demo.jobs.fifo --intelligent-job $demo.jobs.intelligent --labels-file backend\tests\fixtures\research_site\labels.json
 ```
 
 ## Tests and checks

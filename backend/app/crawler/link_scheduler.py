@@ -110,11 +110,13 @@ class LinkScheduler:
                     self.job.links_below_threshold += 1
                     self.job.pages_skipped += 1
                     logger.info(
-                        "low relevance URL rejected: %s", row.normalized_target_url,
+                        "low relevance URL rejected: %s",
+                        row.normalized_target_url,
                         extra={"job_id": self.job.id},
                     )
             logger.info(
-                "link scoring completed: %s candidates", len(eligible),
+                "link scoring completed: %s candidates",
+                len(eligible),
                 extra={"job_id": self.job.id},
             )
 
@@ -138,7 +140,8 @@ class LinkScheduler:
             self.frontier.push(item)
             if row.priority_score is not None:
                 logger.info(
-                    "URL priority assigned: %s score=%.4f", row.normalized_target_url,
+                    "URL priority assigned: %s score=%.4f",
+                    row.normalized_target_url,
                     row.priority_score,
                     extra={"job_id": self.job.id},
                 )

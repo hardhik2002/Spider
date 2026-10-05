@@ -13,8 +13,8 @@ from app.crawler.scoring import (
     candidate_representation,
     cosine_similarity,
 )
-from app.db.database import initialize_database, make_engine
-from app.db.models import CrawledPage, DiscoveredLink
+from app.db.database import initialize_database, make_engine, make_session_factory
+from app.db.models import CrawledPage, CrawlJob, DiscoveredLink
 from app.evaluation.compare import compare_jobs
 from app.evaluation.demo import HOST, QUERY, SITE_ROOT, fixture_response
 from app.main import create_app
@@ -60,17 +60,18 @@ def test_mode_validation_and_fifo_default():
         CrawlRequest(start_url="https://example.com", crawl_mode="intelligent")
     with pytest.raises(ValidationError):
         CrawlRequest(start_url="https://example.com", crawl_mode="intelligent", research_query=" ")
-    assert CrawlRequest(
-        start_url="https://example.com", crawl_mode="intelligent", research_query="  RAG  "
-    ).research_query == "RAG"
+    assert (
+        CrawlRequest(
+            start_url="https://example.com", crawl_mode="intelligent", research_query="  RAG  "
+        ).research_query
+        == "RAG"
+    )
 
 
 @pytest.mark.asyncio
 async def test_provider_batch_cache_and_cosine():
     provider = CountingProvider()
-    scorer = SemanticScorer(
-        provider, depth_penalty=0.02, max_context_chars=30, max_page_chars=100
-    )
+    scorer = SemanticScorer(provider, depth_penalty=0.02, max_context_chars=30, max_page_chars=100)
     await scorer.prepare(QUERY)
     await scorer.prepare(QUERY)
     candidates = [
@@ -163,9 +164,7 @@ async def test_intelligent_order_persistence_links_threshold_and_metrics(tmp_pat
                     jobs[mode] = created.json()["job_id"]
                     status = await wait_for_job(api, jobs[mode])
                     assert status["status"] == "COMPLETED", status
-                intelligent = (
-                    await api.get(f"/api/v1/crawl/{jobs['intelligent']}")
-                ).json()
+                intelligent = (await api.get(f"/api/v1/crawl/{jobs['intelligent']}")).json()
                 assert intelligent["links_scored"] == 8
                 assert intelligent["candidate_embeddings"] == 8
                 assert intelligent["embedding_model"] == provider.model_name
@@ -238,9 +237,25 @@ async def test_intelligent_order_persistence_links_threshold_and_metrics(tmp_pat
 async def test_existing_phase1_sqlite_migrates_additively(tmp_path):
     path = tmp_path / "old.db"
     connection = sqlite3.connect(path)
-    for table in ("crawl_jobs", "crawled_pages", "discovered_links"):
+    connection.execute(
+        """CREATE TABLE crawl_jobs (
+        id TEXT PRIMARY KEY, start_url TEXT NOT NULL, status TEXT NOT NULL,
+        created_at DATETIME NOT NULL, started_at DATETIME, completed_at DATETIME,
+        max_depth INTEGER NOT NULL, max_pages INTEGER NOT NULL, timeout FLOAT NOT NULL,
+        max_content_size INTEGER NOT NULL, allowed_domains TEXT NOT NULL,
+        allow_external_domains BOOLEAN NOT NULL, pages_discovered INTEGER NOT NULL,
+        pages_crawled INTEGER NOT NULL, pages_failed INTEGER NOT NULL,
+        pages_skipped INTEGER NOT NULL, error_message TEXT
+        )"""
+    )
+    for table in ("crawled_pages", "discovered_links"):
         connection.execute(f"CREATE TABLE {table} (id TEXT PRIMARY KEY)")
-    connection.execute("INSERT INTO crawl_jobs(id) VALUES ('old-job')")
+    connection.execute(
+        """INSERT INTO crawl_jobs VALUES (
+        'old-job', 'https://example.com/', 'COMPLETED', '2026-01-01 00:00:00',
+        NULL, NULL, 2, 25, 120.0, 2000000, '[]', 0, 3, 2, 0, 1, NULL
+        )"""
+    )
     connection.commit()
     connection.close()
     engine = make_engine(f"sqlite+aiosqlite:///{path.as_posix()}")
@@ -254,6 +269,11 @@ async def test_existing_phase1_sqlite_migrates_additively(tmp_path):
             assert names.count("crawl_mode") == 1
             old = await connection.exec_driver_sql("SELECT id, crawl_mode FROM crawl_jobs")
             assert old.first() == ("old-job", "fifo")
+        async with make_session_factory(engine)() as session:
+            old_job = await session.get(CrawlJob, "old-job")
+            assert old_job.pages_crawled == 2
+            assert old_job.research_query is None
+            assert old_job.crawl_mode == "fifo"
     finally:
         await engine.dispose()
 
@@ -297,8 +317,82 @@ async def test_private_discovered_link_is_rejected(tmp_path):
                 assert created.status_code == 202
                 status = await wait_for_job(api, created.json()["job_id"])
                 assert status["status"] == "COMPLETED"
-                links = (
-                    await api.get(f"/api/v1/crawl/{created.json()['job_id']}/links")
-                ).json()
+                links = (await api.get(f"/api/v1/crawl/{created.json()['job_id']}/links")).json()
                 assert links[0]["rejection_reason"] == "SSRF_BLOCKED"
                 assert links[0]["selected_for_crawl"] is False
+
+
+@pytest.mark.asyncio
+async def test_intelligent_external_scope_and_robots(tmp_path):
+    settings = Settings(
+        database_url=f"sqlite+aiosqlite:///{(tmp_path / 'scope.db').as_posix()}",
+        domain_delay_seconds=0,
+    )
+    app = create_app(settings, embedding_provider=CountingProvider())
+    hits = []
+
+    def responder(request):
+        hits.append(str(request.url))
+        if request.url.path == "/robots.txt":
+            text = "User-agent: *\nDisallow: /blocked\n" if request.url.host == HOST else ""
+            return httpx.Response(200, headers={"content-type": "text/plain"}, text=text)
+        if request.url.host == HOST and request.url.path == "/":
+            return httpx.Response(
+                200,
+                headers={"content-type": "text/html"},
+                text=(
+                    '<main>Root <a href="/blocked">Blocked RAG page</a>'
+                    '<a href="https://external.test/research">External RAG</a></main>'
+                ),
+            )
+        return httpx.Response(
+            200,
+            headers={"content-type": "text/html"},
+            text="<main>External research content</main>",
+        )
+
+    async with app.router.lifespan_context(app):
+        async with httpx.AsyncClient(transport=httpx.MockTransport(responder)) as source:
+            service = app.state.crawl_service
+            service.validator = FixtureValidator()
+            service.fetcher.validator = service.validator
+            service.fetcher.client = source
+            async with httpx.AsyncClient(
+                transport=httpx.ASGITransport(app=app), base_url="http://test"
+            ) as api:
+                for allow_external in (False, True):
+                    created = await api.post(
+                        "/api/v1/crawl",
+                        json={
+                            "start_url": f"https://{HOST}/",
+                            "crawl_mode": "intelligent",
+                            "research_query": QUERY,
+                            "allow_external_domains": allow_external,
+                            "max_pages": 3,
+                        },
+                    )
+                    assert created.status_code == 202
+                    job_id = created.json()["job_id"]
+                    status = await wait_for_job(api, job_id)
+                    assert status["status"] == "COMPLETED"
+                    links = (await api.get(f"/api/v1/crawl/{job_id}/links")).json()
+                    external_only = (
+                        await api.get(
+                            f"/api/v1/crawl/{job_id}/links",
+                            params={"internal": "false", "limit": 1, "offset": 0},
+                        )
+                    ).json()
+                    assert len(external_only) == 1
+                    assert external_only[0]["is_internal"] is False
+                    by_url = {row["normalized_url"]: row for row in links}
+                    assert by_url[f"https://{HOST}/blocked"]["rejection_reason"] == "ROBOTS_DENIED"
+                    external = by_url["https://external.test/research"]
+                    if allow_external:
+                        assert external["scoring_status"] == "SCORED"
+                        assert external["selected_for_crawl"] is True
+                        assert status["pages_crawled"] == 2
+                    else:
+                        assert external["rejection_reason"] == "EXTERNAL_DOMAIN_DISABLED"
+                        assert external["selected_for_crawl"] is False
+                        assert status["pages_crawled"] == 1
+                assert hits.count("https://external.test/research") == 1

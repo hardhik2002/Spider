@@ -88,7 +88,9 @@ class SemanticScorer:
         representations = [
             candidate_representation(candidate, self.max_context_chars) for candidate in candidates
         ]
-        missing = list(dict.fromkeys(text for text in representations if text not in self._candidate_cache))
+        missing = list(
+            dict.fromkeys(text for text in representations if text not in self._candidate_cache)
+        )
         if missing:
             vectors = await self.provider.embed_many(missing)
             if len(vectors) != len(missing):
@@ -103,9 +105,7 @@ class SemanticScorer:
         self.candidate_scoring_ms += int((time.monotonic() - started) * 1000)
         return scores
 
-    async def score_page(
-        self, title: str | None, description: str | None, content: str
-    ) -> float:
+    async def score_page(self, title: str | None, description: str | None, content: str) -> float:
         if self.query_vector is None:
             raise RuntimeError("Research query must be embedded before scoring")
         representation = page_representation(title, description, content, self.max_page_chars)

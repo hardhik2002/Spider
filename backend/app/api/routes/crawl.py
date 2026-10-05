@@ -35,16 +35,22 @@ async def get_crawl(job_id: UUID, request: Request) -> CrawlStatus:
         error_message=job.error_message,
         crawl_mode=job.crawl_mode,
         research_query=job.research_query,
-        links_scored=job.links_scored if job.research_query else None,
-        links_below_threshold=job.links_below_threshold if job.crawl_mode == "intelligent" else None,
+        links_scored=job.links_scored if job.crawl_mode == "intelligent" else None,
+        links_below_threshold=job.links_below_threshold
+        if job.crawl_mode == "intelligent"
+        else None,
         average_relevance_score=(
             job.relevance_score_sum / job.links_scored if job.links_scored else None
         ),
         highest_relevance_score=job.highest_relevance_score,
         embedding_model=job.embedding_model,
-        candidate_embeddings=job.candidate_embeddings if job.research_query else None,
+        candidate_embeddings=(
+            job.candidate_embeddings if job.crawl_mode == "intelligent" else None
+        ),
         query_embedding_ms=job.query_embedding_ms,
-        candidate_scoring_ms=job.candidate_scoring_ms if job.research_query else None,
+        candidate_scoring_ms=(
+            job.candidate_scoring_ms if job.crawl_mode == "intelligent" else None
+        ),
         model_load_ms=job.model_load_ms,
         duration_ms=job.duration_ms,
     )

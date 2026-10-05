@@ -91,7 +91,9 @@ async def run_demo(database_url: str) -> dict:
                     jobs[mode] = created.json()["job_id"]
                     statuses[mode] = await wait_for_job(api, jobs[mode])
                     if statuses[mode]["status"] != "COMPLETED":
-                        raise RuntimeError(f"{mode} crawl failed: {statuses[mode]['error_message']}")
+                        raise RuntimeError(
+                            f"{mode} crawl failed: {statuses[mode]['error_message']}"
+                        )
                 links = (
                     await api.get(
                         f"/api/v1/crawl/{jobs['intelligent']}/links",
@@ -108,8 +110,24 @@ async def run_demo(database_url: str) -> dict:
                     relevant_urls=labels,
                 )
                 async with service.session_factory() as session:
-                    pages = list((await session.execute(select(CrawledPage))).scalars())
-                    persisted_links = list((await session.execute(select(DiscoveredLink))).scalars())
+                    pages = list(
+                        (
+                            await session.execute(
+                                select(CrawledPage).where(
+                                    CrawledPage.crawl_job_id.in_(jobs.values())
+                                )
+                            )
+                        ).scalars()
+                    )
+                    persisted_links = list(
+                        (
+                            await session.execute(
+                                select(DiscoveredLink).where(
+                                    DiscoveredLink.crawl_job_id.in_(jobs.values())
+                                )
+                            )
+                        ).scalars()
+                    )
                 return {
                     "query": QUERY,
                     "jobs": jobs,

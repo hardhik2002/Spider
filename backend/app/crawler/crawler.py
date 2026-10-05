@@ -120,7 +120,8 @@ class Crawler:
             item = frontier.pop()
             if isinstance(frontier, PriorityFrontier):
                 logger.info(
-                    "priority frontier pop: %s", item.normalized_url,
+                    "priority frontier pop: %s",
+                    item.normalized_url,
                     extra={"job_id": job.id},
                 )
                 if frontier.last_pop_exploration:
@@ -132,9 +133,7 @@ class Crawler:
                     page.crawl_status = PageStatus.SKIPPED
                     page.error_message = "Denied by robots.txt"
                     job.pages_skipped += 1
-                    await scheduler.reject_selected(
-                        session, item, RejectionReason.ROBOTS_DENIED
-                    )
+                    await scheduler.reject_selected(session, item, RejectionReason.ROBOTS_DENIED)
                     logger.info("robots denied", extra={"job_id": job.id})
                     continue
                 page.crawl_status = PageStatus.FETCHING
@@ -198,9 +197,7 @@ class Crawler:
                 if isinstance(exc, FetchError):
                     page.status_code = exc.status_code
                     if exc.unsafe_target:
-                        await scheduler.reject_selected(
-                            session, item, RejectionReason.SSRF_BLOCKED
-                        )
+                        await scheduler.reject_selected(session, item, RejectionReason.SSRF_BLOCKED)
                 job.pages_failed += 1
                 logger.warning(
                     "URL failed: %s: %s", item.normalized_url, exc, extra={"job_id": job.id}

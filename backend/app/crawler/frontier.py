@@ -46,12 +46,8 @@ class PriorityFrontier:
         self._seen.add(item.normalized_url)
         self._active[item.normalized_url] = item
         score = item.priority_score if item.priority_score is not None else item.priority
-        heapq.heappush(
-            self._high, (-score, item.depth, item.discovery_order, item.normalized_url)
-        )
-        heapq.heappush(
-            self._low, (score, item.depth, item.discovery_order, item.normalized_url)
-        )
+        heapq.heappush(self._high, (-score, item.depth, item.discovery_order, item.normalized_url))
+        heapq.heappush(self._low, (score, item.depth, item.discovery_order, item.normalized_url))
         return True
 
     def pop(self) -> FrontierItem:
