@@ -1,8 +1,8 @@
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker, create_async_engine
 
-from app.db.models import Base
 from app.db.migrations import migrate_sqlite
+from app.db.models import Base
 
 
 def make_engine(database_url: str) -> AsyncEngine:

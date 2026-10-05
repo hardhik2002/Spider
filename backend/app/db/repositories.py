@@ -3,8 +3,8 @@ import json
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from app.crawler.models import JobStatus, PageStatus
 from app.core.config import Settings
+from app.crawler.models import JobStatus, PageStatus
 from app.db.models import CrawledPage, CrawlJob, DiscoveredLink, utc_now
 from app.schemas.crawl import CrawlRequest
 
@@ -30,7 +30,11 @@ class CrawlRepository:
                 min_relevance_score=(
                     request.min_relevance_score
                     if request.min_relevance_score is not None
-                    else settings.default_min_relevance_score
+                    else (
+                        settings.default_min_relevance_score
+                        if request.crawl_mode == "intelligent"
+                        else None
+                    )
                 ),
                 embedding_model=(model_name if request.research_query else None),
                 depth_penalty=(

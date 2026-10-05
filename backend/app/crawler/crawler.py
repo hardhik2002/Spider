@@ -4,6 +4,7 @@ import time
 
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
+from app.core.config import Settings
 from app.crawler.deduplicator import ContentDeduplicator, content_hash
 from app.crawler.embedding import EmbeddingProvider
 from app.crawler.fetcher import Fetcher, FetchError, FetchSkipped
@@ -14,7 +15,6 @@ from app.crawler.normalizer import normalize_url
 from app.crawler.parser import parse_page
 from app.crawler.robots import RobotsManager
 from app.crawler.scoring import ScoringFailure, SemanticScorer
-from app.core.config import Settings
 from app.db.models import CrawlJob, utc_now
 from app.db.repositories import CrawlRepository
 
@@ -48,6 +48,7 @@ class Crawler:
             await session.commit()
             logger.info("crawl started", extra={"job_id": job_id})
             started = time.monotonic()
+            model_was_loaded = self.embedding_provider.load_time_ms is not None
             scorer = None
             final_status = JobStatus.COMPLETED
             error_message = None
@@ -90,7 +91,9 @@ class Crawler:
                         persisted.query_embedding_ms = scorer.query_embedding_ms
                         persisted.candidate_embeddings = scorer.candidate_count
                         persisted.candidate_scoring_ms = scorer.candidate_scoring_ms
-                        persisted.model_load_ms = self.embedding_provider.load_time_ms
+                        persisted.model_load_ms = (
+                            0 if model_was_loaded else self.embedding_provider.load_time_ms
+                        )
                     persisted.duration_ms = int((time.monotonic() - started) * 1000)
                     persisted.completed_at = utc_now()
                     await final_session.commit()
@@ -194,6 +197,10 @@ class Crawler:
                 page.error_message = str(exc)[:1000]
                 if isinstance(exc, FetchError):
                     page.status_code = exc.status_code
+                    if exc.unsafe_target:
+                        await scheduler.reject_selected(
+                            session, item, RejectionReason.SSRF_BLOCKED
+                        )
                 job.pages_failed += 1
                 logger.warning(
                     "URL failed: %s: %s", item.normalized_url, exc, extra={"job_id": job.id}

@@ -12,9 +12,16 @@ from app.crawler.security import TargetValidator, UnsafeTarget
 
 
 class FetchError(Exception):
-    def __init__(self, message: str, status_code: int | None = None) -> None:
+    def __init__(
+        self,
+        message: str,
+        status_code: int | None = None,
+        *,
+        unsafe_target: bool = False,
+    ) -> None:
         super().__init__(message)
         self.status_code = status_code
+        self.unsafe_target = unsafe_target
 
 
 class FetchSkipped(FetchError):
@@ -53,7 +60,7 @@ class Fetcher:
             try:
                 current = await self.validator.validate(current)
             except (InvalidURL, UnsafeTarget) as exc:
-                raise FetchError(str(exc)) from exc
+                raise FetchError(str(exc), unsafe_target=isinstance(exc, UnsafeTarget)) from exc
             for attempt in range(self.max_retries + 1):
                 await self.limiter.wait(current)
                 try:

@@ -6,11 +6,11 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from app.core.config import Settings
 from app.crawler.crawler import Crawler
+from app.crawler.embedding import EmbeddingProvider, SentenceTransformerProvider
 from app.crawler.fetcher import Fetcher
 from app.crawler.normalizer import hostname, normalize_url
 from app.crawler.rate_limit import DomainRateLimiter
 from app.crawler.robots import RobotsManager
-from app.crawler.embedding import EmbeddingProvider, SentenceTransformerProvider
 from app.crawler.security import TargetValidator
 from app.db.repositories import CrawlRepository
 from app.schemas.crawl import CrawlRequest

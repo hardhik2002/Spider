@@ -1,5 +1,5 @@
-from collections import deque
 import heapq
+from collections import deque
 
 from app.crawler.models import FrontierItem
 

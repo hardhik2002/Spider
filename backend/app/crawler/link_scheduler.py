@@ -10,9 +10,8 @@ from app.crawler.models import (
     RejectionReason,
     ScoringStatus,
 )
-from app.crawler.normalizer import hostname
-from app.crawler.scoring import LinkCandidate, SemanticScorer
-from app.crawler.scoring import ScoringFailure
+from app.crawler.normalizer import hostname, is_private_address
+from app.crawler.scoring import LinkCandidate, ScoringFailure, SemanticScorer
 from app.db.models import CrawledPage, CrawlJob, DiscoveredLink
 
 logger = logging.getLogger("spidermind.scheduler")
@@ -60,6 +59,8 @@ class LinkScheduler:
             logger.info("URL discovered: %s", target, extra={"job_id": self.job.id})
             if row.target_depth > self.job.max_depth:
                 row.rejection_reason = RejectionReason.DEPTH_LIMIT
+            elif is_private_address(hostname(target)):
+                row.rejection_reason = RejectionReason.SSRF_BLOCKED
             elif hostname(target) != self.root_domain and not self.job.allow_external_domains:
                 row.rejection_reason = RejectionReason.EXTERNAL_DOMAIN_DISABLED
             elif self.allowed_domains and hostname(target) not in self.allowed_domains:
