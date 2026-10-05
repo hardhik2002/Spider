@@ -1,16 +1,20 @@
 import asyncio
-import json
 import logging
+import time
 
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from app.crawler.deduplicator import ContentDeduplicator, content_hash
+from app.crawler.embedding import EmbeddingProvider
 from app.crawler.fetcher import Fetcher, FetchError, FetchSkipped
-from app.crawler.frontier import Frontier
-from app.crawler.models import FrontierItem, JobStatus, PageStatus
-from app.crawler.normalizer import hostname, normalize_url
+from app.crawler.frontier import Frontier, PriorityFrontier
+from app.crawler.link_scheduler import LinkScheduler
+from app.crawler.models import CrawlMode, FrontierItem, JobStatus, PageStatus, RejectionReason
+from app.crawler.normalizer import normalize_url
 from app.crawler.parser import parse_page
 from app.crawler.robots import RobotsManager
+from app.crawler.scoring import ScoringFailure, SemanticScorer
+from app.core.config import Settings
 from app.db.models import CrawlJob, utc_now
 from app.db.repositories import CrawlRepository
 
@@ -24,11 +28,15 @@ class Crawler:
         repository: CrawlRepository,
         fetcher: Fetcher,
         robots: RobotsManager,
+        embedding_provider: EmbeddingProvider,
+        settings: Settings,
     ) -> None:
         self.session_factory = session_factory
         self.repository = repository
         self.fetcher = fetcher
         self.robots = robots
+        self.embedding_provider = embedding_provider
+        self.settings = settings
 
     async def run(self, job_id: str) -> None:
         async with self.session_factory() as session:
@@ -39,49 +47,81 @@ class Crawler:
             job.started_at = utc_now()
             await session.commit()
             logger.info("crawl started", extra={"job_id": job_id})
+            started = time.monotonic()
+            scorer = None
+            final_status = JobStatus.COMPLETED
+            error_message = None
             try:
                 async with asyncio.timeout(job.timeout):
-                    await self._crawl(session, job)
-                job.status = JobStatus.COMPLETED
+                    if job.research_query:
+                        scorer = SemanticScorer(
+                            self.embedding_provider,
+                            depth_penalty=job.depth_penalty,
+                            max_context_chars=self.settings.max_candidate_context_chars,
+                            max_page_chars=self.settings.max_page_scoring_chars,
+                        )
+                        if job.crawl_mode == CrawlMode.INTELLIGENT:
+                            logger.info("intelligent crawl started", extra={"job_id": job.id})
+                        await scorer.prepare(job.research_query)
+                        logger.info(
+                            "research query embedded in %s ms",
+                            scorer.query_embedding_ms,
+                            extra={"job_id": job.id},
+                        )
+                    await self._crawl(session, job, scorer)
                 logger.info("crawl completed", extra={"job_id": job_id})
+                if job.crawl_mode == CrawlMode.INTELLIGENT:
+                    logger.info("intelligent crawl completed", extra={"job_id": job_id})
             except asyncio.CancelledError:
-                job.status = JobStatus.CANCELLED
-                job.error_message = "Crawl task cancelled"
+                final_status = JobStatus.CANCELLED
+                error_message = "Crawl task cancelled"
                 logger.info("crawl cancelled", extra={"job_id": job_id})
             except Exception as exc:
-                job.status = JobStatus.FAILED
-                job.error_message = f"{type(exc).__name__}: {exc}"[:1000]
+                final_status = JobStatus.FAILED
+                error_message = f"{type(exc).__name__}: {exc}"[:1000]
                 logger.exception("crawl failed", extra={"job_id": job_id})
             finally:
-                job.completed_at = utc_now()
-                await session.commit()
+                await session.rollback()
+                async with self.session_factory() as final_session:
+                    persisted = await final_session.get(CrawlJob, job_id)
+                    persisted.status = final_status
+                    persisted.error_message = error_message
+                    if scorer is not None:
+                        persisted.query_embedding_ms = scorer.query_embedding_ms
+                        persisted.candidate_embeddings = scorer.candidate_count
+                        persisted.candidate_scoring_ms = scorer.candidate_scoring_ms
+                        persisted.model_load_ms = self.embedding_provider.load_time_ms
+                    persisted.duration_ms = int((time.monotonic() - started) * 1000)
+                    persisted.completed_at = utc_now()
+                    await final_session.commit()
 
-    async def _crawl(self, session, job: CrawlJob) -> None:
-        root_domain = hostname(job.start_url)
-        allowed_domains = set(json.loads(job.allowed_domains))
-        if allowed_domains and root_domain not in allowed_domains:
-            raise ValueError("Start domain is not included in allowed_domains")
-        frontier = Frontier()
+    async def _crawl(self, session, job: CrawlJob, scorer: SemanticScorer | None) -> None:
+        frontier = (
+            PriorityFrontier(job.exploration_rate)
+            if job.crawl_mode == CrawlMode.INTELLIGENT
+            else Frontier()
+        )
         frontier.push(FrontierItem(job.start_url, job.start_url, 0))
-        seen = {job.start_url}
+        scheduler = LinkScheduler(job, frontier, scorer)
         job.pages_discovered = 1
         deduplicator = ContentDeduplicator(await self.repository.existing_hashes(session, job.id))
         attempts = 0
 
-        def in_scope(url: str) -> bool:
-            domain = hostname(url)
-            return (domain == root_domain or job.allow_external_domains) and (
-                not allowed_domains or domain in allowed_domains
-            )
-
         async def check_redirect(url: str) -> None:
-            if not in_scope(url):
+            if not scheduler.in_scope(url):
                 raise FetchSkipped("Redirect outside crawl scope")
             if not await self.robots.allowed(url):
                 raise FetchSkipped("Redirect denied by robots.txt")
 
         while frontier and attempts < job.max_pages:
             item = frontier.pop()
+            if isinstance(frontier, PriorityFrontier):
+                logger.info(
+                    "priority frontier pop: %s", item.normalized_url,
+                    extra={"job_id": job.id},
+                )
+                if frontier.last_pop_exploration:
+                    logger.info("exploration selection", extra={"job_id": job.id})
             attempts += 1
             page = await self.repository.add_page(session, job.id, item)
             try:
@@ -89,6 +129,9 @@ class Crawler:
                     page.crawl_status = PageStatus.SKIPPED
                     page.error_message = "Denied by robots.txt"
                     job.pages_skipped += 1
+                    await scheduler.reject_selected(
+                        session, item, RejectionReason.ROBOTS_DENIED
+                    )
                     logger.info("robots denied", extra={"job_id": job.id})
                     continue
                 page.crawl_status = PageStatus.FETCHING
@@ -103,13 +146,20 @@ class Crawler:
                 page.response_size = result.response_size
                 page.response_time_ms = result.response_time_ms
                 logger.info("fetch completed", extra={"job_id": job.id})
-                parsed = parse_page(result.body, page.final_url, root_domain)
+                parsed = parse_page(result.body, page.final_url, scheduler.root_domain)
                 page.crawl_status = PageStatus.PARSED
                 page.title = parsed.title
                 page.meta_description = parsed.meta_description
                 page.canonical_url = parsed.canonical_url
                 digest = content_hash(parsed.text_content)
                 page.content_hash = digest
+                if scorer is not None:
+                    try:
+                        page.actual_page_relevance = await scorer.score_page(
+                            parsed.title, parsed.meta_description, parsed.text_content
+                        )
+                    except Exception as exc:
+                        raise ScoringFailure("Page embedding or scoring failed") from exc
                 duplicate_id = deduplicator.find_or_add(digest, page.id)
                 if duplicate_id is not None:
                     page.duplicate_of_page_id = duplicate_id
@@ -124,26 +174,21 @@ class Crawler:
                 page.crawled_at = utc_now()
                 await session.commit()
                 logger.info("parsing completed", extra={"job_id": job.id})
-                await self.repository.add_links(session, job.id, page, parsed.links)
-                for link in parsed.links:
-                    target = link.normalized_target_url
-                    if target in seen:
-                        continue
-                    seen.add(target)
-                    job.pages_discovered += 1
-                    logger.info("URL discovered: %s", target, extra={"job_id": job.id})
-                    if item.depth + 1 > job.max_depth or not in_scope(target):
-                        job.pages_skipped += 1
-                        logger.info("URL skipped: %s", target, extra={"job_id": job.id})
-                        continue
-                    frontier.push(
-                        FrontierItem(link.target_url, target, item.depth + 1, page.final_url)
-                    )
+                link_rows = await self.repository.add_links(session, job.id, page, parsed.links)
+                await scheduler.schedule(session, page, link_rows)
             except FetchSkipped as exc:
                 page.crawl_status = PageStatus.SKIPPED
                 page.error_message = str(exc)
                 job.pages_skipped += 1
+                reason = (
+                    RejectionReason.ROBOTS_DENIED
+                    if "robots" in str(exc).lower()
+                    else RejectionReason.EXTERNAL_DOMAIN_DISABLED
+                )
+                await scheduler.reject_selected(session, item, reason)
                 logger.info("URL skipped: %s", item.normalized_url, extra={"job_id": job.id})
+            except ScoringFailure:
+                raise
             except (FetchError, ValueError) as exc:
                 page.crawl_status = PageStatus.FAILED
                 page.error_message = str(exc)[:1000]
@@ -169,4 +214,5 @@ class Crawler:
             page.error_message = "max_pages reached"
             page.crawled_at = utc_now()
             job.pages_skipped += 1
+            await scheduler.reject_selected(session, item, RejectionReason.PAGE_LIMIT)
         await session.commit()

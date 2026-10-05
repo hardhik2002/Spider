@@ -2,6 +2,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker, create_async_engine
 
 from app.db.models import Base
+from app.db.migrations import migrate_sqlite
 
 
 def make_engine(database_url: str) -> AsyncEngine:
@@ -15,6 +16,8 @@ def make_session_factory(engine: AsyncEngine) -> async_sessionmaker:
 async def initialize_database(engine: AsyncEngine) -> None:
     async with engine.begin() as connection:
         await connection.run_sync(Base.metadata.create_all)
+        if engine.url.get_backend_name() == "sqlite":
+            await migrate_sqlite(connection)
 
 
 async def database_ready(engine: AsyncEngine) -> bool:

@@ -16,10 +16,11 @@ class TargetValidator:
         if is_private_address(host):
             raise UnsafeTarget("Private or local target is blocked")
         try:
-            addresses = await asyncio.get_running_loop().getaddrinfo(
-                host, None, type=socket.SOCK_STREAM
+            addresses = await asyncio.wait_for(
+                asyncio.get_running_loop().getaddrinfo(host, None, type=socket.SOCK_STREAM),
+                timeout=5.0,
             )
-        except socket.gaierror as exc:
+        except (socket.gaierror, TimeoutError) as exc:
             raise UnsafeTarget(f"DNS resolution failed: {exc}") from exc
         if not addresses or any(
             not ipaddress.ip_address(entry[4][0]).is_global for entry in addresses

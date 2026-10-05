@@ -142,7 +142,9 @@ async def test_external_crawl_requires_explicit_opt_in(tmp_path):
     pages = {
         "https://example.com/robots.txt": robots(),
         "https://external.test/robots.txt": robots(),
-        "https://example.com/": html('<main>Start <a href="https://external.test/">Next</a></main>'),
+        "https://example.com/": html(
+            '<main>Start <a href="https://external.test/">Next</a></main>'
+        ),
         "https://external.test/": html("<main>External useful content</main>"),
     }
     result, rows, links, hits = await run_crawl(
@@ -168,9 +170,7 @@ async def test_redirect_out_of_scope_is_skipped(tmp_path):
             302, headers={"location": "https://external.test/secret"}
         ),
     }
-    result, rows, _, hits = await run_crawl(
-        tmp_path, pages, {"start_url": "https://example.com"}
-    )
+    result, rows, _, hits = await run_crawl(tmp_path, pages, {"start_url": "https://example.com"})
     assert result["status"] == "COMPLETED"
     assert result["pages_skipped"] == 1
     assert rows[0][1] == "SKIPPED"
@@ -194,3 +194,40 @@ async def test_api_health_ready_and_invalid_start(tmp_path):
             assert (
                 await api.post("/api/v1/crawl", json={"start_url": "http://127.0.0.1"})
             ).status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_job_timeout_terminates(tmp_path):
+    settings = Settings(
+        database_url=f"sqlite+aiosqlite:///{(tmp_path / 'timeout.db').as_posix()}",
+        domain_delay_seconds=0,
+    )
+    app = create_app(settings)
+
+    async def slow_response(request):
+        await asyncio.sleep(0.2)
+        return robots()
+
+    async with app.router.lifespan_context(app):
+        async with httpx.AsyncClient(transport=httpx.MockTransport(slow_response)) as source:
+            service = app.state.crawl_service
+            service.validator = PublicValidator()
+            service.fetcher.validator = service.validator
+            service.fetcher.client = source
+            async with httpx.AsyncClient(
+                transport=httpx.ASGITransport(app=app), base_url="http://test"
+            ) as api:
+                created = await api.post(
+                    "/api/v1/crawl",
+                    json={"start_url": "https://example.com", "timeout": 0.02},
+                )
+                assert created.status_code == 202
+                job_id = created.json()["job_id"]
+                for _ in range(100):
+                    result = (await api.get(f"/api/v1/crawl/{job_id}")).json()
+                    if result["status"] == "FAILED":
+                        break
+                    await asyncio.sleep(0.01)
+                else:
+                    pytest.fail("Timed-out crawl did not terminate")
+                assert "TimeoutError" in result["error_message"]

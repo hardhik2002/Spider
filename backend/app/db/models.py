@@ -1,10 +1,10 @@
 from datetime import UTC, datetime
 from uuid import uuid4
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Index, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
-from app.crawler.models import JobStatus, PageStatus
+from app.crawler.models import CrawlMode, JobStatus, PageStatus, ScoringStatus
 
 
 def utc_now() -> datetime:
@@ -35,6 +35,21 @@ class CrawlJob(Base):
     pages_failed: Mapped[int] = mapped_column(Integer, default=0)
     pages_skipped: Mapped[int] = mapped_column(Integer, default=0)
     error_message: Mapped[str | None] = mapped_column(Text)
+    research_query: Mapped[str | None] = mapped_column(Text)
+    crawl_mode: Mapped[str] = mapped_column(String(20), default=CrawlMode.FIFO.value)
+    min_relevance_score: Mapped[float | None] = mapped_column(Float)
+    embedding_model: Mapped[str | None] = mapped_column(Text)
+    depth_penalty: Mapped[float | None] = mapped_column(Float)
+    exploration_rate: Mapped[float | None] = mapped_column(Float)
+    links_scored: Mapped[int] = mapped_column(Integer, default=0)
+    links_below_threshold: Mapped[int] = mapped_column(Integer, default=0)
+    relevance_score_sum: Mapped[float] = mapped_column(Float, default=0.0)
+    highest_relevance_score: Mapped[float | None] = mapped_column(Float)
+    query_embedding_ms: Mapped[int | None] = mapped_column(Integer)
+    candidate_embeddings: Mapped[int] = mapped_column(Integer, default=0)
+    candidate_scoring_ms: Mapped[int] = mapped_column(Integer, default=0)
+    model_load_ms: Mapped[int | None] = mapped_column(Integer)
+    duration_ms: Mapped[int | None] = mapped_column(Integer)
 
 
 class CrawledPage(Base):
@@ -64,6 +79,11 @@ class CrawledPage(Base):
     crawl_status: Mapped[str] = mapped_column(String(20), default=PageStatus.QUEUED.value)
     error_message: Mapped[str | None] = mapped_column(Text)
     crawled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    predicted_link_relevance: Mapped[float | None] = mapped_column(Float)
+    actual_page_relevance: Mapped[float | None] = mapped_column(Float)
+    priority_score: Mapped[float | None] = mapped_column(Float)
+    discovery_order: Mapped[int | None] = mapped_column(Integer)
+    source_link_id: Mapped[int | None] = mapped_column(ForeignKey("discovered_links.id"))
 
 
 class DiscoveredLink(Base):
@@ -81,3 +101,14 @@ class DiscoveredLink(Base):
     anchor_text: Mapped[str] = mapped_column(Text)
     is_internal: Mapped[bool] = mapped_column(Boolean)
     discovered_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+    source_page_title: Mapped[str | None] = mapped_column(Text)
+    link_context: Mapped[str | None] = mapped_column(Text)
+    target_depth: Mapped[int | None] = mapped_column(Integer)
+    discovery_order: Mapped[int | None] = mapped_column(Integer)
+    relevance_score: Mapped[float | None] = mapped_column(Float)
+    priority_score: Mapped[float | None] = mapped_column(Float)
+    depth_penalty: Mapped[float | None] = mapped_column(Float)
+    scoring_status: Mapped[str] = mapped_column(String(20), default=ScoringStatus.NOT_SCORED.value)
+    scoring_reason: Mapped[str | None] = mapped_column(Text)
+    selected_for_crawl: Mapped[bool] = mapped_column(Boolean, default=False)
+    rejection_reason: Mapped[str | None] = mapped_column(String(40))

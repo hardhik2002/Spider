@@ -26,9 +26,17 @@ def parse_page(html: bytes, final_url: str, root_domain: str) -> ParsedPage:
             target = normalize_url(raw, final_url)
         except InvalidURL:
             continue
+        nearby = anchor.find_parent(["p", "li"])
+        if nearby is None:
+            nearby = anchor.parent
+        context = " ".join(nearby.get_text(" ", strip=True).split()) if nearby else ""
         links.append(
             Link(
-                raw, target, anchor.get_text(" ", strip=True)[:500], hostname(target) == root_domain
+                raw,
+                target,
+                anchor.get_text(" ", strip=True)[:500],
+                hostname(target) == root_domain,
+                context[:320],
             )
         )
     for tag in soup(["script", "style", "nav", "footer", "header", "aside"]):
