@@ -1,7 +1,7 @@
 from functools import lru_cache
 from urllib.parse import urlsplit
 
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -30,6 +30,36 @@ class Settings(BaseSettings):
     max_concurrent_subquestion_crawls: int = Field(default=1, ge=1, le=4)
     max_seeds_per_domain_per_subquestion: int = Field(default=1, ge=1, le=10)
     seed_semantic_weight: float = Field(default=0.85, ge=0, le=1)
+    chunk_target_tokens: int = Field(default=500, ge=50, le=2000)
+    chunk_max_tokens: int = Field(default=650, ge=80, le=2500)
+    chunk_overlap_tokens: int = Field(default=80, ge=0, le=500)
+    chunk_min_tokens: int = Field(default=80, ge=1, le=500)
+    qdrant_path: str = "data/qdrant"
+    qdrant_collection: str = "spidermind_chunks"
+    dense_top_k: int = Field(default=50, ge=1, le=200)
+    lexical_top_k: int = Field(default=50, ge=1, le=200)
+    fusion_top_k: int = Field(default=30, ge=1, le=100)
+    rrf_k: int = Field(default=60, ge=1, le=200)
+    rrf_dense_weight: float = Field(default=1.0, ge=0, le=10)
+    rrf_lexical_weight: float = Field(default=1.0, ge=0, le=10)
+    reranker_model: str = "BAAI/bge-reranker-v2-m3"
+    reranker_device: str = "cpu"
+    reranker_batch_size: int = Field(default=4, ge=1, le=64)
+    reranker_candidate_count: int = Field(default=30, ge=1, le=100)
+    rerank_enabled: bool = True
+    final_top_k: int = Field(default=8, ge=1, le=50)
+    max_final_chunks_per_document: int = Field(default=2, ge=1, le=20)
+    neighbor_expansion_enabled: bool = True
+    neighbor_window: int = Field(default=1, ge=0, le=3)
+    max_neighbor_context_tokens: int = Field(default=700, ge=50, le=3000)
+
+    @model_validator(mode="after")
+    def valid_chunk_profile(self):
+        if not (self.chunk_min_tokens <= self.chunk_target_tokens <= self.chunk_max_tokens):
+            raise ValueError("chunk_min_tokens <= chunk_target_tokens <= chunk_max_tokens required")
+        if self.chunk_overlap_tokens >= self.chunk_target_tokens:
+            raise ValueError("chunk_overlap_tokens must be less than chunk_target_tokens")
+        return self
 
     @field_validator("ollama_url")
     @classmethod

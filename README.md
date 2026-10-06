@@ -1,6 +1,6 @@
-# SpiderMind — research planning, search, and intelligent crawling
+# SpiderMind — research, crawling, and evidence retrieval
 
-SpiderMind is an incremental AI research project. Phase 3 accepts a question, creates a structured local-LLM research plan, searches the web, selects semantically ranked public seeds, and runs targeted Phase 2 crawls. It persists the trail from question to crawled page. It does not generate answers, citations, claims, RAG indexes, knowledge graphs, agents, or a frontend.
+SpiderMind is an incremental AI research project. Phase 3 accepts a question, creates a structured local-LLM research plan, searches the web, selects semantically ranked public seeds, and runs targeted Phase 2 crawls. Phase 4 indexes those pages and retrieves traceable evidence. It does not generate answers, verify claims, build a knowledge graph, or provide a frontend.
 
 ## Phase 1 foundation
 
@@ -61,11 +61,12 @@ The frontier owns ordering and URL identity; the scheduler owns eligibility, bat
 ```text
 backend/
   app/
-    api/routes/      # health, crawl, and research endpoints
+    api/routes/      # health, crawl, research, and retrieval endpoints
     core/            # configuration and JSON logging
     crawler/         # frontier, normalization, safety, fetching, parser, embeddings, scoring
     db/              # SQLAlchemy models, additive migration, repository
-    evaluation/      # controlled Phase 2 and Phase 3 metrics
+    evaluation/      # controlled Phase 2, 3, and 4 metrics
+    rag/             # chunking, vector/BM25 indexes, fusion, reranking, evidence
     research/        # Ollama planner, prompt, search provider
     schemas/         # Pydantic API contracts
     services/        # crawl job lifecycle
@@ -205,6 +206,38 @@ $env:PYTHONPATH = "backend"
 
 A measured live run is stored in [phase3-live-smoke-results.json](docs/phase3-live-smoke-results.json). Ollama produced two valid subquestions; DDGS returned four unique public results; two seeds were selected. One seed's site exceeded the redirect limit, and an arXiv HTML page was crawled and scored. The research job correctly ended `partial` with one useful page. This is a connectivity and integration smoke test, not a relevance benchmark.
 
+## Phase 4 evidence retrieval
+
+Install with `pip install -r backend/requirements-rag.txt`. Phase 4 indexes successful, nonduplicate pages from selected Phase 3 crawl seeds. Start the API with `uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000`. The SQLite startup migration moves schema version 3 to 4 additively; existing crawl and research rows are retained. Local Qdrant persists at `data/qdrant` by default. Model files are fetched and cached on first use.
+
+```powershell
+$researchJobId = "<existing research job UUID>"
+$indexJob = Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/api/v1/research/$researchJobId/index"
+Invoke-RestMethod "http://127.0.0.1:8000/api/v1/research/$researchJobId/index"
+Invoke-RestMethod "http://127.0.0.1:8000/api/v1/research/$researchJobId/index/consistency"
+$body = @{
+    query = "How does GraphRAG differ from traditional RAG architecture?"
+    retrieval_mode = "hybrid"
+    dense_top_k = 50
+    lexical_top_k = 50
+    fusion_top_k = 30
+    final_top_k = 8
+    rerank = $true
+    include_neighbor_context = $true
+} | ConvertTo-Json
+Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/api/v1/research/$researchJobId/retrieve" -ContentType "application/json" -Body $body
+```
+
+Index jobs run in process and expose `PENDING`, `RUNNING`, `COMPLETED`, `PARTIAL`, or `FAILED` plus document, chunk, timing, and error counters. A repeated request while a job is active returns that job. An unchanged completed document is skipped; changed content, title, chunk profile, or embedding model causes reindexing. The consistency endpoint compares active SQLite chunks, FTS rows, and Qdrant point IDs. `source_domain`, `document_id`, `crawl_job_id`, and Phase 3 `subquestion_id` are optional retrieval filters. Subquestion filtering follows selected seed **crawl jobs**: pages reached from a seed can match that subquestion even if that page itself was not a search result for it. Results include scores, ranks, source URLs, page IDs, and bounded neighbor context. Scores are ranking signals, not probabilities.
+
+The chunker uses the BGE-M3 tokenizer and tries paragraph and sentence boundaries before token splits. Defaults are target 500, maximum 650, overlap 80, and minimum 80 tokens. It keeps one canonical passage per research job and stores every document occurrence separately. The shared BGE-M3 provider embeds title, section, and passage into 1024-dimensional vectors. Qdrant stores vectors; SQLite stores relational provenance and an FTS5 BM25 index with triggers. If Python's SQLite lacks FTS5, a local BM25 fallback remains available.
+
+Dense retrieval can find paraphrases. BM25 is useful for exact identifiers, acronyms, model names, and uncommon technical terms. Hybrid retrieval joins the candidate lists by canonical chunk ID with reciprocal rank fusion; it uses ranks because raw cosine and SQLite BM25 scores have different scales. A local `BAAI/bge-reranker-v2-m3` cross encoder scores at most 30 fused pairs by default. A per-document cap is applied after reranking. On CPU, reranking can add several seconds; `SPIDERMIND_RERANK_ENABLED=false` or `"rerank": false` disables it when latency matters. A requested reranker failure is returned as an error, not silently ignored.
+
+The [controlled fixture](backend/tests/fixtures/phase4_benchmark.json) has eight labeled source documents and eight questions, including exact identifiers, paraphrases, and distractors. Run `python -m app.evaluation.phase4_benchmark --output docs/phase4-benchmark-results.json` with `PYTHONPATH=backend` to compare dense, BM25, hybrid, and hybrid with reranking across three chunk profiles. The [measured artifact](docs/phase4-benchmark-results.json) includes Recall@5, Precision@5, MRR, nDCG@5, HitRate@5, per-query rankings, latency, and index metrics. On the 80-token fixture profile, dense Recall@5 was 0.875, BM25 0.9375, hybrid 0.875, and hybrid with reranking 0.9375. This small corpus does not establish broad superiority; BM25 beat plain hybrid here, and reranking cost about 6.1 seconds per query on this CPU run. [The live smoke artifact](docs/phase4-live-smoke-results.json) indexes a copy of a prior Phase 3 job and records real URLs and snippets; it is a connectivity check, not a relevance benchmark.
+
+See [architecture.md](docs/architecture.md) for the data flow and recovery limits.
+
 ## Tests and checks
 
 ```powershell
@@ -218,4 +251,4 @@ The suite uses HTTPX mock transports and temporary SQLite databases, with no dep
 
 ## Current limits and roadmap
 
-Jobs run as in-process tasks. Restarting the API marks unfinished jobs failed; there is no durable worker or distributed scheduling. The SQLite migration is additive, not a general migration framework. BGE-M3 and Qwen3 have substantial memory and startup costs. Search quality and availability depend on public engines used by `ddgs`; timeout or rate limiting can produce partial jobs. Facet alias matching is a small controlled proxy for coverage and needs human review for production evaluation. A threshold may exclude useful low-scoring pages, and link context can be sparse or misleading. The crawler does not run JavaScript, authenticate to sites, enforce site-specific crawl-delay directives, or parse sitemaps. Robots retrieval fails closed when unavailable, except 404/410. The URL guard rejects local/private and non-global resolved IPs, validates every redirect hop, and disables environment proxies. DNS validation and connection resolution are separate, so DNS rebinding remains a known SSRF limit; production exposure to untrusted users needs connection-level address pinning and network egress controls. Answer generation, RAG, and knowledge graph engines remain future work.
+Jobs run as in-process tasks. Restarting the API marks unfinished jobs failed or partial; there is no durable worker or distributed scheduling. The SQLite migration is additive, not a general migration framework. BGE-M3, BGE-reranker-v2-m3, and Qwen3 have substantial memory and startup costs. Search quality and availability depend on public engines used by `ddgs`; timeout or rate limiting can produce partial jobs. Facet alias matching is a small controlled proxy for coverage and needs human review for production evaluation. A threshold may exclude useful low-scoring pages, and link context can be sparse or misleading. The crawler does not run JavaScript, authenticate to sites, enforce site-specific crawl-delay directives, or parse sitemaps. Robots retrieval fails closed when unavailable, except 404/410. The URL guard rejects local/private and non-global resolved IPs, validates every redirect hop, and disables environment proxies. DNS validation and connection resolution are separate, so DNS rebinding remains a known SSRF limit; production exposure to untrusted users needs connection-level address pinning and network egress controls. Retrieved web passages are untrusted data and may contain prompt injection; Phase 4 never executes instructions found in them. Answer generation, claim verification, and knowledge graph engines remain future work.

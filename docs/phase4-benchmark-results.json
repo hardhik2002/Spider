@@ -1,0 +1,2631 @@
+{
+  "fixture": "phase4_benchmark.json",
+  "models": {
+    "embedding": "BAAI/bge-m3",
+    "reranker": "BAAI/bge-reranker-v2-m3"
+  },
+  "profiles": [
+    {
+      "profile": {
+        "target_tokens": 80,
+        "max_tokens": 110,
+        "overlap_tokens": 12
+      },
+      "index": {
+        "status": "COMPLETED",
+        "documents_processed": 8,
+        "documents_failed": 0,
+        "chunks_created": 18,
+        "chunks_deduplicated": 0,
+        "chunks_embedded": 18,
+        "vector_records": 18,
+        "lexical_records": 18,
+        "average_chunk_tokens": 65.05555555555556,
+        "median_chunk_tokens": 70.0,
+        "max_chunk_tokens": 79,
+        "embedding_batches": 8,
+        "embedding_duration_ms": 14717,
+        "vector_upsert_duration_ms": 211,
+        "fts_index_duration_ms": 161,
+        "duration_ms": 26354,
+        "embedding_model": "BAAI/bge-m3",
+        "embedding_dimension": 1024,
+        "chunking_profile": "target=80,max=110,overlap=12,min=20"
+      },
+      "strategies": {
+        "dense": {
+          "metrics": {
+            "recall@5": 0.875,
+            "precision@5": 0.2,
+            "mrr": 0.875,
+            "ndcg@5": 0.8642911026750043,
+            "hit_rate@5": 1.0
+          },
+          "mean_latency_ms": 233.375
+        },
+        "bm25": {
+          "metrics": {
+            "recall@5": 0.9375,
+            "precision@5": 0.225,
+            "mrr": 0.9166666666666666,
+            "ndcg@5": 0.9073766308048339,
+            "hit_rate@5": 1.0
+          },
+          "mean_latency_ms": 5.5
+        },
+        "hybrid": {
+          "metrics": {
+            "recall@5": 0.875,
+            "precision@5": 0.2,
+            "mrr": 0.875,
+            "ndcg@5": 0.8642911026750043,
+            "hit_rate@5": 1.0
+          },
+          "mean_latency_ms": 91.0
+        },
+        "hybrid_rerank": {
+          "metrics": {
+            "recall@5": 0.9375,
+            "precision@5": 0.225,
+            "mrr": 0.9375,
+            "ndcg@5": 0.923742850001266,
+            "hit_rate@5": 1.0
+          },
+          "mean_latency_ms": 6118.625
+        }
+      },
+      "queries": [
+        {
+          "query": "How does GraphRAG differ from conventional vector RAG?",
+          "relevant": {
+            "graph": 2,
+            "vector": 1
+          },
+          "dense": {
+            "ranked_documents": [
+              "graph",
+              "distractor",
+              "distractor2",
+              "eval",
+              "bm25"
+            ],
+            "metrics": {
+              "recall@5": 0.5,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 0.8262346571285599,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 82,
+              "dense_search_ms": 4,
+              "fusion_ms": 0,
+              "total_ms": 90
+            },
+            "first_relevant_rank": 1
+          },
+          "bm25": {
+            "ranked_documents": [
+              "graph",
+              "eval",
+              "bm25",
+              "distractor2",
+              "distractor"
+            ],
+            "metrics": {
+              "recall@5": 0.5,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 0.8262346571285599,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "lexical_search_ms": 2,
+              "fusion_ms": 0,
+              "total_ms": 5
+            },
+            "first_relevant_rank": 1
+          },
+          "hybrid": {
+            "ranked_documents": [
+              "graph",
+              "eval",
+              "distractor",
+              "bm25",
+              "distractor2"
+            ],
+            "metrics": {
+              "recall@5": 0.5,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 0.8262346571285599,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 66,
+              "dense_search_ms": 2,
+              "lexical_search_ms": 1,
+              "fusion_ms": 0,
+              "total_ms": 72
+            },
+            "first_relevant_rank": 1
+          },
+          "hybrid_rerank": {
+            "ranked_documents": [
+              "graph",
+              "distractor",
+              "eval",
+              "distractor2",
+              "vector"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.4,
+              "mrr": 1.0,
+              "ndcg@5": 0.9327783893101107,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 72,
+              "dense_search_ms": 2,
+              "lexical_search_ms": 1,
+              "fusion_ms": 0,
+              "rerank_ms": 18987,
+              "total_ms": 19072
+            },
+            "first_relevant_rank": 1
+          }
+        },
+        {
+          "query": "Which method finds exact BGE-M3 and GPT-5 identifiers?",
+          "relevant": {
+            "bm25": 2
+          },
+          "dense": {
+            "ranked_documents": [
+              "bm25",
+              "vector",
+              "latency",
+              "distractor2",
+              "eval"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 957,
+              "dense_search_ms": 28,
+              "fusion_ms": 0,
+              "total_ms": 1001
+            },
+            "first_relevant_rank": 1
+          },
+          "bm25": {
+            "ranked_documents": [
+              "bm25",
+              "vector",
+              "eval",
+              "latency",
+              "distractor"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "lexical_search_ms": 4,
+              "fusion_ms": 0,
+              "total_ms": 7
+            },
+            "first_relevant_rank": 1
+          },
+          "hybrid": {
+            "ranked_documents": [
+              "bm25",
+              "vector",
+              "latency",
+              "distractor2",
+              "eval"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 86,
+              "dense_search_ms": 2,
+              "lexical_search_ms": 2,
+              "fusion_ms": 0,
+              "total_ms": 95
+            },
+            "first_relevant_rank": 1
+          },
+          "hybrid_rerank": {
+            "ranked_documents": [
+              "bm25",
+              "vector",
+              "hallucination",
+              "eval",
+              "latency"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 81,
+              "dense_search_ms": 2,
+              "lexical_search_ms": 1,
+              "fusion_ms": 0,
+              "rerank_ms": 4033,
+              "total_ms": 4122
+            },
+            "first_relevant_rank": 1
+          }
+        },
+        {
+          "query": "How can search find semantically similar text without matching words?",
+          "relevant": {
+            "vector": 2
+          },
+          "dense": {
+            "ranked_documents": [
+              "vector",
+              "bm25",
+              "distractor2",
+              "graph",
+              "eval"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 105,
+              "dense_search_ms": 2,
+              "fusion_ms": 0,
+              "total_ms": 111
+            },
+            "first_relevant_rank": 1
+          },
+          "bm25": {
+            "ranked_documents": [
+              "vector",
+              "bm25",
+              "eval",
+              "graph",
+              "distractor2"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "lexical_search_ms": 2,
+              "fusion_ms": 0,
+              "total_ms": 5
+            },
+            "first_relevant_rank": 1
+          },
+          "hybrid": {
+            "ranked_documents": [
+              "vector",
+              "bm25",
+              "eval",
+              "graph",
+              "distractor2"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 75,
+              "dense_search_ms": 2,
+              "lexical_search_ms": 1,
+              "fusion_ms": 0,
+              "total_ms": 82
+            },
+            "first_relevant_rank": 1
+          },
+          "hybrid_rerank": {
+            "ranked_documents": [
+              "vector",
+              "bm25",
+              "eval",
+              "latency",
+              "graph"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 70,
+              "dense_search_ms": 1,
+              "lexical_search_ms": 1,
+              "fusion_ms": 0,
+              "rerank_ms": 3832,
+              "total_ms": 3909
+            },
+            "first_relevant_rank": 1
+          }
+        },
+        {
+          "query": "What does MRR measure in a retrieval benchmark?",
+          "relevant": {
+            "eval": 2
+          },
+          "dense": {
+            "ranked_documents": [
+              "distractor2",
+              "eval",
+              "latency",
+              "vector",
+              "bm25"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 0.5,
+              "ndcg@5": 0.6309297535714574,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 118,
+              "dense_search_ms": 10,
+              "fusion_ms": 0,
+              "total_ms": 131
+            },
+            "first_relevant_rank": 2
+          },
+          "bm25": {
+            "ranked_documents": [
+              "distractor2",
+              "bm25",
+              "eval",
+              "latency",
+              "vector"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 0.3333333333333333,
+              "ndcg@5": 0.5,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "lexical_search_ms": 1,
+              "fusion_ms": 0,
+              "total_ms": 6
+            },
+            "first_relevant_rank": 3
+          },
+          "hybrid": {
+            "ranked_documents": [
+              "distractor2",
+              "eval",
+              "latency",
+              "bm25",
+              "vector"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 0.5,
+              "ndcg@5": 0.6309297535714574,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 85,
+              "dense_search_ms": 2,
+              "lexical_search_ms": 1,
+              "fusion_ms": 0,
+              "total_ms": 92
+            },
+            "first_relevant_rank": 2
+          },
+          "hybrid_rerank": {
+            "ranked_documents": [
+              "distractor2",
+              "eval",
+              "latency",
+              "hallucination",
+              "vector"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 0.5,
+              "ndcg@5": 0.6309297535714574,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 69,
+              "dense_search_ms": 1,
+              "lexical_search_ms": 2,
+              "fusion_ms": 0,
+              "rerank_ms": 3873,
+              "total_ms": 3948
+            },
+            "first_relevant_rank": 2
+          }
+        },
+        {
+          "query": "How can citations be checked against unsupported claims?",
+          "relevant": {
+            "hallucination": 2
+          },
+          "dense": {
+            "ranked_documents": [
+              "hallucination",
+              "eval",
+              "bm25",
+              "distractor2",
+              "vector"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 102,
+              "dense_search_ms": 2,
+              "fusion_ms": 0,
+              "total_ms": 108
+            },
+            "first_relevant_rank": 1
+          },
+          "bm25": {
+            "ranked_documents": [
+              "hallucination",
+              "vector",
+              "eval",
+              "distractor",
+              "graph"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "lexical_search_ms": 1,
+              "fusion_ms": 0,
+              "total_ms": 4
+            },
+            "first_relevant_rank": 1
+          },
+          "hybrid": {
+            "ranked_documents": [
+              "hallucination",
+              "eval",
+              "vector",
+              "distractor2",
+              "distractor"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 70,
+              "dense_search_ms": 2,
+              "lexical_search_ms": 1,
+              "fusion_ms": 0,
+              "total_ms": 77
+            },
+            "first_relevant_rank": 1
+          },
+          "hybrid_rerank": {
+            "ranked_documents": [
+              "hallucination",
+              "eval",
+              "vector",
+              "distractor",
+              "bm25"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 71,
+              "dense_search_ms": 2,
+              "lexical_search_ms": 1,
+              "fusion_ms": 0,
+              "rerank_ms": 4032,
+              "total_ms": 4110
+            },
+            "first_relevant_rank": 1
+          }
+        },
+        {
+          "query": "Why is cross encoder scoring limited to a small candidate set?",
+          "relevant": {
+            "latency": 2
+          },
+          "dense": {
+            "ranked_documents": [
+              "vector",
+              "latency",
+              "bm25",
+              "distractor2",
+              "eval"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 0.5,
+              "ndcg@5": 0.6309297535714574,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 156,
+              "dense_search_ms": 2,
+              "fusion_ms": 0,
+              "total_ms": 162
+            },
+            "first_relevant_rank": 2
+          },
+          "bm25": {
+            "ranked_documents": [
+              "latency",
+              "vector",
+              "bm25",
+              "eval",
+              "hallucination"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "lexical_search_ms": 2,
+              "fusion_ms": 0,
+              "total_ms": 6
+            },
+            "first_relevant_rank": 1
+          },
+          "hybrid": {
+            "ranked_documents": [
+              "vector",
+              "latency",
+              "bm25",
+              "eval",
+              "distractor2"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 0.5,
+              "ndcg@5": 0.6309297535714574,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 100,
+              "dense_search_ms": 3,
+              "lexical_search_ms": 2,
+              "fusion_ms": 0,
+              "total_ms": 110
+            },
+            "first_relevant_rank": 2
+          },
+          "hybrid_rerank": {
+            "ranked_documents": [
+              "latency",
+              "vector",
+              "eval",
+              "bm25",
+              "distractor2"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 99,
+              "dense_search_ms": 3,
+              "lexical_search_ms": 2,
+              "fusion_ms": 0,
+              "rerank_ms": 4489,
+              "total_ms": 4599
+            },
+            "first_relevant_rank": 1
+          }
+        },
+        {
+          "query": "How do BM25 and cosine rankings combine without adding raw scores?",
+          "relevant": {
+            "bm25": 2,
+            "graph": 1
+          },
+          "dense": {
+            "ranked_documents": [
+              "bm25",
+              "vector",
+              "latency",
+              "distractor2",
+              "eval"
+            ],
+            "metrics": {
+              "recall@5": 0.5,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 0.8262346571285599,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 102,
+              "dense_search_ms": 3,
+              "fusion_ms": 0,
+              "total_ms": 109
+            },
+            "first_relevant_rank": 1
+          },
+          "bm25": {
+            "ranked_documents": [
+              "bm25",
+              "distractor",
+              "vector",
+              "eval",
+              "graph"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.4,
+              "mrr": 1.0,
+              "ndcg@5": 0.9327783893101107,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "lexical_search_ms": 2,
+              "fusion_ms": 0,
+              "total_ms": 5
+            },
+            "first_relevant_rank": 1
+          },
+          "hybrid": {
+            "ranked_documents": [
+              "bm25",
+              "vector",
+              "latency",
+              "eval",
+              "distractor2"
+            ],
+            "metrics": {
+              "recall@5": 0.5,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 0.8262346571285599,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 85,
+              "dense_search_ms": 3,
+              "lexical_search_ms": 1,
+              "fusion_ms": 0,
+              "total_ms": 94
+            },
+            "first_relevant_rank": 1
+          },
+          "hybrid_rerank": {
+            "ranked_documents": [
+              "bm25",
+              "vector",
+              "latency",
+              "distractor2",
+              "eval"
+            ],
+            "metrics": {
+              "recall@5": 0.5,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 0.8262346571285599,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 91,
+              "dense_search_ms": 3,
+              "lexical_search_ms": 1,
+              "fusion_ms": 0,
+              "rerank_ms": 4498,
+              "total_ms": 4596
+            },
+            "first_relevant_rank": 1
+          }
+        },
+        {
+          "query": "Which retrieval measure counts all labeled relevant items found in top K?",
+          "relevant": {
+            "eval": 2
+          },
+          "dense": {
+            "ranked_documents": [
+              "eval",
+              "vector",
+              "bm25",
+              "distractor2",
+              "latency"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 148,
+              "dense_search_ms": 2,
+              "fusion_ms": 0,
+              "total_ms": 155
+            },
+            "first_relevant_rank": 1
+          },
+          "bm25": {
+            "ranked_documents": [
+              "eval",
+              "distractor2",
+              "latency",
+              "hallucination",
+              "vector"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "lexical_search_ms": 2,
+              "fusion_ms": 0,
+              "total_ms": 6
+            },
+            "first_relevant_rank": 1
+          },
+          "hybrid": {
+            "ranked_documents": [
+              "eval",
+              "distractor2",
+              "vector",
+              "latency",
+              "bm25"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 98,
+              "dense_search_ms": 2,
+              "lexical_search_ms": 2,
+              "fusion_ms": 0,
+              "total_ms": 106
+            },
+            "first_relevant_rank": 1
+          },
+          "hybrid_rerank": {
+            "ranked_documents": [
+              "eval",
+              "distractor2",
+              "hallucination",
+              "bm25",
+              "vector"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 93,
+              "dense_search_ms": 3,
+              "lexical_search_ms": 2,
+              "fusion_ms": 0,
+              "rerank_ms": 4490,
+              "total_ms": 4593
+            },
+            "first_relevant_rank": 1
+          }
+        }
+      ]
+    },
+    {
+      "profile": {
+        "target_tokens": 120,
+        "max_tokens": 160,
+        "overlap_tokens": 18
+      },
+      "index": {
+        "status": "COMPLETED",
+        "documents_processed": 8,
+        "documents_failed": 0,
+        "chunks_created": 14,
+        "chunks_deduplicated": 0,
+        "chunks_embedded": 14,
+        "vector_records": 14,
+        "lexical_records": 14,
+        "average_chunk_tokens": 82.78571428571429,
+        "median_chunk_tokens": 98.5,
+        "max_chunk_tokens": 120,
+        "embedding_batches": 8,
+        "embedding_duration_ms": 5227,
+        "vector_upsert_duration_ms": 251,
+        "fts_index_duration_ms": 260,
+        "duration_ms": 24523,
+        "embedding_model": "BAAI/bge-m3",
+        "embedding_dimension": 1024,
+        "chunking_profile": "target=120,max=160,overlap=18,min=20"
+      },
+      "strategies": {
+        "dense": {
+          "metrics": {
+            "recall@5": 0.875,
+            "precision@5": 0.2,
+            "mrr": 0.8125,
+            "ndcg@5": 0.8181573218714365,
+            "hit_rate@5": 1.0
+          },
+          "mean_latency_ms": 215.75
+        },
+        "bm25": {
+          "metrics": {
+            "recall@5": 0.9375,
+            "precision@5": 0.225,
+            "mrr": 0.9375,
+            "ndcg@5": 0.923742850001266,
+            "hit_rate@5": 1.0
+          },
+          "mean_latency_ms": 6.625
+        },
+        "hybrid": {
+          "metrics": {
+            "recall@5": 0.875,
+            "precision@5": 0.2,
+            "mrr": 0.875,
+            "ndcg@5": 0.8642911026750043,
+            "hit_rate@5": 1.0
+          },
+          "mean_latency_ms": 153.125
+        },
+        "hybrid_rerank": {
+          "metrics": {
+            "recall@5": 0.875,
+            "precision@5": 0.2,
+            "mrr": 0.9375,
+            "ndcg@5": 0.9104248834785722,
+            "hit_rate@5": 1.0
+          },
+          "mean_latency_ms": 6297.375
+        }
+      },
+      "queries": [
+        {
+          "query": "How does GraphRAG differ from conventional vector RAG?",
+          "relevant": {
+            "graph": 2,
+            "vector": 1
+          },
+          "dense": {
+            "ranked_documents": [
+              "graph",
+              "distractor",
+              "distractor2",
+              "eval",
+              "bm25"
+            ],
+            "metrics": {
+              "recall@5": 0.5,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 0.8262346571285599,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 97,
+              "dense_search_ms": 4,
+              "fusion_ms": 0,
+              "total_ms": 108
+            },
+            "first_relevant_rank": 1
+          },
+          "bm25": {
+            "ranked_documents": [
+              "graph",
+              "eval",
+              "bm25",
+              "distractor2",
+              "distractor"
+            ],
+            "metrics": {
+              "recall@5": 0.5,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 0.8262346571285599,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "lexical_search_ms": 1,
+              "fusion_ms": 0,
+              "total_ms": 4
+            },
+            "first_relevant_rank": 1
+          },
+          "hybrid": {
+            "ranked_documents": [
+              "graph",
+              "eval",
+              "distractor2",
+              "distractor",
+              "bm25"
+            ],
+            "metrics": {
+              "recall@5": 0.5,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 0.8262346571285599,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 80,
+              "dense_search_ms": 2,
+              "lexical_search_ms": 1,
+              "fusion_ms": 0,
+              "total_ms": 87
+            },
+            "first_relevant_rank": 1
+          },
+          "hybrid_rerank": {
+            "ranked_documents": [
+              "graph",
+              "distractor",
+              "eval",
+              "distractor2",
+              "latency"
+            ],
+            "metrics": {
+              "recall@5": 0.5,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 0.8262346571285599,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 71,
+              "dense_search_ms": 2,
+              "lexical_search_ms": 1,
+              "fusion_ms": 0,
+              "rerank_ms": 3839,
+              "total_ms": 3918
+            },
+            "first_relevant_rank": 1
+          }
+        },
+        {
+          "query": "Which method finds exact BGE-M3 and GPT-5 identifiers?",
+          "relevant": {
+            "bm25": 2
+          },
+          "dense": {
+            "ranked_documents": [
+              "bm25",
+              "vector",
+              "distractor2",
+              "latency",
+              "eval"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 217,
+              "dense_search_ms": 4,
+              "fusion_ms": 0,
+              "total_ms": 225
+            },
+            "first_relevant_rank": 1
+          },
+          "bm25": {
+            "ranked_documents": [
+              "bm25",
+              "vector",
+              "eval",
+              "latency",
+              "graph"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "lexical_search_ms": 3,
+              "fusion_ms": 0,
+              "total_ms": 8
+            },
+            "first_relevant_rank": 1
+          },
+          "hybrid": {
+            "ranked_documents": [
+              "bm25",
+              "vector",
+              "eval",
+              "latency",
+              "distractor2"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 144,
+              "dense_search_ms": 3,
+              "lexical_search_ms": 2,
+              "fusion_ms": 0,
+              "total_ms": 155
+            },
+            "first_relevant_rank": 1
+          },
+          "hybrid_rerank": {
+            "ranked_documents": [
+              "bm25",
+              "vector",
+              "hallucination",
+              "eval",
+              "graph"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 147,
+              "dense_search_ms": 3,
+              "lexical_search_ms": 2,
+              "fusion_ms": 0,
+              "rerank_ms": 6011,
+              "total_ms": 6169
+            },
+            "first_relevant_rank": 1
+          }
+        },
+        {
+          "query": "How can search find semantically similar text without matching words?",
+          "relevant": {
+            "vector": 2
+          },
+          "dense": {
+            "ranked_documents": [
+              "bm25",
+              "vector",
+              "distractor2",
+              "eval",
+              "graph"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 0.5,
+              "ndcg@5": 0.6309297535714574,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 114,
+              "dense_search_ms": 4,
+              "fusion_ms": 0,
+              "total_ms": 123
+            },
+            "first_relevant_rank": 2
+          },
+          "bm25": {
+            "ranked_documents": [
+              "vector",
+              "bm25",
+              "eval",
+              "graph",
+              "distractor2"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "lexical_search_ms": 2,
+              "fusion_ms": 0,
+              "total_ms": 6
+            },
+            "first_relevant_rank": 1
+          },
+          "hybrid": {
+            "ranked_documents": [
+              "vector",
+              "bm25",
+              "eval",
+              "distractor2",
+              "graph"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 99,
+              "dense_search_ms": 3,
+              "lexical_search_ms": 2,
+              "fusion_ms": 0,
+              "total_ms": 109
+            },
+            "first_relevant_rank": 1
+          },
+          "hybrid_rerank": {
+            "ranked_documents": [
+              "vector",
+              "bm25",
+              "eval",
+              "latency",
+              "graph"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 109,
+              "dense_search_ms": 3,
+              "lexical_search_ms": 2,
+              "fusion_ms": 0,
+              "rerank_ms": 5585,
+              "total_ms": 5704
+            },
+            "first_relevant_rank": 1
+          }
+        },
+        {
+          "query": "What does MRR measure in a retrieval benchmark?",
+          "relevant": {
+            "eval": 2
+          },
+          "dense": {
+            "ranked_documents": [
+              "distractor2",
+              "eval",
+              "latency",
+              "vector",
+              "bm25"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 0.5,
+              "ndcg@5": 0.6309297535714574,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 487,
+              "dense_search_ms": 3,
+              "fusion_ms": 0,
+              "total_ms": 497
+            },
+            "first_relevant_rank": 2
+          },
+          "bm25": {
+            "ranked_documents": [
+              "distractor2",
+              "eval",
+              "bm25",
+              "latency",
+              "vector"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 0.5,
+              "ndcg@5": 0.6309297535714574,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "lexical_search_ms": 3,
+              "fusion_ms": 0,
+              "total_ms": 8
+            },
+            "first_relevant_rank": 2
+          },
+          "hybrid": {
+            "ranked_documents": [
+              "distractor2",
+              "eval",
+              "latency",
+              "bm25",
+              "vector"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 0.5,
+              "ndcg@5": 0.6309297535714574,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 211,
+              "dense_search_ms": 4,
+              "lexical_search_ms": 3,
+              "fusion_ms": 0,
+              "total_ms": 225
+            },
+            "first_relevant_rank": 2
+          },
+          "hybrid_rerank": {
+            "ranked_documents": [
+              "distractor2",
+              "eval",
+              "latency",
+              "hallucination",
+              "vector"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 0.5,
+              "ndcg@5": 0.6309297535714574,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 141,
+              "dense_search_ms": 4,
+              "lexical_search_ms": 2,
+              "fusion_ms": 0,
+              "rerank_ms": 7044,
+              "total_ms": 7197
+            },
+            "first_relevant_rank": 2
+          }
+        },
+        {
+          "query": "How can citations be checked against unsupported claims?",
+          "relevant": {
+            "hallucination": 2
+          },
+          "dense": {
+            "ranked_documents": [
+              "hallucination",
+              "eval",
+              "bm25",
+              "distractor2",
+              "graph"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 135,
+              "dense_search_ms": 4,
+              "fusion_ms": 0,
+              "total_ms": 145
+            },
+            "first_relevant_rank": 1
+          },
+          "bm25": {
+            "ranked_documents": [
+              "hallucination",
+              "eval",
+              "vector",
+              "distractor",
+              "graph"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "lexical_search_ms": 2,
+              "fusion_ms": 0,
+              "total_ms": 8
+            },
+            "first_relevant_rank": 1
+          },
+          "hybrid": {
+            "ranked_documents": [
+              "hallucination",
+              "eval",
+              "vector",
+              "graph",
+              "distractor2"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 135,
+              "dense_search_ms": 3,
+              "lexical_search_ms": 2,
+              "fusion_ms": 0,
+              "total_ms": 146
+            },
+            "first_relevant_rank": 1
+          },
+          "hybrid_rerank": {
+            "ranked_documents": [
+              "hallucination",
+              "eval",
+              "vector",
+              "bm25",
+              "graph"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 126,
+              "dense_search_ms": 4,
+              "lexical_search_ms": 3,
+              "fusion_ms": 0,
+              "rerank_ms": 6731,
+              "total_ms": 6869
+            },
+            "first_relevant_rank": 1
+          }
+        },
+        {
+          "query": "Why is cross encoder scoring limited to a small candidate set?",
+          "relevant": {
+            "latency": 2
+          },
+          "dense": {
+            "ranked_documents": [
+              "vector",
+              "latency",
+              "bm25",
+              "distractor2",
+              "eval"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 0.5,
+              "ndcg@5": 0.6309297535714574,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 203,
+              "dense_search_ms": 4,
+              "fusion_ms": 0,
+              "total_ms": 213
+            },
+            "first_relevant_rank": 2
+          },
+          "bm25": {
+            "ranked_documents": [
+              "latency",
+              "vector",
+              "eval",
+              "bm25",
+              "hallucination"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "lexical_search_ms": 2,
+              "fusion_ms": 0,
+              "total_ms": 6
+            },
+            "first_relevant_rank": 1
+          },
+          "hybrid": {
+            "ranked_documents": [
+              "vector",
+              "latency",
+              "eval",
+              "bm25",
+              "distractor2"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 0.5,
+              "ndcg@5": 0.6309297535714574,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 209,
+              "dense_search_ms": 4,
+              "lexical_search_ms": 3,
+              "fusion_ms": 0,
+              "total_ms": 222
+            },
+            "first_relevant_rank": 2
+          },
+          "hybrid_rerank": {
+            "ranked_documents": [
+              "latency",
+              "vector",
+              "eval",
+              "bm25",
+              "distractor2"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 295,
+              "dense_search_ms": 3,
+              "lexical_search_ms": 3,
+              "fusion_ms": 0,
+              "rerank_ms": 6902,
+              "total_ms": 7210
+            },
+            "first_relevant_rank": 1
+          }
+        },
+        {
+          "query": "How do BM25 and cosine rankings combine without adding raw scores?",
+          "relevant": {
+            "bm25": 2,
+            "graph": 1
+          },
+          "dense": {
+            "ranked_documents": [
+              "bm25",
+              "vector",
+              "distractor2",
+              "latency",
+              "eval"
+            ],
+            "metrics": {
+              "recall@5": 0.5,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 0.8262346571285599,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 176,
+              "dense_search_ms": 5,
+              "fusion_ms": 0,
+              "total_ms": 187
+            },
+            "first_relevant_rank": 1
+          },
+          "bm25": {
+            "ranked_documents": [
+              "bm25",
+              "vector",
+              "distractor",
+              "eval",
+              "graph"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.4,
+              "mrr": 1.0,
+              "ndcg@5": 0.9327783893101107,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "lexical_search_ms": 3,
+              "fusion_ms": 0,
+              "total_ms": 8
+            },
+            "first_relevant_rank": 1
+          },
+          "hybrid": {
+            "ranked_documents": [
+              "bm25",
+              "vector",
+              "eval",
+              "distractor2",
+              "latency"
+            ],
+            "metrics": {
+              "recall@5": 0.5,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 0.8262346571285599,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 141,
+              "dense_search_ms": 5,
+              "lexical_search_ms": 3,
+              "fusion_ms": 0,
+              "total_ms": 155
+            },
+            "first_relevant_rank": 1
+          },
+          "hybrid_rerank": {
+            "ranked_documents": [
+              "bm25",
+              "vector",
+              "eval",
+              "latency",
+              "distractor2"
+            ],
+            "metrics": {
+              "recall@5": 0.5,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 0.8262346571285599,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 142,
+              "dense_search_ms": 3,
+              "lexical_search_ms": 3,
+              "fusion_ms": 0,
+              "rerank_ms": 6890,
+              "total_ms": 7044
+            },
+            "first_relevant_rank": 1
+          }
+        },
+        {
+          "query": "Which retrieval measure counts all labeled relevant items found in top K?",
+          "relevant": {
+            "eval": 2
+          },
+          "dense": {
+            "ranked_documents": [
+              "eval",
+              "vector",
+              "distractor2",
+              "bm25",
+              "latency"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 218,
+              "dense_search_ms": 3,
+              "fusion_ms": 0,
+              "total_ms": 228
+            },
+            "first_relevant_rank": 1
+          },
+          "bm25": {
+            "ranked_documents": [
+              "eval",
+              "distractor2",
+              "latency",
+              "hallucination",
+              "vector"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "lexical_search_ms": 2,
+              "fusion_ms": 0,
+              "total_ms": 5
+            },
+            "first_relevant_rank": 1
+          },
+          "hybrid": {
+            "ranked_documents": [
+              "eval",
+              "distractor2",
+              "vector",
+              "latency",
+              "hallucination"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 116,
+              "dense_search_ms": 4,
+              "lexical_search_ms": 2,
+              "fusion_ms": 0,
+              "total_ms": 126
+            },
+            "first_relevant_rank": 1
+          },
+          "hybrid_rerank": {
+            "ranked_documents": [
+              "eval",
+              "distractor2",
+              "bm25",
+              "hallucination",
+              "distractor"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 120,
+              "dense_search_ms": 2,
+              "lexical_search_ms": 2,
+              "fusion_ms": 0,
+              "rerank_ms": 6139,
+              "total_ms": 6268
+            },
+            "first_relevant_rank": 1
+          }
+        }
+      ]
+    },
+    {
+      "profile": {
+        "target_tokens": 180,
+        "max_tokens": 230,
+        "overlap_tokens": 25
+      },
+      "index": {
+        "status": "COMPLETED",
+        "documents_processed": 8,
+        "documents_failed": 0,
+        "chunks_created": 8,
+        "chunks_deduplicated": 0,
+        "chunks_embedded": 8,
+        "vector_records": 8,
+        "lexical_records": 8,
+        "average_chunk_tokens": 131.375,
+        "median_chunk_tokens": 133.5,
+        "max_chunk_tokens": 162,
+        "embedding_batches": 8,
+        "embedding_duration_ms": 4092,
+        "vector_upsert_duration_ms": 240,
+        "fts_index_duration_ms": 210,
+        "duration_ms": 15801,
+        "embedding_model": "BAAI/bge-m3",
+        "embedding_dimension": 1024,
+        "chunking_profile": "target=180,max=230,overlap=25,min=20"
+      },
+      "strategies": {
+        "dense": {
+          "metrics": {
+            "recall@5": 0.875,
+            "precision@5": 0.2,
+            "mrr": 0.8125,
+            "ndcg@5": 0.8181573218714365,
+            "hit_rate@5": 1.0
+          },
+          "mean_latency_ms": 181.5
+        },
+        "bm25": {
+          "metrics": {
+            "recall@5": 0.9375,
+            "precision@5": 0.225,
+            "mrr": 0.875,
+            "ndcg@5": 0.8776090691976982,
+            "hit_rate@5": 1.0
+          },
+          "mean_latency_ms": 10.0
+        },
+        "hybrid": {
+          "metrics": {
+            "recall@5": 0.875,
+            "precision@5": 0.2,
+            "mrr": 0.8125,
+            "ndcg@5": 0.8181573218714365,
+            "hit_rate@5": 1.0
+          },
+          "mean_latency_ms": 138.875
+        },
+        "hybrid_rerank": {
+          "metrics": {
+            "recall@5": 0.875,
+            "precision@5": 0.2,
+            "mrr": 0.9375,
+            "ndcg@5": 0.9104248834785722,
+            "hit_rate@5": 1.0
+          },
+          "mean_latency_ms": 4812.5
+        }
+      },
+      "queries": [
+        {
+          "query": "How does GraphRAG differ from conventional vector RAG?",
+          "relevant": {
+            "graph": 2,
+            "vector": 1
+          },
+          "dense": {
+            "ranked_documents": [
+              "graph",
+              "distractor",
+              "distractor2",
+              "eval",
+              "bm25"
+            ],
+            "metrics": {
+              "recall@5": 0.5,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 0.8262346571285599,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 165,
+              "dense_search_ms": 5,
+              "fusion_ms": 0,
+              "total_ms": 180
+            },
+            "first_relevant_rank": 1
+          },
+          "bm25": {
+            "ranked_documents": [
+              "graph",
+              "eval",
+              "bm25",
+              "distractor",
+              "distractor2"
+            ],
+            "metrics": {
+              "recall@5": 0.5,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 0.8262346571285599,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "lexical_search_ms": 3,
+              "fusion_ms": 0,
+              "total_ms": 9
+            },
+            "first_relevant_rank": 1
+          },
+          "hybrid": {
+            "ranked_documents": [
+              "graph",
+              "eval",
+              "distractor",
+              "bm25",
+              "distractor2"
+            ],
+            "metrics": {
+              "recall@5": 0.5,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 0.8262346571285599,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 224,
+              "dense_search_ms": 4,
+              "lexical_search_ms": 3,
+              "fusion_ms": 0,
+              "total_ms": 237
+            },
+            "first_relevant_rank": 1
+          },
+          "hybrid_rerank": {
+            "ranked_documents": [
+              "graph",
+              "distractor",
+              "eval",
+              "distractor2",
+              "latency"
+            ],
+            "metrics": {
+              "recall@5": 0.5,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 0.8262346571285599,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 345,
+              "dense_search_ms": 3,
+              "lexical_search_ms": 2,
+              "fusion_ms": 0,
+              "rerank_ms": 5555,
+              "total_ms": 5913
+            },
+            "first_relevant_rank": 1
+          }
+        },
+        {
+          "query": "Which method finds exact BGE-M3 and GPT-5 identifiers?",
+          "relevant": {
+            "bm25": 2
+          },
+          "dense": {
+            "ranked_documents": [
+              "bm25",
+              "vector",
+              "distractor2",
+              "latency",
+              "graph"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 211,
+              "dense_search_ms": 3,
+              "fusion_ms": 0,
+              "total_ms": 219
+            },
+            "first_relevant_rank": 1
+          },
+          "bm25": {
+            "ranked_documents": [
+              "bm25",
+              "vector",
+              "eval",
+              "graph",
+              "latency"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "lexical_search_ms": 2,
+              "fusion_ms": 0,
+              "total_ms": 36
+            },
+            "first_relevant_rank": 1
+          },
+          "hybrid": {
+            "ranked_documents": [
+              "bm25",
+              "vector",
+              "eval",
+              "distractor2",
+              "graph"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 118,
+              "dense_search_ms": 3,
+              "lexical_search_ms": 2,
+              "fusion_ms": 0,
+              "total_ms": 128
+            },
+            "first_relevant_rank": 1
+          },
+          "hybrid_rerank": {
+            "ranked_documents": [
+              "bm25",
+              "vector",
+              "hallucination",
+              "eval",
+              "distractor2"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 124,
+              "dense_search_ms": 3,
+              "lexical_search_ms": 2,
+              "fusion_ms": 0,
+              "rerank_ms": 4612,
+              "total_ms": 4747
+            },
+            "first_relevant_rank": 1
+          }
+        },
+        {
+          "query": "How can search find semantically similar text without matching words?",
+          "relevant": {
+            "vector": 2
+          },
+          "dense": {
+            "ranked_documents": [
+              "bm25",
+              "vector",
+              "distractor2",
+              "graph",
+              "eval"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 0.5,
+              "ndcg@5": 0.6309297535714574,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 115,
+              "dense_search_ms": 7,
+              "fusion_ms": 0,
+              "total_ms": 127
+            },
+            "first_relevant_rank": 2
+          },
+          "bm25": {
+            "ranked_documents": [
+              "bm25",
+              "vector",
+              "eval",
+              "graph",
+              "distractor2"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 0.5,
+              "ndcg@5": 0.6309297535714574,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "lexical_search_ms": 2,
+              "fusion_ms": 0,
+              "total_ms": 6
+            },
+            "first_relevant_rank": 2
+          },
+          "hybrid": {
+            "ranked_documents": [
+              "bm25",
+              "vector",
+              "eval",
+              "distractor2",
+              "graph"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 0.5,
+              "ndcg@5": 0.6309297535714574,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 101,
+              "dense_search_ms": 3,
+              "lexical_search_ms": 2,
+              "fusion_ms": 0,
+              "total_ms": 111
+            },
+            "first_relevant_rank": 2
+          },
+          "hybrid_rerank": {
+            "ranked_documents": [
+              "vector",
+              "bm25",
+              "eval",
+              "latency",
+              "graph"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 109,
+              "dense_search_ms": 3,
+              "lexical_search_ms": 2,
+              "fusion_ms": 0,
+              "rerank_ms": 4264,
+              "total_ms": 4384
+            },
+            "first_relevant_rank": 1
+          }
+        },
+        {
+          "query": "What does MRR measure in a retrieval benchmark?",
+          "relevant": {
+            "eval": 2
+          },
+          "dense": {
+            "ranked_documents": [
+              "distractor2",
+              "eval",
+              "latency",
+              "bm25",
+              "vector"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 0.5,
+              "ndcg@5": 0.6309297535714574,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 144,
+              "dense_search_ms": 3,
+              "fusion_ms": 0,
+              "total_ms": 151
+            },
+            "first_relevant_rank": 2
+          },
+          "bm25": {
+            "ranked_documents": [
+              "distractor2",
+              "eval",
+              "bm25",
+              "latency",
+              "vector"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 0.5,
+              "ndcg@5": 0.6309297535714574,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "lexical_search_ms": 1,
+              "fusion_ms": 0,
+              "total_ms": 4
+            },
+            "first_relevant_rank": 2
+          },
+          "hybrid": {
+            "ranked_documents": [
+              "distractor2",
+              "eval",
+              "bm25",
+              "latency",
+              "vector"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 0.5,
+              "ndcg@5": 0.6309297535714574,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 110,
+              "dense_search_ms": 2,
+              "lexical_search_ms": 1,
+              "fusion_ms": 0,
+              "total_ms": 118
+            },
+            "first_relevant_rank": 2
+          },
+          "hybrid_rerank": {
+            "ranked_documents": [
+              "distractor2",
+              "eval",
+              "hallucination",
+              "latency",
+              "vector"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 0.5,
+              "ndcg@5": 0.6309297535714574,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 80,
+              "dense_search_ms": 2,
+              "lexical_search_ms": 1,
+              "fusion_ms": 0,
+              "rerank_ms": 4339,
+              "total_ms": 4427
+            },
+            "first_relevant_rank": 2
+          }
+        },
+        {
+          "query": "How can citations be checked against unsupported claims?",
+          "relevant": {
+            "hallucination": 2
+          },
+          "dense": {
+            "ranked_documents": [
+              "hallucination",
+              "eval",
+              "bm25",
+              "distractor2",
+              "vector"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 114,
+              "dense_search_ms": 3,
+              "fusion_ms": 0,
+              "total_ms": 121
+            },
+            "first_relevant_rank": 1
+          },
+          "bm25": {
+            "ranked_documents": [
+              "hallucination",
+              "eval",
+              "vector",
+              "distractor",
+              "graph"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "lexical_search_ms": 2,
+              "fusion_ms": 0,
+              "total_ms": 6
+            },
+            "first_relevant_rank": 1
+          },
+          "hybrid": {
+            "ranked_documents": [
+              "hallucination",
+              "eval",
+              "vector",
+              "distractor",
+              "distractor2"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 102,
+              "dense_search_ms": 3,
+              "lexical_search_ms": 2,
+              "fusion_ms": 0,
+              "total_ms": 111
+            },
+            "first_relevant_rank": 1
+          },
+          "hybrid_rerank": {
+            "ranked_documents": [
+              "hallucination",
+              "eval",
+              "vector",
+              "graph",
+              "bm25"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 100,
+              "dense_search_ms": 3,
+              "lexical_search_ms": 2,
+              "fusion_ms": 0,
+              "rerank_ms": 4568,
+              "total_ms": 4679
+            },
+            "first_relevant_rank": 1
+          }
+        },
+        {
+          "query": "Why is cross encoder scoring limited to a small candidate set?",
+          "relevant": {
+            "latency": 2
+          },
+          "dense": {
+            "ranked_documents": [
+              "vector",
+              "latency",
+              "bm25",
+              "distractor2",
+              "eval"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 0.5,
+              "ndcg@5": 0.6309297535714574,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 288,
+              "dense_search_ms": 3,
+              "fusion_ms": 0,
+              "total_ms": 297
+            },
+            "first_relevant_rank": 2
+          },
+          "bm25": {
+            "ranked_documents": [
+              "latency",
+              "vector",
+              "eval",
+              "bm25",
+              "hallucination"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "lexical_search_ms": 2,
+              "fusion_ms": 0,
+              "total_ms": 6
+            },
+            "first_relevant_rank": 1
+          },
+          "hybrid": {
+            "ranked_documents": [
+              "vector",
+              "latency",
+              "bm25",
+              "eval",
+              "distractor2"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 0.5,
+              "ndcg@5": 0.6309297535714574,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 119,
+              "dense_search_ms": 3,
+              "lexical_search_ms": 2,
+              "fusion_ms": 0,
+              "total_ms": 128
+            },
+            "first_relevant_rank": 2
+          },
+          "hybrid_rerank": {
+            "ranked_documents": [
+              "latency",
+              "vector",
+              "bm25",
+              "eval",
+              "distractor2"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 107,
+              "dense_search_ms": 2,
+              "lexical_search_ms": 1,
+              "fusion_ms": 0,
+              "rerank_ms": 4470,
+              "total_ms": 4586
+            },
+            "first_relevant_rank": 1
+          }
+        },
+        {
+          "query": "How do BM25 and cosine rankings combine without adding raw scores?",
+          "relevant": {
+            "bm25": 2,
+            "graph": 1
+          },
+          "dense": {
+            "ranked_documents": [
+              "bm25",
+              "vector",
+              "distractor2",
+              "latency",
+              "eval"
+            ],
+            "metrics": {
+              "recall@5": 0.5,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 0.8262346571285599,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 183,
+              "dense_search_ms": 4,
+              "fusion_ms": 0,
+              "total_ms": 193
+            },
+            "first_relevant_rank": 1
+          },
+          "bm25": {
+            "ranked_documents": [
+              "bm25",
+              "distractor",
+              "vector",
+              "eval",
+              "graph"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.4,
+              "mrr": 1.0,
+              "ndcg@5": 0.9327783893101107,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "lexical_search_ms": 3,
+              "fusion_ms": 0,
+              "total_ms": 8
+            },
+            "first_relevant_rank": 1
+          },
+          "hybrid": {
+            "ranked_documents": [
+              "bm25",
+              "vector",
+              "eval",
+              "distractor",
+              "distractor2"
+            ],
+            "metrics": {
+              "recall@5": 0.5,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 0.8262346571285599,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 140,
+              "dense_search_ms": 3,
+              "lexical_search_ms": 2,
+              "fusion_ms": 0,
+              "total_ms": 151
+            },
+            "first_relevant_rank": 1
+          },
+          "hybrid_rerank": {
+            "ranked_documents": [
+              "bm25",
+              "vector",
+              "latency",
+              "eval",
+              "distractor2"
+            ],
+            "metrics": {
+              "recall@5": 0.5,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 0.8262346571285599,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 113,
+              "dense_search_ms": 4,
+              "lexical_search_ms": 2,
+              "fusion_ms": 0,
+              "rerank_ms": 4665,
+              "total_ms": 4789
+            },
+            "first_relevant_rank": 1
+          }
+        },
+        {
+          "query": "Which retrieval measure counts all labeled relevant items found in top K?",
+          "relevant": {
+            "eval": 2
+          },
+          "dense": {
+            "ranked_documents": [
+              "eval",
+              "vector",
+              "bm25",
+              "distractor2",
+              "latency"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 156,
+              "dense_search_ms": 3,
+              "fusion_ms": 0,
+              "total_ms": 164
+            },
+            "first_relevant_rank": 1
+          },
+          "bm25": {
+            "ranked_documents": [
+              "eval",
+              "distractor2",
+              "latency",
+              "hallucination",
+              "vector"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "lexical_search_ms": 1,
+              "fusion_ms": 0,
+              "total_ms": 5
+            },
+            "first_relevant_rank": 1
+          },
+          "hybrid": {
+            "ranked_documents": [
+              "eval",
+              "distractor2",
+              "vector",
+              "latency",
+              "bm25"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 118,
+              "dense_search_ms": 3,
+              "lexical_search_ms": 2,
+              "fusion_ms": 0,
+              "total_ms": 127
+            },
+            "first_relevant_rank": 1
+          },
+          "hybrid_rerank": {
+            "ranked_documents": [
+              "eval",
+              "distractor2",
+              "hallucination",
+              "bm25",
+              "vector"
+            ],
+            "metrics": {
+              "recall@5": 1.0,
+              "precision@5": 0.2,
+              "mrr": 1.0,
+              "ndcg@5": 1.0,
+              "hit_rate@5": 1.0
+            },
+            "timings": {
+              "query_embedding_ms": 118,
+              "dense_search_ms": 3,
+              "lexical_search_ms": 2,
+              "fusion_ms": 0,
+              "rerank_ms": 4845,
+              "total_ms": 4975
+            },
+            "first_relevant_rank": 1
+          }
+        }
+      ]
+    }
+  ]
+}

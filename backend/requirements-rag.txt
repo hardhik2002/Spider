@@ -1,0 +1,2 @@
+-r requirements-research.txt
+qdrant-client>=1.12,<2

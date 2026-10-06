@@ -1,6 +1,11 @@
-"""Idempotent additive Phase 2 migration for existing Phase 1 SQLite files."""
+"""Idempotent additive migrations for existing SQLite files."""
 
+import logging
+
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.ext.asyncio import AsyncConnection
+
+logger = logging.getLogger("spidermind.migrations")
 
 ADDITIONS: dict[str, dict[str, str]] = {
     "crawl_jobs": {
@@ -40,6 +45,10 @@ ADDITIONS: dict[str, dict[str, str]] = {
         "selected_for_crawl": "BOOLEAN NOT NULL DEFAULT 0",
         "rejection_reason": "VARCHAR(40)",
     },
+    "knowledge_documents": {
+        "chunking_profile": "TEXT",
+        "embedding_model": "TEXT",
+    },
 }
 
 
@@ -52,4 +61,40 @@ async def migrate_sqlite(connection: AsyncConnection) -> None:
                 await connection.exec_driver_sql(
                     f"ALTER TABLE {table} ADD COLUMN {column} {definition}"
                 )
-    await connection.exec_driver_sql("PRAGMA user_version = 3")
+    existing_fts = await connection.exec_driver_sql(
+        "SELECT 1 FROM sqlite_master WHERE name = 'knowledge_chunks_fts'"
+    )
+    needs_rebuild = existing_fts.first() is None
+    try:
+        await connection.exec_driver_sql(
+            "CREATE VIRTUAL TABLE IF NOT EXISTS knowledge_chunks_fts USING "
+            "fts5(source_title, heading, text, content='knowledge_chunks', content_rowid='id')"
+        )
+    except OperationalError as exc:
+        if "no such module: fts5" not in str(exc).lower():
+            raise
+        logger.warning("SQLite FTS5 unavailable; using local BM25 fallback")
+        await connection.exec_driver_sql("PRAGMA user_version = 4")
+        return
+    await connection.exec_driver_sql(
+        """CREATE TRIGGER IF NOT EXISTS knowledge_chunks_ai AFTER INSERT ON knowledge_chunks BEGIN
+        INSERT INTO knowledge_chunks_fts(rowid, source_title, heading, text)
+        VALUES (new.id, new.source_title, new.heading, new.text); END"""
+    )
+    await connection.exec_driver_sql(
+        """CREATE TRIGGER IF NOT EXISTS knowledge_chunks_ad AFTER DELETE ON knowledge_chunks BEGIN
+        INSERT INTO knowledge_chunks_fts(knowledge_chunks_fts, rowid, source_title, heading, text)
+        VALUES ('delete', old.id, old.source_title, old.heading, old.text); END"""
+    )
+    await connection.exec_driver_sql(
+        """CREATE TRIGGER IF NOT EXISTS knowledge_chunks_au AFTER UPDATE ON knowledge_chunks BEGIN
+        INSERT INTO knowledge_chunks_fts(knowledge_chunks_fts, rowid, source_title, heading, text)
+        VALUES ('delete', old.id, old.source_title, old.heading, old.text);
+        INSERT INTO knowledge_chunks_fts(rowid, source_title, heading, text)
+        VALUES (new.id, new.source_title, new.heading, new.text); END"""
+    )
+    if needs_rebuild:
+        await connection.exec_driver_sql(
+            "INSERT INTO knowledge_chunks_fts(knowledge_chunks_fts) VALUES('rebuild')"
+        )
+    await connection.exec_driver_sql("PRAGMA user_version = 4")

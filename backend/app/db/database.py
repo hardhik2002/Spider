@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker, create_async
 
 from app.db.migrations import migrate_sqlite
 from app.db.models import Base
+from app.rag import models as rag_models  # noqa: F401 - register Phase 4 tables
 
 
 def make_engine(database_url: str) -> AsyncEngine:

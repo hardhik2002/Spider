@@ -90,7 +90,35 @@ Tables `research_jobs`, `research_subquestions`, `research_search_queries`, `res
 
 The deterministic evaluation helper uses human-labeled high-level facet aliases and source/page URL labels. Facet coverage is matched alias count divided by expected facets. Subquestion redundancy and query diversity use pairwise token Jaccard overlap at `0.8`. Seed precision at K uses labeled relevant selected seeds divided by selected seeds; domain ratio uses unique domains divided by selected seeds. It also reports selected/rejected cosine distributions, relevant crawled-page count, mean page cosine, and attempted-page budget utilization. These metrics describe the fixture, not general accuracy. Benchmarks are in `backend/tests/fixtures/phase3_benchmarks.json`.
 
-Phase 3 deliberately stops after source collection. It has no answer generator, claim verifier, vector database, RAG index, autonomous loop, LangGraph workflow, or frontend.
+Phase 3 stops after source collection. Phase 4 consumes its persisted pages; answer generation, claim verification, autonomous workflows, and a frontend remain outside this phase.
+
+## Phase 4 retrieval architecture
+
+```mermaid
+flowchart TD
+    A[Phase 3 selected seeds and completed crawl pages] --> B[KnowledgeDocument]
+    B --> C[BGE-M3 tokenizer: paragraph, sentence, bounded token chunks]
+    C --> D[Canonical KnowledgeChunk + occurrence provenance]
+    D --> E[BGE-M3 embeddings]
+    D --> F[SQLite FTS5 external-content table]
+    E --> G[(Qdrant local collection)]
+    F --> H[BM25 candidate ranks]
+    G --> I[Dense candidate ranks]
+    H --> J[Weighted reciprocal rank fusion]
+    I --> J
+    J --> K[BGE-reranker-v2-m3 cross encoder]
+    K --> L[Document diversity cap + neighbor context]
+    L --> M[Evidence results with URL, IDs, ranks, raw scores]
+    M --> N[Future answer generation]
+```
+
+`KnowledgeDocument` references an existing `CrawledPage` and stores its hash, URL, title, and indexing state. A token bounded chunk retains title and heading context without copying the full page. `KnowledgeChunk` is canonical for an exact passage representation within one research job; `KnowledgeChunkSource` records each document occurrence and adjacency. This prevents repeated identical passages from multiplying evidence, while preserving source paths. The BGE-M3 embedding provider is the same instance used by crawling and research planning. Its vectors live only in Qdrant, under stable UUID5 point IDs and a mandatory `research_job_id` payload filter. A single collection serves all jobs. SQL rows hold the relational facts and FTS5 indexes title, heading, and passage with insert/update/delete triggers. If FTS5 is unavailable, the lexical adapter computes BM25 locally from SQLite rows.
+
+`POST /research/{id}/index` persists an `IndexJob`, responds 202, and starts bounded work in process. The worker selects completed, nonduplicate text pages belonging to selected Phase 3 seed crawl jobs. Per-document statuses and counts survive process exit. It computes a current title-and-content hash, skips unchanged documents, and rebuilds changed passages. An embedding model or chunk profile change also forces reindexing. It repairs missing vectors after a prior interrupted write. It removes orphan canonical chunks, FTS entries, and Qdrant points; pages no longer eligible have their source links removed. A restart marks interrupted index jobs `PARTIAL`, and another POST can retry. SQL, FTS, and Qdrant are separate stores, so a crash between writes can leave temporary drift. The `/index/consistency` endpoint compares SQL, FTS integrity, and Qdrant IDs; reindexing repairs missing points, and orphan cleanup removes stale points.
+
+Retrieval first builds an allow set of active sources for the requested research job and optional filters. A `subquestion_id` filter follows selected `ResearchSeed.crawl_job_id` links; every page crawled within that seed's job is eligible. It does not claim a direct search-result relationship for a discovered descendant page. Dense retrieval embeds the query once and searches only allowed Qdrant point IDs. The lexical adapter safely quotes technical tokens before FTS5 `MATCH` and orders SQLite BM25 scores ascending. Hybrid retrieval merges unique chunk IDs by weighted reciprocal rank fusion. The reranker receives bounded title, section, and passage text for at most the configured fused candidate count, and its raw scores are not called probabilities. The final list limits chunks per document only after reranking. Optional adjacent passages come from the same document, fit a token budget, and are identified as supporting context rather than independent retrieved evidence. Each result exposes its source IDs, URL, rank path, and raw scores.
+
+The controlled evaluation fixture labels relevant **documents** for eight queries. The benchmark runs dense, BM25, hybrid, and hybrid with reranking on identical questions for three chunk profiles. [Measured JSON](phase4-benchmark-results.json) includes Recall@5, Precision@5, MRR, nDCG@5, HitRate@5, per-query first relevant ranks before and after reranking, model names, index counts, and latency. The default operational chunk profile is larger than these short fixture profiles; profile comparisons here are local evidence, not production tuning. The [Phase 3 live-data smoke test](phase4-live-smoke-results.json) checks an existing arXiv source separately from the controlled relevance labels.
 
 ## Security and operational limits
 
