@@ -94,6 +94,21 @@ class FakeSearch:
         ]
 
 
+class SharedSearch(FakeSearch):
+    async def search(self, query, limit):
+        self.calls.append(query)
+        return [
+            SearchResult(
+                "Alpha and beta evidence",
+                "https://research.example/shared",
+                "Shared methods",
+                1,
+                query,
+                self.provider_name,
+            )
+        ]
+
+
 class FakeEmbedding:
     model_name = "fixture-embedding"
     load_time_ms = 0
@@ -454,3 +469,54 @@ async def test_multiple_seeds_share_subquestion_budget(tmp_path):
                 assert status["pages_crawled"] == 2
                 sources = (await api.get(f"/api/v1/research/{job_id}/sources")).json()["sources"]
                 assert len({row["crawl_job_id"] for row in sources if row["selected"]}) == 2
+
+
+@pytest.mark.asyncio
+async def test_shared_seed_crawled_once_with_two_subquestion_links(tmp_path):
+    settings = Settings(
+        database_url=f"sqlite+aiosqlite:///{(tmp_path / 'shared.db').as_posix()}",
+        domain_delay_seconds=0,
+    )
+    app = create_app(
+        settings,
+        embedding_provider=FakeEmbedding(),
+        research_planner=FakePlanner(),
+        search_provider=SharedSearch(),
+    )
+    fetched = []
+
+    def responder(request):
+        if request.url.path == "/robots.txt":
+            return httpx.Response(404)
+        fetched.append(str(request.url))
+        return httpx.Response(200, headers={"content-type": "text/html"}, text="Shared evidence")
+
+    async with app.router.lifespan_context(app):
+        service = app.state.crawl_service
+        service.validator = FixtureValidator()
+        service.fetcher.validator = service.validator
+        async with httpx.AsyncClient(transport=httpx.MockTransport(responder)) as source:
+            service.fetcher.client = source
+            async with httpx.AsyncClient(
+                transport=httpx.ASGITransport(app=app), base_url="http://test"
+            ) as api:
+                created = await api.post(
+                    "/api/v1/research",
+                    json={
+                        "question": "Compare alpha and beta evidence",
+                        "max_subquestions": 2,
+                        "search_queries_per_subquestion": 2,
+                        "seeds_per_subquestion": 1,
+                        "max_pages_per_subquestion": 1,
+                        "max_total_pages": 2,
+                        "max_depth": 0,
+                    },
+                )
+                job_id = created.json()["research_job_id"]
+                status = await wait_research(api, job_id)
+                assert status["status"] == "completed", status
+                assert status["pages_crawled"] == 1
+                sources = (await api.get(f"/api/v1/research/{job_id}/sources")).json()["sources"]
+                assert len(sources) == 2
+                assert len({row["crawl_job_id"] for row in sources}) == 1
+                assert fetched == ["https://research.example/shared"]

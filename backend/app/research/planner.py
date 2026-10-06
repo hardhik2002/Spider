@@ -26,6 +26,11 @@ class OllamaResearchPlanner:
         self.timeout = timeout
 
     async def plan(self, request: ResearchRequest) -> ResearchPlan:
+        schema = ResearchPlan.model_json_schema()
+        schema["properties"]["subquestions"]["maxItems"] = request.max_subquestions
+        schema["$defs"]["PlannedSubquestion"]["properties"]["search_queries"]["maxItems"] = (
+            request.search_queries_per_subquestion
+        )
         messages = [
             {"role": "system", "content": SYSTEM_PROMPT},
             {
@@ -44,21 +49,25 @@ class OllamaResearchPlanner:
                     json={
                         "model": self.model_name,
                         "messages": messages,
-                        "format": ResearchPlan.model_json_schema(),
+                        "format": schema,
                         "stream": False,
                         "think": False,
                         "options": {"temperature": 0},
                     },
                 )
                 response.raise_for_status()
-                content = response.json()["message"]["content"]
+                content = None
                 try:
+                    content = response.json()["message"]["content"]
+                    if not isinstance(content, str):
+                        raise ValueError("Planner content must be a JSON string")
                     return validate_plan(ResearchPlan.model_validate_json(content), request)
-                except (ValidationError, ValueError) as exc:
+                except (ValidationError, ValueError, KeyError, TypeError) as exc:
                     if attempt:
                         raise ValueError(f"Planner returned invalid plan twice: {exc}") from exc
                     logger.warning("planner schema validation failed; retrying once: %s", exc)
-                    messages.append({"role": "assistant", "content": content})
+                    if isinstance(content, str):
+                        messages.append({"role": "assistant", "content": content})
                     messages.append(
                         {
                             "role": "user",

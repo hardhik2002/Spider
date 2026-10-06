@@ -61,6 +61,13 @@ async def test_ollama_schema_retry_and_question_only_boundary(monkeypatch):
     assert result.original_question == question
     assert len(calls) == 2
     assert calls[0]["format"]["type"] == "object"
+    assert calls[0]["format"]["properties"]["subquestions"]["maxItems"] == 1
+    assert (
+        calls[0]["format"]["$defs"]["PlannedSubquestion"]["properties"]["search_queries"][
+            "maxItems"
+        ]
+        == 3
+    )
     assert calls[0]["messages"][1]["content"].startswith("Original question:")
     assert calls[0]["stream"] is False
     assert calls[0]["options"]["temperature"] == 0
