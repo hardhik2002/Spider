@@ -109,6 +109,11 @@ class SharedSearch(FakeSearch):
         ]
 
 
+class FailAllSearch(FakeSearch):
+    async def search(self, query, limit):
+        raise TimeoutError("search unavailable")
+
+
 class FakeEmbedding:
     model_name = "fixture-embedding"
     load_time_ms = 0
@@ -520,3 +525,35 @@ async def test_shared_seed_crawled_once_with_two_subquestion_links(tmp_path):
                 assert len(sources) == 2
                 assert len({row["crawl_job_id"] for row in sources}) == 1
                 assert fetched == ["https://research.example/shared"]
+
+
+@pytest.mark.asyncio
+async def test_all_searches_failed_has_failed_research_status(tmp_path):
+    settings = Settings(
+        database_url=f"sqlite+aiosqlite:///{(tmp_path / 'all-failed.db').as_posix()}"
+    )
+    app = create_app(
+        settings,
+        embedding_provider=FakeEmbedding(),
+        research_planner=FakePlanner(),
+        search_provider=FailAllSearch(),
+    )
+    async with app.router.lifespan_context(app):
+        async with httpx.AsyncClient(
+            transport=httpx.ASGITransport(app=app), base_url="http://test"
+        ) as api:
+            created = await api.post(
+                "/api/v1/research",
+                json={
+                    "question": "Compare alpha and beta evidence",
+                    "max_subquestions": 2,
+                    "search_queries_per_subquestion": 2,
+                },
+            )
+            job_id = created.json()["research_job_id"]
+            status = await wait_research(api, job_id)
+            assert status["status"] == "failed"
+            assert status["failed_subquestions"] == 2
+            searches = (await api.get(f"/api/v1/research/{job_id}/searches")).json()
+            assert len(searches["queries"]) == 3
+            assert all(row["status"] == "failed" for row in searches["queries"])

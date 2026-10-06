@@ -15,7 +15,8 @@
     "unique_search_results": 4,
     "selected_seed_count": 2,
     "pages_crawled": 1,
-    "failed_subquestions": 1
+    "failed_subquestions": 1,
+    "duration_seconds": 177.6
   },
   "plan": {
     "original_question": "Compare GraphRAG and traditional RAG architectures",
@@ -98,7 +99,7 @@
       "url": "https://www.designveloper.com/blog/graph-rag-vs-traditional-rag",
       "semantic_relevance": 0.6733344628132911,
       "seed_score": 0.8611671466956488,
-      "selected": 1,
+      "selected": true,
       "rejection_reason": null,
       "crawl_job_id": "41c0855f-7715-49f1-a420-4998f659b78e"
     },
@@ -107,7 +108,7 @@
       "url": "https://dataclue.tech/blogs/graphrag-vs-rag",
       "semantic_relevance": 0.6481442699425458,
       "seed_score": 0.7951007777613007,
-      "selected": 0,
+      "selected": false,
       "rejection_reason": "SEED_LIMIT",
       "crawl_job_id": null
     },
@@ -116,7 +117,7 @@
       "url": "https://arxiv.org/html/2502.11371v1",
       "semantic_relevance": 0.7326141506787719,
       "seed_score": 0.8863610140384781,
-      "selected": 1,
+      "selected": true,
       "rejection_reason": null,
       "crawl_job_id": "064636b2-6fca-4e31-9cfe-a795331f05b5"
     },
@@ -125,7 +126,7 @@
       "url": "https://arxiv.org/abs/2502.11371",
       "semantic_relevance": 0.7474459613168998,
       "seed_score": 0.8373039965954011,
-      "selected": 0,
+      "selected": false,
       "rejection_reason": "SEED_LIMIT",
       "crawl_job_id": null
     }
@@ -162,5 +163,17 @@
       "error_message": null
     }
   ],
-  "schema_version": 3
+  "schema_version": 3,
+  "subquestion_progress": [
+    {
+      "id": "subq1",
+      "status": "failed",
+      "error_message": "1 page attempts failed"
+    },
+    {
+      "id": "subq2",
+      "status": "completed",
+      "error_message": null
+    }
+  ]
 }
