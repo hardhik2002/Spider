@@ -1,6 +1,6 @@
-# SpiderMind — Phase 1 and 2 crawler
+# SpiderMind — research planning, search, and intelligent crawling
 
-SpiderMind is an incremental AI research project. Its long-term goal is to investigate a question by finding sources, following citations, indexing knowledge, checking claims, and producing citation-backed reports with a navigable source graph. **The current Phase 2 application chooses which discovered URL to crawl next using local semantic embeddings. It does not yet perform autonomous research or generate answers.** There are no LLMs, RAG pipelines, agents, vector databases, or frontend.
+SpiderMind is an incremental AI research project. Phase 3 accepts a question, creates a structured local-LLM research plan, searches the web, selects semantically ranked public seeds, and runs targeted Phase 2 crawls. It persists the trail from question to crawled page. It does not generate answers, citations, claims, RAG indexes, knowledge graphs, agents, or a frontend.
 
 ## Phase 1 foundation
 
@@ -22,6 +22,14 @@ SpiderMind is an incremental AI research project. Its long-term goal is to inves
 - An optional `min_relevance_score` excludes lower-scoring links while retaining them in the database. Deterministic exploration periodically pops the lowest-priority *eligible* link (default every tenth pop). A configured threshold remains a hard cutoff.
 - `/api/v1/crawl/{job_id}/links` exposes link context, scores, decisions, and rejection reasons with filters and pagination.
 - Page-level semantic relevance and a same-budget evaluation utility compare FIFO with intelligent crawling. A small labeled fixture provides an independent relevance check.
+
+## Phase 3 research planning and search
+
+`POST /api/v1/research` returns a job ID immediately. A local Ollama planner (default `Qwen3:latest`) produces a Pydantic validated JSON plan from the user's question only. One invalid response gets one repair attempt. Queries are deduplicated across subquestions, searched through a replaceable provider (default `ddgs`), and associated with every originating subquestion. Search URLs pass the crawler's normalizer and public-target validator before entering the result pool. The shared local BGE-M3 provider scores bounded title/snippet/URL representations against each subquestion. Selected seeds start Phase 2 intelligent crawls with that subquestion as `research_query`.
+
+Selection uses `seed_score = semantic_weight × ((cosine + 1) / 2) + (1 - semantic_weight) × (1 / log2(rank + 1))`, with default `semantic_weight = 0.85`. Scores rank candidates; they are not probabilities. Selection is deterministic, caps seeds per domain per subquestion, and retains rejected candidates with reasons. Search runs with bounded concurrency; crawls run sequentially to enforce the shared page budget and avoid duplicate fetches across completed research crawls. A failed search or seed crawl leaves other subquestions available. Persisted research tables are created additively alongside existing crawl tables; in-process research jobs abandoned on restart become failed.
+
+The planner never receives search snippets or crawled content, so web text cannot alter the plan in this phase. Inspect `/plan`, `/searches`, and `/sources` for the plan, query/result associations, scores, seed decisions, crawl IDs, and page outcomes. [Architecture details](docs/architecture.md) and the [controlled benchmark labels](backend/tests/fixtures/phase3_benchmarks.json) describe the data and evaluation boundaries.
 
 ## Architecture
 
@@ -53,11 +61,12 @@ The frontier owns ordering and URL identity; the scheduler owns eligibility, bat
 ```text
 backend/
   app/
-    api/routes/      # health and crawl endpoints
+    api/routes/      # health, crawl, and research endpoints
     core/            # configuration and JSON logging
     crawler/         # frontier, normalization, safety, fetching, parser, embeddings, scoring
     db/              # SQLAlchemy models, additive migration, repository
-    evaluation/      # measured comparison and controlled-site demo
+    evaluation/      # controlled Phase 2 and Phase 3 metrics
+    research/        # Ollama planner, prompt, search provider
     schemas/         # Pydantic API contracts
     services/        # crawl job lifecycle
     main.py
@@ -65,6 +74,7 @@ backend/
     fixtures/research_site/
   requirements.txt
   requirements-intelligent.txt
+  requirements-research.txt
 docs/architecture.md
 docs/phase2-demo-results.json
 pyproject.toml
@@ -76,7 +86,8 @@ From the repository root, with Python 3.11 or newer installed:
 
 ```powershell
 py -3 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r backend\requirements-intelligent.txt
+.\.venv\Scripts\python.exe -m pip install -r backend\requirements-research.txt
+ollama pull Qwen3:latest
 $env:PYTHONPATH = "backend"
 .\.venv\Scripts\python.exe -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000
 ```
@@ -87,9 +98,31 @@ The first intelligent crawl downloads BGE-M3 from Hugging Face and caches it loc
 .\.venv\Scripts\python.exe -c "from sentence_transformers import SentenceTransformer; model = SentenceTransformer('BAAI/bge-m3'); print(model.get_embedding_dimension())"
 ```
 
-This download needs internet once; embedding inference then runs locally. To run only FIFO without the model dependency, install `backend\requirements.txt` instead. The default SQLite file is `spidermind.db` in the working directory. Existing Phase 1 SQLite files receive an idempotent, additive Phase 2 schema migration on startup. Set `SPIDERMIND_DATABASE_URL` to another `sqlite+aiosqlite:///...` URL if needed. Configuration includes `SPIDERMIND_EMBEDDING_MODEL_NAME`, `SPIDERMIND_EMBEDDING_BATCH_SIZE`, `SPIDERMIND_MAX_CANDIDATE_CONTEXT_CHARS`, `SPIDERMIND_MAX_PAGE_SCORING_CHARS`, `SPIDERMIND_DEPTH_PENALTY`, `SPIDERMIND_EXPLORATION_RATE`, and `SPIDERMIND_DEFAULT_MIN_RELEVANCE_SCORE`, plus Phase 1 HTTP and rate-limit settings. Crawling defaults to one second between requests to the same domain.
+This download needs internet once; embedding inference then runs locally. Ollama must be running at `SPIDERMIND_OLLAMA_URL` (default `http://127.0.0.1:11434`); `SPIDERMIND_OLLAMA_MODEL` selects the installed model. To run only FIFO without the model dependency, install `backend\requirements.txt` instead. The default SQLite file is `spidermind.db` in the working directory. Existing Phase 1/2 SQLite files receive an idempotent, additive schema migration on startup. Set `SPIDERMIND_DATABASE_URL` to another `sqlite+aiosqlite:///...` URL if needed. Phase 3 settings include `SPIDERMIND_MAX_CONCURRENT_SEARCHES`, `SPIDERMIND_MAX_SEEDS_PER_DOMAIN_PER_SUBQUESTION`, `SPIDERMIND_SEED_SEMANTIC_WEIGHT`, and `SPIDERMIND_SEARCH_RETRIES`. Crawls currently run one at a time to enforce page budgets even if `SPIDERMIND_MAX_CONCURRENT_SUBQUESTION_CRAWLS` is higher. Crawling defaults to one second between requests to the same domain.
 
 ## API
+
+For a Phase 3 research job:
+
+```powershell
+$body = @{
+  question = "Compare GraphRAG with traditional RAG for enterprise knowledge systems"
+  max_subquestions = 6
+  search_queries_per_subquestion = 3
+  search_results_per_query = 8
+  seeds_per_subquestion = 3
+  max_pages_per_subquestion = 10
+  max_total_pages = 60
+  max_depth = 2
+} | ConvertTo-Json
+$research = Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/api/v1/research -ContentType application/json -Body $body
+Invoke-RestMethod "http://127.0.0.1:8000/api/v1/research/$($research.research_job_id)"
+Invoke-RestMethod "http://127.0.0.1:8000/api/v1/research/$($research.research_job_id)/plan"
+Invoke-RestMethod "http://127.0.0.1:8000/api/v1/research/$($research.research_job_id)/searches"
+Invoke-RestMethod "http://127.0.0.1:8000/api/v1/research/$($research.research_job_id)/sources"
+```
+
+The research status is `pending`, `running`, `completed`, `partial`, `failed`, or `cancelled`. The `stage` shows planning, searching, scoring, or crawling progress. Inspect the older crawl IDs through `/api/v1/crawl/{id}` and `/links`. Research input limits reject oversized plans, queries, and page budgets with HTTP 422.
 
 ```powershell
 Invoke-RestMethod http://127.0.0.1:8000/health
@@ -157,6 +190,21 @@ $demo = Get-Content docs\phase2-demo-results.json -Raw | ConvertFrom-Json
 .\.venv\Scripts\python.exe -m app.evaluation.compare --database-url sqlite+aiosqlite:///./spidermind-demo.db --fifo-job $demo.jobs.fifo --intelligent-job $demo.jobs.intelligent --labels-file backend\tests\fixtures\research_site\labels.json
 ```
 
+## Phase 3 evaluation
+
+`backend/app/evaluation/phase3.py` computes facet coverage from declared alias labels, token-Jaccard redundancy and query diversity (threshold 0.8), schema valid-plan rate, seed precision at K, relevant seed yield, unique-domain ratio, selected/rejected cosine distributions, relevant-page yield, mean page cosine relevance, and page-budget utilization. [Benchmark fixtures](backend/tests/fixtures/phase3_benchmarks.json) contain three realistic questions and high-level expected facets. Matching is explicit and conservative; these are controlled metrics, not a claim of general research accuracy. `backend/tests/test_phase3.py` runs a deterministic end-to-end job through fake planner/search/embeddings, local HTTP fixture pages, real orchestration, and SQLite, then evaluates the persisted output. Live public search quality is separate from this repeatable test.
+
+The measured fixture output is in [phase3-controlled-results.json](docs/phase3-controlled-results.json): 2/2 relevant selected seeds, 3 labeled relevant pages, 4/4 page-attempt slots used, and mean page cosine 0.667. Both seeds share one domain, giving unique-domain ratio 0.5; the domain cap applies within each subquestion.
+
+For an opt-in live check with Ollama, BGE-M3, public search, and at most two one-page crawls:
+
+```powershell
+$env:PYTHONPATH = "backend"
+.\.venv\Scripts\python.exe -m app.evaluation.phase3_smoke
+```
+
+A measured live run is stored in [phase3-live-smoke-results.json](docs/phase3-live-smoke-results.json). Ollama produced two valid subquestions; DDGS returned four unique public results; two seeds were selected. One seed's site exceeded the redirect limit, and an arXiv HTML page was crawled and scored. The research job correctly ended `partial` with one useful page. This is a connectivity and integration smoke test, not a relevance benchmark.
+
 ## Tests and checks
 
 ```powershell
@@ -170,6 +218,4 @@ The suite uses HTTPX mock transports and temporary SQLite databases, with no dep
 
 ## Current limits and roadmap
 
-Jobs run as in-process tasks. Restarting the API marks unfinished jobs failed; there is no durable worker or distributed scheduling. The SQLite migration only adds Phase 2 columns; it is not a general migration framework. BGE-M3 has a substantial one-time download, memory footprint, and CPU cost. A threshold may exclude genuinely useful low-scoring pages, and link context can be sparse or misleading. The crawler does not run JavaScript, authenticate to sites, enforce site-specific crawl-delay directives, or parse sitemaps. Robots retrieval fails closed when unavailable, except 404/410. The URL guard rejects local/private and non-global resolved IPs, validates every redirect hop, and disables environment proxies. DNS validation and connection resolution are separate, so DNS rebinding remains a known SSRF limit; production exposure to untrusted users needs connection-level address pinning and network egress controls.
-
-Phase 3 can add search and research planning by feeding seed URLs and objectives into the existing crawl API. It should not require a rewrite of the Phase 2 frontier or scorer. Answer generation, RAG, and knowledge graph engines remain future work.
+Jobs run as in-process tasks. Restarting the API marks unfinished jobs failed; there is no durable worker or distributed scheduling. The SQLite migration is additive, not a general migration framework. BGE-M3 and Qwen3 have substantial memory and startup costs. Search quality and availability depend on public engines used by `ddgs`; timeout or rate limiting can produce partial jobs. Facet alias matching is a small controlled proxy for coverage and needs human review for production evaluation. A threshold may exclude useful low-scoring pages, and link context can be sparse or misleading. The crawler does not run JavaScript, authenticate to sites, enforce site-specific crawl-delay directives, or parse sitemaps. Robots retrieval fails closed when unavailable, except 404/410. The URL guard rejects local/private and non-global resolved IPs, validates every redirect hop, and disables environment proxies. DNS validation and connection resolution are separate, so DNS rebinding remains a known SSRF limit; production exposure to untrusted users needs connection-level address pinning and network egress controls. Answer generation, RAG, and knowledge graph engines remain future work.

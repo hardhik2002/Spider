@@ -1,0 +1,166 @@
+{
+  "kind": "live_smoke",
+  "scope": "One bounded public search run; changing search results may change outcomes.",
+  "job": {
+    "id": "38f3b146-6170-49c2-8b5c-64677210dd3f",
+    "question": "Compare GraphRAG and traditional RAG architectures",
+    "status": "partial",
+    "stage": "completed",
+    "planner_provider": "ollama",
+    "planner_model": "Qwen3:latest",
+    "created_at": "2026-10-06 11:10:06.587007",
+    "completed_at": "2026-10-06 11:13:04.233635",
+    "total_search_queries": 2,
+    "total_search_results": 4,
+    "unique_search_results": 4,
+    "selected_seed_count": 2,
+    "pages_crawled": 1,
+    "failed_subquestions": 1
+  },
+  "plan": {
+    "original_question": "Compare GraphRAG and traditional RAG architectures",
+    "normalized_question": "Compare GraphRAG and traditional RAG architectures",
+    "objective": "Understand the differences and advantages of GraphRAG compared to traditional RAG architectures.",
+    "assumptions": [
+      "GraphRAG and traditional RAG are distinct architectures with different design principles.",
+      "Both architectures are used for information retrieval and question answering tasks."
+    ],
+    "scope_inclusions": [
+      "Key components of GraphRAG and traditional RAG",
+      "Performance metrics for both architectures",
+      "Use cases and limitations"
+    ],
+    "scope_exclusions": [
+      "Implementation details of specific frameworks",
+      "User experience or interface design"
+    ],
+    "time_sensitivity": "recent",
+    "subquestions": [
+      {
+        "id": "subq1",
+        "question": "What are the key architectural differences between GraphRAG and traditional RAG?",
+        "rationale": "Identifying the core structural differences will provide a foundation for comparison.",
+        "priority": "high",
+        "expected_evidence": [
+          "Architectural diagrams or descriptions of GraphRAG",
+          "Architectural descriptions of traditional RAG"
+        ],
+        "preferred_source_types": [
+          "Research papers",
+          "Technical documentation"
+        ],
+        "search_queries": [
+          {
+            "query": "architectural differences between GraphRAG and traditional RAG",
+            "intent": "Identify structural distinctions"
+          }
+        ]
+      },
+      {
+        "id": "subq2",
+        "question": "How do GraphRAG and traditional RAG perform in terms of information retrieval and question answering?",
+        "rationale": "Performance metrics will highlight the practical advantages and limitations of each architecture.",
+        "priority": "high",
+        "expected_evidence": [
+          "Experimental results comparing both architectures",
+          "Benchmarking studies"
+        ],
+        "preferred_source_types": [
+          "Peer-reviewed papers",
+          "Conference proceedings"
+        ],
+        "search_queries": [
+          {
+            "query": "performance comparison of GraphRAG and traditional RAG",
+            "intent": "Identify empirical results"
+          }
+        ]
+      }
+    ]
+  },
+  "queries": [
+    {
+      "query": "architectural differences between GraphRAG and traditional RAG",
+      "status": "completed",
+      "result_count": 2,
+      "error_message": null
+    },
+    {
+      "query": "performance comparison of GraphRAG and traditional RAG",
+      "status": "completed",
+      "result_count": 2,
+      "error_message": null
+    }
+  ],
+  "seeds": [
+    {
+      "subquestion_id": "subq1",
+      "url": "https://www.designveloper.com/blog/graph-rag-vs-traditional-rag",
+      "semantic_relevance": 0.6733344628132911,
+      "seed_score": 0.8611671466956488,
+      "selected": 1,
+      "rejection_reason": null,
+      "crawl_job_id": "41c0855f-7715-49f1-a420-4998f659b78e"
+    },
+    {
+      "subquestion_id": "subq1",
+      "url": "https://dataclue.tech/blogs/graphrag-vs-rag",
+      "semantic_relevance": 0.6481442699425458,
+      "seed_score": 0.7951007777613007,
+      "selected": 0,
+      "rejection_reason": "SEED_LIMIT",
+      "crawl_job_id": null
+    },
+    {
+      "subquestion_id": "subq2",
+      "url": "https://arxiv.org/html/2502.11371v1",
+      "semantic_relevance": 0.7326141506787719,
+      "seed_score": 0.8863610140384781,
+      "selected": 1,
+      "rejection_reason": null,
+      "crawl_job_id": "064636b2-6fca-4e31-9cfe-a795331f05b5"
+    },
+    {
+      "subquestion_id": "subq2",
+      "url": "https://arxiv.org/abs/2502.11371",
+      "semantic_relevance": 0.7474459613168998,
+      "seed_score": 0.8373039965954011,
+      "selected": 0,
+      "rejection_reason": "SEED_LIMIT",
+      "crawl_job_id": null
+    }
+  ],
+  "crawls": [
+    {
+      "id": "41c0855f-7715-49f1-a420-4998f659b78e",
+      "start_url": "https://www.designveloper.com/blog/graph-rag-vs-traditional-rag",
+      "status": "COMPLETED",
+      "pages_crawled": 0,
+      "pages_failed": 1,
+      "pages_skipped": 0
+    },
+    {
+      "id": "064636b2-6fca-4e31-9cfe-a795331f05b5",
+      "start_url": "https://arxiv.org/html/2502.11371v1",
+      "status": "COMPLETED",
+      "pages_crawled": 1,
+      "pages_failed": 0,
+      "pages_skipped": 22
+    }
+  ],
+  "pages": [
+    {
+      "normalized_url": "https://www.designveloper.com/blog/graph-rag-vs-traditional-rag",
+      "crawl_status": "FAILED",
+      "actual_page_relevance": null,
+      "error_message": "Redirect limit exceeded"
+    },
+    {
+      "normalized_url": "https://arxiv.org/html/2502.11371v1",
+      "crawl_status": "COMPLETED",
+      "actual_page_relevance": 0.7234467254656871,
+      "error_message": null
+    }
+  ],
+  "schema_version": 3
+}

@@ -1,0 +1,35 @@
+[
+  {
+    "question": "Compare GraphRAG with traditional RAG for enterprise knowledge systems.",
+    "expected_facets": {
+      "architecture": ["architecture", "graph structure"],
+      "retrieval quality": ["retrieval quality", "retrieval accuracy"],
+      "latency": ["latency", "performance"],
+      "cost": ["cost", "resources"],
+      "complexity": ["complexity", "implementation"],
+      "limitations": ["limitations", "failure modes"]
+    }
+  },
+  {
+    "question": "What methods are used to evaluate hallucinations in RAG systems?",
+    "expected_facets": {
+      "definitions": ["hallucination definitions", "what counts as hallucination"],
+      "metrics": ["evaluation metrics", "metrics"],
+      "datasets": ["benchmark datasets", "datasets"],
+      "automated evaluation": ["automated evaluation", "automatic evaluation"],
+      "human evaluation": ["human evaluation", "human review"],
+      "limitations": ["limitations", "failure modes"]
+    }
+  },
+  {
+    "question": "How do open source vector databases compare for local RAG deployments?",
+    "expected_facets": {
+      "indexing": ["indexing", "index types"],
+      "retrieval": ["retrieval", "search quality"],
+      "operations": ["operations", "deployment"],
+      "performance": ["performance", "latency"],
+      "cost": ["cost", "resources"],
+      "limitations": ["limitations", "tradeoffs"]
+    }
+  }
+]

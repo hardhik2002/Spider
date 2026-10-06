@@ -1,4 +1,4 @@
-# SpiderMind crawler architecture: Phases 1 and 2
+# SpiderMind architecture: Phases 1 to 3
 
 ## Lifecycle and boundaries
 
@@ -65,9 +65,32 @@ The job records mode, query, model, threshold, penalty, exploration rate, scorin
 
 The evaluation utility compares completed jobs with the same query, seed, scope, depth, and page budget. `relevant_page_yield = relevant completed pages / completed pages`. When fixture labels are supplied, relevance comes from those independent labels; otherwise it uses a declared page-score threshold. `mean_page_relevance = sum(actual page cosine scores) / completed pages`. `high_relevance_hit_rate = pages with actual score ≥ high_threshold / completed pages`. `crawl_efficiency = relevant completed pages / requested max_pages`. Zero denominators yield zero. A controlled fixture and measured output are in `backend/tests/fixtures/research_site` and `docs/phase2-demo-results.json`.
 
-## Phase 3 boundary
+## Phase 3 research flow
 
-Search or research planning can submit multiple seeds and query objectives to the existing API or orchestration layer. The frontier and scorer need not know where the seed came from. Answer generation, retrieval, vector databases, and knowledge graph processing remain outside this crawler.
+```mermaid
+flowchart LR
+    Q[Question] --> P[Ollama planner + Pydantic schema]
+    P --> SQ[Subquestions and deduplicated queries]
+    SQ --> S[DDGS search provider]
+    S --> V[Normalize URL + public target validation]
+    V --> R[Unique result pool + query associations]
+    R --> E[BGE-M3 semantic scores]
+    E --> D[Deterministic rank and domain selection]
+    D --> C[Sequential bounded Phase 2 intelligent crawls]
+    C --> DB[(SQLite provenance and page outcomes)]
+```
+
+`POST /api/v1/research` persists a `pending` job and returns HTTP 202 before planning. The background service plans once from the original question, validates the structured JSON response, searches each unique query once, and retains the many-to-many query/subquestion and result/query relationships. The planner gets no snippets or page content. Malformed/private results are rejected before persistence or crawling. Search calls are bounded by `max_concurrent_searches` and retry a limited number of times. An individual failed query is recorded; remaining queries continue.
+
+For each subquestion, the service embeds its question and each unique result representation (bounded title, snippet, URL) with the same BGE-M3 provider used by Phase 2. Cosine is mapped to `[0,1]`, combined with the reciprocal-log search-rank prior using configurable semantic weight (default `0.85`), then sorted by descending score and URL as a deterministic tie-breaker. The default domain cap is one selected seed per domain per subquestion. All candidates retain their cosine, combined score, selection, and rejection reason. A URL can be relevant to multiple subquestions, with one seed row per association.
+
+The orchestrator submits each selected public seed as an existing intelligent crawl with its subquestion as `research_query`. It runs crawls sequentially so actual page attempts can be counted before allocating the next budget. Global and per-subquestion limits bound the next crawl's `max_pages`; failed and robots-denied attempts consume slots. The same selected seed URL is crawled once, and previously fetched URLs are skipped by later research crawls. Distinct crawl jobs retain their own Phase 2 page/link provenance. This avoids repeat fetching across completed crawls; the skipped URL can still consume one attempted slot when it is discovered in a later frontier. Multiple Uvicorn processes do not coordinate these in-memory deduplication sets.
+
+Tables `research_jobs`, `research_subquestions`, `research_search_queries`, `research_query_subquestions`, `research_search_results`, `research_result_occurrences`, and `research_seeds` store a path from question to subquestion to query to result to seed to crawl job to page. Existing Phase 1/2 tables and endpoints remain. The additive SQLite startup migration creates the new tables and sets schema version 3. A full relational migration framework is still future work. `/plan`, `/searches`, and `/sources` expose persisted decisions without final answer synthesis.
+
+The deterministic evaluation helper uses human-labeled high-level facet aliases and source/page URL labels. Facet coverage is matched alias count divided by expected facets. Subquestion redundancy and query diversity use pairwise token Jaccard overlap at `0.8`. Seed precision at K uses labeled relevant selected seeds divided by selected seeds; domain ratio uses unique domains divided by selected seeds. It also reports selected/rejected cosine distributions, relevant crawled-page count, mean page cosine, and attempted-page budget utilization. These metrics describe the fixture, not general accuracy. Benchmarks are in `backend/tests/fixtures/phase3_benchmarks.json`.
+
+Phase 3 deliberately stops after source collection. It has no answer generator, claim verifier, vector database, RAG index, autonomous loop, LangGraph workflow, or frontend.
 
 ## Security and operational limits
 

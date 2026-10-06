@@ -47,7 +47,7 @@ class CrawlService:
             settings.embedding_model_name, settings.embedding_batch_size
         )
 
-    async def start(self, request: CrawlRequest):
+    async def start(self, request: CrawlRequest, *, excluded_urls: set[str] | None = None):
         start_url = normalize_url(request.start_url)
         await self.validator.validate(start_url)
         if request.allowed_domains and hostname(start_url) not in request.allowed_domains:
@@ -55,12 +55,12 @@ class CrawlService:
         job = await self.repository.create_job(
             request, start_url, self.settings, self.embedding_provider.model_name
         )
-        task = asyncio.create_task(self._run(job.id))
+        task = asyncio.create_task(self._run(job.id, excluded_urls or set()))
         self.tasks.add(task)
         task.add_done_callback(self.tasks.discard)
         return job
 
-    async def _run(self, job_id: str) -> None:
+    async def _run(self, job_id: str, excluded_urls: set[str]) -> None:
         crawler = Crawler(
             self.session_factory,
             self.repository,
@@ -68,6 +68,7 @@ class CrawlService:
             self.robots,
             self.embedding_provider,
             self.settings,
+            excluded_urls=excluded_urls,
         )
         await crawler.run(job_id)
 

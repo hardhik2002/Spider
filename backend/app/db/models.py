@@ -122,3 +122,110 @@ class DiscoveredLink(Base):
     scoring_reason: Mapped[str | None] = mapped_column(Text)
     selected_for_crawl: Mapped[bool] = mapped_column(Boolean, default=False)
     rejection_reason: Mapped[str | None] = mapped_column(String(40))
+
+
+class ResearchJob(Base):
+    __tablename__ = "research_jobs"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
+    question: Mapped[str] = mapped_column(Text)
+    normalized_question: Mapped[str | None] = mapped_column(Text)
+    objective: Mapped[str | None] = mapped_column(Text)
+    plan_json: Mapped[str | None] = mapped_column(Text)
+    request_json: Mapped[str] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(String(30), default="pending")
+    stage: Mapped[str] = mapped_column(String(30), default="pending")
+    planner_provider: Mapped[str] = mapped_column(String(30), default="ollama")
+    planner_model: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    max_subquestions: Mapped[int] = mapped_column(Integer)
+    max_total_pages: Mapped[int] = mapped_column(Integer)
+    total_search_queries: Mapped[int] = mapped_column(Integer, default=0)
+    total_search_results: Mapped[int] = mapped_column(Integer, default=0)
+    unique_search_results: Mapped[int] = mapped_column(Integer, default=0)
+    selected_seed_count: Mapped[int] = mapped_column(Integer, default=0)
+    pages_crawled: Mapped[int] = mapped_column(Integer, default=0)
+    failed_subquestions: Mapped[int] = mapped_column(Integer, default=0)
+    error_message: Mapped[str | None] = mapped_column(Text)
+
+
+class ResearchSubquestion(Base):
+    __tablename__ = "research_subquestions"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    research_job_id: Mapped[str] = mapped_column(ForeignKey("research_jobs.id"), index=True)
+    plan_id: Mapped[str] = mapped_column(String(80))
+    question: Mapped[str] = mapped_column(Text)
+    rationale: Mapped[str] = mapped_column(Text)
+    priority: Mapped[str] = mapped_column(String(10))
+    expected_evidence: Mapped[str] = mapped_column(Text)
+    preferred_source_types: Mapped[str] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(String(30), default="pending")
+    order: Mapped[int] = mapped_column(Integer)
+    error_message: Mapped[str | None] = mapped_column(Text)
+
+
+class ResearchSearchQuery(Base):
+    __tablename__ = "research_search_queries"
+    __table_args__ = (UniqueConstraint("research_job_id", "query"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    research_job_id: Mapped[str] = mapped_column(ForeignKey("research_jobs.id"), index=True)
+    query: Mapped[str] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(String(30), default="pending")
+    result_count: Mapped[int] = mapped_column(Integer, default=0)
+    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    error_message: Mapped[str | None] = mapped_column(Text)
+
+
+class ResearchQuerySubquestion(Base):
+    __tablename__ = "research_query_subquestions"
+    __table_args__ = (UniqueConstraint("query_id", "subquestion_id"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    query_id: Mapped[int] = mapped_column(ForeignKey("research_search_queries.id"), index=True)
+    subquestion_id: Mapped[int] = mapped_column(ForeignKey("research_subquestions.id"), index=True)
+    intent: Mapped[str] = mapped_column(Text)
+
+
+class ResearchSearchResult(Base):
+    __tablename__ = "research_search_results"
+    __table_args__ = (UniqueConstraint("research_job_id", "normalized_url"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    research_job_id: Mapped[str] = mapped_column(ForeignKey("research_jobs.id"), index=True)
+    normalized_url: Mapped[str] = mapped_column(Text)
+    url: Mapped[str] = mapped_column(Text)
+    title: Mapped[str] = mapped_column(Text)
+    snippet: Mapped[str] = mapped_column(Text)
+    domain: Mapped[str] = mapped_column(String(255))
+    provider: Mapped[str] = mapped_column(String(40))
+    best_rank: Mapped[int] = mapped_column(Integer)
+
+
+class ResearchResultOccurrence(Base):
+    __tablename__ = "research_result_occurrences"
+    __table_args__ = (UniqueConstraint("result_id", "query_id"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    result_id: Mapped[int] = mapped_column(ForeignKey("research_search_results.id"), index=True)
+    query_id: Mapped[int] = mapped_column(ForeignKey("research_search_queries.id"), index=True)
+    rank: Mapped[int] = mapped_column(Integer)
+
+
+class ResearchSeed(Base):
+    __tablename__ = "research_seeds"
+    __table_args__ = (UniqueConstraint("subquestion_id", "result_id"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    research_job_id: Mapped[str] = mapped_column(ForeignKey("research_jobs.id"), index=True)
+    subquestion_id: Mapped[int] = mapped_column(ForeignKey("research_subquestions.id"), index=True)
+    result_id: Mapped[int] = mapped_column(ForeignKey("research_search_results.id"), index=True)
+    semantic_relevance: Mapped[float] = mapped_column(Float)
+    seed_score: Mapped[float] = mapped_column(Float)
+    selected: Mapped[bool] = mapped_column(Boolean, default=False)
+    rejection_reason: Mapped[str | None] = mapped_column(String(40))
+    crawl_job_id: Mapped[str | None] = mapped_column(ForeignKey("crawl_jobs.id"))

@@ -1,0 +1,36 @@
+{
+  "kind": "deterministic_fixture",
+  "question": "Compare alpha and beta evidence",
+  "planner": "FakePlanner",
+  "search_provider": "FakeSearch",
+  "embedding_provider": "FakeEmbedding",
+  "source": "backend/tests/test_phase3.py::test_research_pipeline_dedup_budget_and_traceability",
+  "schema_version": 3,
+  "plan": {
+    "facet_coverage": 1.0,
+    "represented_facets": ["alpha", "beta"],
+    "subquestion_redundancy_rate": 0.0,
+    "search_query_diversity": 0.8333333333333334,
+    "subquestion_count": 2,
+    "search_query_count": 4
+  },
+  "search": {
+    "unique_executed_queries": 3,
+    "unique_public_results": 2
+  },
+  "seeds": {
+    "precision_at_k": 1.0,
+    "relevant_seed_yield": 2,
+    "unique_domain_ratio": 0.5,
+    "selected_cosine_mean": 1.0,
+    "rejected_cosine_mean": 0.0
+  },
+  "crawl": {
+    "page_budget": 4,
+    "budget_utilization": 1.0,
+    "pages_crawled": 3,
+    "relevant_page_yield": 3,
+    "mean_page_cosine": 0.6666666666666666
+  },
+  "interpretation": "Fixture-only measurements. They are not a general accuracy estimate."
+}

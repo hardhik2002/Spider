@@ -30,6 +30,7 @@ class Crawler:
         robots: RobotsManager,
         embedding_provider: EmbeddingProvider,
         settings: Settings,
+        excluded_urls: set[str] | None = None,
     ) -> None:
         self.session_factory = session_factory
         self.repository = repository
@@ -37,6 +38,7 @@ class Crawler:
         self.robots = robots
         self.embedding_provider = embedding_provider
         self.settings = settings
+        self.excluded_urls = excluded_urls or set()
 
     async def run(self, job_id: str) -> None:
         async with self.session_factory() as session:
@@ -129,6 +131,12 @@ class Crawler:
             attempts += 1
             page = await self.repository.add_page(session, job.id, item)
             try:
+                if item.normalized_url in self.excluded_urls:
+                    page.crawl_status = PageStatus.SKIPPED
+                    page.error_message = "Already crawled in this research job"
+                    job.pages_skipped += 1
+                    await scheduler.reject_selected(session, item, RejectionReason.DUPLICATE_URL)
+                    continue
                 if not await self.robots.allowed(item.normalized_url):
                     page.crawl_status = PageStatus.SKIPPED
                     page.error_message = "Denied by robots.txt"

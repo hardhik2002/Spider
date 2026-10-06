@@ -1,0 +1,2 @@
+-r requirements-intelligent.txt
+ddgs>=9,<11

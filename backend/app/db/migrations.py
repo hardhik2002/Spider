@@ -52,4 +52,4 @@ async def migrate_sqlite(connection: AsyncConnection) -> None:
                 await connection.exec_driver_sql(
                     f"ALTER TABLE {table} ADD COLUMN {column} {definition}"
                 )
-    await connection.exec_driver_sql("PRAGMA user_version = 2")
+    await connection.exec_driver_sql("PRAGMA user_version = 3")
