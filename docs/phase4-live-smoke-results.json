@@ -1,0 +1,146 @@
+{
+  "kind": "live_phase3_data_smoke",
+  "source_database": "spidermind-phase3-smoke-final.db",
+  "research_job_id": "38f3b146-6170-49c2-8b5c-64677210dd3f",
+  "index": {
+    "status": "COMPLETED",
+    "documents_discovered": 1,
+    "documents_processed": 1,
+    "documents_indexed": 1,
+    "documents_failed": 0,
+    "chunks_created": 43,
+    "chunks_embedded": 43,
+    "vector_records": 43,
+    "lexical_records": 43,
+    "embedding_dimension": 1024,
+    "embedding_duration_ms": 95688,
+    "duration_ms": 108439,
+    "error_message": null
+  },
+  "consistency": {
+    "research_job_id": "38f3b146-6170-49c2-8b5c-64677210dd3f",
+    "sql_chunks": 43,
+    "active_chunks": 43,
+    "fts_records": 43,
+    "vector_records": 43,
+    "missing_vector_ids": [],
+    "unexpected_vector_ids": [],
+    "orphan_chunk_ids": [],
+    "fts5_integrity_ok": true,
+    "fts5_detail": null,
+    "consistent": true
+  },
+  "retrievals": [
+    {
+      "query": "What architectural differences exist between GraphRAG and traditional RAG?",
+      "candidate_counts": {
+        "dense_candidates": 43,
+        "lexical_candidates": 43,
+        "fused_candidates": 30,
+        "reranked_candidates": 30
+      },
+      "timings": {
+        "query_embedding_ms": 89,
+        "dense_search_ms": 13,
+        "lexical_search_ms": 7,
+        "fusion_ms": 0,
+        "rerank_ms": 66247,
+        "total_ms": 66396
+      },
+      "evidence": [
+        {
+          "rank": 1,
+          "source_url": "https://arxiv.org/html/2502.11371v1",
+          "source_title": "RAG vs. GraphRAG: A Systematic Evaluation and Key Insights",
+          "snippet": "RAG vs. GraphRAG: A Systematic Evaluation and Key Insights\nAbstract\nRetrieval-Augmented Generation (RAG) enhances the performance of LLMs across various tasks by retrieving relevant information from external sources, particularly on text-based data. For structured data, such as knowledge graphs, GraphRAG has been widel",
+          "dense_rank": 15,
+          "lexical_rank": 13,
+          "reranker_raw_score": 1.8643368482589722
+        },
+        {
+          "rank": 2,
+          "source_url": "https://arxiv.org/html/2502.11371v1",
+          "source_title": "RAG vs. GraphRAG: A Systematic Evaluation and Key Insights",
+          "snippet": "is more effective for multi-hop questions. In the Query-based Summarization task, RAG captures fine-grained details, whereas GraphRAG generates more diverse and multi-faceted summaries. Building on these insights, we investigate two strategies from different perspectives to integrate their unique strengths and enhance ",
+          "dense_rank": 2,
+          "lexical_rank": 17,
+          "reranker_raw_score": 1.6879229545593262
+        }
+      ]
+    },
+    {
+      "query": "What evidence compares retrieval performance?",
+      "candidate_counts": {
+        "dense_candidates": 43,
+        "lexical_candidates": 31,
+        "fused_candidates": 30,
+        "reranked_candidates": 30
+      },
+      "timings": {
+        "query_embedding_ms": 336,
+        "dense_search_ms": 6,
+        "lexical_search_ms": 9,
+        "fusion_ms": 0,
+        "rerank_ms": 54676,
+        "total_ms": 55048
+      },
+      "evidence": [
+        {
+          "rank": 1,
+          "source_url": "https://arxiv.org/html/2502.11371v1",
+          "source_title": "RAG vs. GraphRAG: A Systematic Evaluation and Key Insights",
+          "snippet": "answering systems. Introduced by Google, it consists of real user queries from Google Search with corresponding answers extracted from Wikipedia. Since it primarily contains single-hop questions, we use NQ as the representative dataset for single-hop QA. We treat NQ as a single-document QA task, where multiple question",
+          "dense_rank": 37,
+          "lexical_rank": 3,
+          "reranker_raw_score": -1.6685709953308105
+        },
+        {
+          "rank": 2,
+          "source_url": "https://arxiv.org/html/2502.11371v1",
+          "source_title": "RAG vs. GraphRAG: A Systematic Evaluation and Key Insights",
+          "snippet": "RAG vs. GraphRAG: A Systematic Evaluation and Key Insights\nAbstract\nRetrieval-Augmented Generation (RAG) enhances the performance of LLMs across various tasks by retrieving relevant information from external sources, particularly on text-based data. For structured data, such as knowledge graphs, GraphRAG has been widel",
+          "dense_rank": 3,
+          "lexical_rank": 17,
+          "reranker_raw_score": -2.009753465652466
+        }
+      ]
+    },
+    {
+      "query": "What are limitations of GraphRAG?",
+      "candidate_counts": {
+        "dense_candidates": 43,
+        "lexical_candidates": 43,
+        "fused_candidates": 30,
+        "reranked_candidates": 30
+      },
+      "timings": {
+        "query_embedding_ms": 189,
+        "dense_search_ms": 6,
+        "lexical_search_ms": 6,
+        "fusion_ms": 0,
+        "rerank_ms": 50872,
+        "total_ms": 51086
+      },
+      "evidence": [
+        {
+          "rank": 1,
+          "source_url": "https://arxiv.org/html/2502.11371v1",
+          "source_title": "RAG vs. GraphRAG: A Systematic Evaluation and Key Insights",
+          "snippet": "is more effective for multi-hop questions. In the Query-based Summarization task, RAG captures fine-grained details, whereas GraphRAG generates more diverse and multi-faceted summaries. Building on these insights, we investigate two strategies from different perspectives to integrate their unique strengths and enhance ",
+          "dense_rank": 1,
+          "lexical_rank": 3,
+          "reranker_raw_score": 3.419996738433838
+        },
+        {
+          "rank": 2,
+          "source_url": "https://arxiv.org/html/2502.11371v1",
+          "source_title": "RAG vs. GraphRAG: A Systematic Evaluation and Key Insights",
+          "snippet": "the extracted entities and relations may be incomplete, leading to gaps in the retrieved information. To verify this, we calculated the ratio of answer entities present in the constructed KG. We found that only around 65.8% of answer entities exist in the constructed KG for the Hotpot dataset and 65.5% for the NQ datas",
+          "dense_rank": 2,
+          "lexical_rank": 8,
+          "reranker_raw_score": 2.768561363220215
+        }
+      ]
+    }
+  ]
+}

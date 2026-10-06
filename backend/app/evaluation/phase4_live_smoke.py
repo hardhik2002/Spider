@@ -37,11 +37,20 @@ async def run(source: Path, job_id: str, output: Path) -> None:
             async with app.state.index_service.sessions() as session:
                 index = await session.get(type(index), index.id)
                 index_result = {
-                    key: getattr(index, key) for key in (
-                        "status", "documents_discovered", "documents_processed",
-                        "documents_indexed", "documents_failed", "chunks_created",
-                        "chunks_embedded", "vector_records", "lexical_records",
-                        "embedding_dimension", "embedding_duration_ms", "duration_ms",
+                    key: getattr(index, key)
+                    for key in (
+                        "status",
+                        "documents_discovered",
+                        "documents_processed",
+                        "documents_indexed",
+                        "documents_failed",
+                        "chunks_created",
+                        "chunks_embedded",
+                        "vector_records",
+                        "lexical_records",
+                        "embedding_dimension",
+                        "embedding_duration_ms",
+                        "duration_ms",
                         "error_message",
                     )
                 }
@@ -55,28 +64,43 @@ async def run(source: Path, job_id: str, output: Path) -> None:
             retrievals = []
             for query in QUERIES:
                 response = await app.state.retrieval_service.retrieve(
-                    job_id, RetrievalRequest(query=query, retrieval_mode="hybrid", rerank=True),
+                    job_id,
+                    RetrievalRequest(query=query, retrieval_mode="hybrid", rerank=True),
                 )
-                retrievals.append({
-                    "query": query,
-                    "candidate_counts": {key: response[key] for key in (
-                        "dense_candidates", "lexical_candidates", "fused_candidates",
-                        "reranked_candidates",
-                    )},
-                    "timings": response["timings"],
-                    "evidence": [{
-                        "rank": row["rank"], "source_url": row["source_url"],
-                        "source_title": row["source_title"],
-                        "snippet": row["text"][:320],
-                        "dense_rank": row["dense_rank"],
-                        "lexical_rank": row["lexical_rank"],
-                        "reranker_raw_score": row["reranker_raw_score"],
-                    } for row in response["results"][:3]],
-                })
+                retrievals.append(
+                    {
+                        "query": query,
+                        "candidate_counts": {
+                            key: response[key]
+                            for key in (
+                                "dense_candidates",
+                                "lexical_candidates",
+                                "fused_candidates",
+                                "reranked_candidates",
+                            )
+                        },
+                        "timings": response["timings"],
+                        "evidence": [
+                            {
+                                "rank": row["rank"],
+                                "source_url": row["source_url"],
+                                "source_title": row["source_title"],
+                                "snippet": row["text"][:320],
+                                "dense_rank": row["dense_rank"],
+                                "lexical_rank": row["lexical_rank"],
+                                "reranker_raw_score": row["reranker_raw_score"],
+                            }
+                            for row in response["results"][:3]
+                        ],
+                    }
+                )
     artifact = {
-        "kind": "live_phase3_data_smoke", "source_database": source.name,
-        "research_job_id": job_id, "index": index_result,
-        "consistency": consistency, "retrievals": retrievals,
+        "kind": "live_phase3_data_smoke",
+        "source_database": source.name,
+        "research_job_id": job_id,
+        "index": index_result,
+        "consistency": consistency,
+        "retrievals": retrievals,
     }
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(artifact, indent=2), encoding="utf-8")

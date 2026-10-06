@@ -54,6 +54,51 @@ def _sections(text: str, title: str | None):
             yield heading, block
 
 
+def _split_long(sentence: str, tokenizer: Tokenizer, max_tokens: int) -> list[str]:
+    words = sentence.split()
+    if not words:
+        return []
+    output = []
+    start = 0
+    while start < len(words):
+        low, high = start + 1, len(words)
+        best = start
+        while low <= high:
+            middle = (low + high) // 2
+            candidate = " ".join(words[start:middle])
+            if len(tokenizer.encode(candidate)) <= max_tokens:
+                best = middle
+                low = middle + 1
+            else:
+                high = middle - 1
+        if best == start:
+            # A single pathological word exceeds the limit; token splitting is unavoidable.
+            ids = tokenizer.encode(words[start])
+            output.extend(
+                tokenizer.decode(ids[i : i + max_tokens]) for i in range(0, len(ids), max_tokens)
+            )
+            start += 1
+        else:
+            output.append(" ".join(words[start:best]))
+            start = best
+    return output
+
+
+def _overlap_suffix(text: str, tokenizer: Tokenizer, budget: int) -> str:
+    words = text.split()
+    low, high = 0, min(len(words), budget)
+    best = 0
+    while low <= high:
+        middle = (low + high) // 2
+        candidate = " ".join(words[-middle:]) if middle else ""
+        if len(tokenizer.encode(candidate)) <= budget:
+            best = middle
+            low = middle + 1
+        else:
+            high = middle - 1
+    return " ".join(words[-best:]) if best else ""
+
+
 def chunk_text(
     text: str,
     tokenizer: Tokenizer,
@@ -64,46 +109,55 @@ def chunk_text(
     overlap_tokens: int = 80,
     min_tokens: int = 80,
 ) -> list[Passage]:
-    """Keep paragraph boundaries when possible, then split long sentences by tokens."""
+    """Keep paragraph/sentence and word boundaries while enforcing tokenizer limits."""
     if not text.strip():
         return []
-    units: list[tuple[str | None, list[int]]] = []
+    units: list[tuple[str | None, str]] = []
     for heading, paragraph in _sections(text, title):
-        ids = tokenizer.encode(paragraph)
-        if len(ids) <= target_tokens:
-            units.append((heading, ids))
+        if len(tokenizer.encode(paragraph)) <= target_tokens:
+            units.append((heading, paragraph))
             continue
         for sentence in re.split(r"(?<=[.!?])\s+(?=[A-Z0-9])", paragraph):
-            sentence_ids = tokenizer.encode(sentence)
-            for start in range(0, len(sentence_ids), max_tokens):
-                piece = sentence_ids[start : start + max_tokens]
-                if piece:
-                    units.append((heading, piece))
+            if len(tokenizer.encode(sentence)) <= max_tokens:
+                units.append((heading, sentence))
+            else:
+                units.extend(
+                    (heading, piece) for piece in _split_long(sentence, tokenizer, max_tokens)
+                )
 
     output: list[Passage] = []
-    current: list[int] = []
+    current = ""
     current_heading: str | None = None
 
     def emit() -> None:
         if current:
-            value = tokenizer.decode(current).strip()
-            if value:
-                output.append(Passage(value, current_heading, len(current), len(output)))
+            output.append(
+                Passage(current, current_heading, len(tokenizer.encode(current)), len(output))
+            )
 
-    for heading, ids in units:
-        if current and (len(current) + len(ids) > target_tokens or heading != current_heading):
+    for heading, unit in units:
+        proposed = (current + " " + unit).strip()
+        if current and (
+            len(tokenizer.encode(proposed)) > target_tokens or heading != current_heading
+        ):
             previous = current
             emit()
             overlap = (
-                previous[-overlap_tokens:] if overlap_tokens and heading == current_heading else []
+                _overlap_suffix(previous, tokenizer, overlap_tokens)
+                if (overlap_tokens and heading == current_heading)
+                else ""
             )
-            current = overlap if len(overlap) + len(ids) <= max_tokens else []
-        if not current:
+            proposed = (overlap + " " + unit).strip()
+            current = proposed if len(tokenizer.encode(proposed)) <= max_tokens else unit
             current_heading = heading
-        current.extend(ids)
-        if len(current) >= max_tokens:
+        elif not current:
+            current_heading = heading
+            current = unit
+        else:
+            current = proposed
+        if len(tokenizer.encode(current)) >= max_tokens:
             emit()
-            current = []
+            current = ""
     emit()
     if len(output) > 1 and output[-1].token_count < min_tokens:
         last = output.pop()

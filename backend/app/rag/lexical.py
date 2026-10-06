@@ -4,7 +4,7 @@ import math
 import re
 from collections import Counter
 
-from sqlalchemy import text
+from sqlalchemy import bindparam, text
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -24,26 +24,39 @@ async def search(
     expression = safe_fts_query(query)
     if not expression or allowed_ids == set():
         return []
-    # IDs are filtered after an overfetch. The caller supplies an SQL-derived allow set.
-    fetch_limit = top_k if allowed_ids is None else max(top_k * 10, len(allowed_ids))
-    try:
-        rows = await session.execute(
-            text("""SELECT c.id, bm25(knowledge_chunks_fts, 2.0, 1.5, 1.0) AS score
+    statement = text("""SELECT c.id, bm25(knowledge_chunks_fts, 2.0, 1.5, 1.0) AS score
                 FROM knowledge_chunks_fts
                 JOIN knowledge_chunks c ON c.id = knowledge_chunks_fts.rowid
                 WHERE knowledge_chunks_fts MATCH :query AND c.research_job_id = :job_id
-                ORDER BY score ASC LIMIT :limit"""),
-            {"query": expression, "job_id": research_job_id, "limit": fetch_limit},
-        )
+                AND (:unfiltered = 1 OR c.id IN :allowed_ids)
+                ORDER BY score ASC LIMIT :limit""").bindparams(
+        bindparam("allowed_ids", expanding=True)
+    )
+    ordered_ids = sorted(allowed_ids) if allowed_ids is not None else None
+    groups = (
+        [None]
+        if ordered_ids is None
+        else [ordered_ids[start : start + 900] for start in range(0, len(ordered_ids), 900)]
+    )
+    candidates = []
+    try:
+        for group in groups:
+            rows = await session.execute(
+                statement,
+                {
+                    "query": expression,
+                    "job_id": research_job_id,
+                    "limit": top_k,
+                    "unfiltered": int(group is None),
+                    "allowed_ids": group or [],
+                },
+            )
+            candidates.extend((int(row.id), float(row.score)) for row in rows)
     except OperationalError as exc:
         if "no such table: knowledge_chunks_fts" not in str(exc).lower():
             raise
         return await fallback_bm25(session, query, research_job_id, top_k, allowed_ids)
-    return [
-        (int(row.id), float(row.score))
-        for row in rows
-        if allowed_ids is None or row.id in allowed_ids
-    ][:top_k]
+    return sorted(candidates, key=lambda item: (item[1], item[0]))[:top_k]
 
 
 async def fallback_bm25(

@@ -52,6 +52,7 @@ class IndexingService:
         self.tokenizer = tokenizer or BGETokenizer(settings.embedding_model_name)
         self.tasks: set[asyncio.Task] = set()
         self.locks: dict[str, asyncio.Lock] = {}
+        self._logged_dimension = False
 
     def profile(self) -> str:
         s = self.settings
@@ -407,6 +408,13 @@ class IndexingService:
             for row, vector in zip(batch, vectors, strict=True):
                 if not vector:
                     raise ValueError("Embedding provider returned an empty vector")
+                if not self._logged_dimension:
+                    logger.info(
+                        "index embeddings model=%s dimension=%s",
+                        self.embedder.model_name,
+                        len(vector),
+                    )
+                    self._logged_dimension = True
                 points.append(
                     (
                         row.vector_id,
@@ -509,6 +517,66 @@ class IndexingService:
             await self.vectors.delete(ids)
             for row in orphans:
                 await session.delete(row)
+            primary_link = (
+                select(KnowledgeChunkSource.id)
+                .where(
+                    KnowledgeChunkSource.chunk_id == KnowledgeChunk.id,
+                    KnowledgeChunkSource.document_id == KnowledgeChunk.document_id,
+                )
+                .exists()
+            )
+            survivors = (
+                (
+                    await session.execute(
+                        select(KnowledgeChunk).where(
+                            KnowledgeChunk.research_job_id == research_job_id,
+                            ~primary_link,
+                        )
+                    )
+                )
+                .scalars()
+                .all()
+            )
+            for chunk in survivors:
+                source_row = (
+                    await session.execute(
+                        select(KnowledgeChunkSource, KnowledgeDocument)
+                        .join(
+                            KnowledgeDocument,
+                            KnowledgeDocument.id == KnowledgeChunkSource.document_id,
+                        )
+                        .where(
+                            KnowledgeChunkSource.chunk_id == chunk.id,
+                            KnowledgeDocument.index_status == "COMPLETED",
+                        )
+                        .order_by(KnowledgeChunkSource.id)
+                        .limit(1)
+                    )
+                ).first()
+                if source_row is None:
+                    continue
+                source, document = source_row
+                chunk.document_id = document.id
+                chunk.crawl_job_id = document.crawl_job_id
+                chunk.crawled_page_id = document.crawled_page_id
+                chunk.source_url = document.source_url
+                chunk.source_title = document.title
+                chunk.source_domain = document.source_domain
+                chunk.chunk_index = source.chunk_index
+                chunk.heading = source.heading
+                await self.vectors.set_payload(
+                    chunk.vector_id,
+                    {
+                        "research_job_id": research_job_id,
+                        "chunk_id": chunk.id,
+                        "document_id": document.id,
+                        "crawled_page_id": document.crawled_page_id,
+                        "source_url": document.source_url,
+                        "source_domain": document.source_domain,
+                        "chunk_index": source.chunk_index,
+                        "text_hash": chunk.text_hash,
+                    },
+                )
             await session.commit()
 
     async def shutdown(self) -> None:

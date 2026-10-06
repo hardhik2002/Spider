@@ -206,7 +206,7 @@ async def main(output: Path) -> None:
     fixture = json.loads(FIXTURE.read_text(encoding="utf-8"))
     embedder = SentenceTransformerProvider("BAAI/bge-m3", batch_size=16)
     reranker = CrossEncoderReranker("BAAI/bge-reranker-v2-m3", batch_size=4)
-    profiles = [(80, 110, 12), (120, 160, 18), (180, 230, 25)]
+    profiles = [(80, 110, 12), (120, 160, 18), (180, 230, 25), (500, 650, 80)]
     results = []
     with tempfile.TemporaryDirectory(prefix="spidermind-phase4-") as directory:
         for profile in profiles:

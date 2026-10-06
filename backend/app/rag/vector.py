@@ -21,6 +21,8 @@ class VectorIndex(Protocol):
     async def count(self, research_job_id: str) -> int: ...
 
     async def ids(self, research_job_id: str) -> set[str]: ...
+
+    async def set_payload(self, point_id: str, payload: dict) -> None: ...
     async def close(self) -> None: ...
 
 
@@ -145,6 +147,12 @@ class QdrantVectorIndex:
     async def ids(self, research_job_id: str) -> set[str]:
         async with self._lock:
             return await asyncio.to_thread(self._ids, research_job_id)
+
+    async def set_payload(self, point_id: str, payload: dict) -> None:
+        async with self._lock:
+            await asyncio.to_thread(
+                self.client.set_payload, self.collection, payload, [point_id], wait=True
+            )
 
     def _ids(self, research_job_id):
         if not self.client.collection_exists(self.collection):

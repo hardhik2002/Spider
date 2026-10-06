@@ -1,7 +1,10 @@
 """Local cross-encoder pair scoring; raw logits are not probabilities."""
 
 import asyncio
+import logging
 from typing import Protocol
+
+logger = logging.getLogger("spidermind.rag.reranker")
 
 
 class Reranker(Protocol):
@@ -21,6 +24,7 @@ class CrossEncoderReranker:
             from sentence_transformers import CrossEncoder
 
             self._model = CrossEncoder(self.model_name, device=self.device)
+            logger.info("reranker loaded model=%s device=%s", self.model_name, self.device)
         import torch
 
         with torch.inference_mode():

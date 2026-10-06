@@ -12,11 +12,12 @@ from app.db.models import (
     ResearchSeed,
     ResearchSubquestion,
 )
+from app.evaluation.phase4 import ranking_metrics
 from app.main import create_app
 from app.rag.chunking import chunk_text
 from app.rag.fusion import fuse
-from app.rag.lexical import safe_fts_query
-from app.rag.models import KnowledgeChunk
+from app.rag.lexical import fallback_bm25, safe_fts_query
+from app.rag.models import KnowledgeChunk, KnowledgeChunkSource, KnowledgeDocument
 from sqlalchemy import func, select, text
 
 
@@ -37,6 +38,14 @@ class WordTokenizer:
 
     def decode(self, tokens):
         return " ".join(self.words[token] for token in tokens)
+
+
+class CharacterTokenizer:
+    def encode(self, value):
+        return [ord(char) for char in value]
+
+    def decode(self, tokens):
+        return "".join(chr(token) for token in tokens)
 
 
 class FakeEmbedding:
@@ -70,10 +79,25 @@ def test_chunking_and_fusion():
     assert len(passages) > 2
     assert all(0 < p.token_count <= 16 for p in passages)
     assert all(p.heading == "Heading" for p in passages)
+    source = "GraphRAG connects entities. GraphRAG retrieves evidence. " * 5
+    character_passages = chunk_text(
+        source,
+        CharacterTokenizer(),
+        target_tokens=50,
+        max_tokens=70,
+        overlap_tokens=8,
+        min_tokens=5,
+    )
+    assert all(word in source.split() for p in character_passages for word in p.text.split())
+    assert all(p.token_count <= 70 for p in character_passages)
     ranked = fuse([(1, 0.8), (2, 0.7)], [(2, -3), (3, -2)])
     assert ranked[0].chunk_id == 2
     assert ranked[0].dense_rank == 2 and ranked[0].lexical_rank == 1
     assert '"GPT-5"' in safe_fts_query("GPT-5: (GraphRAG)")
+    metrics = ranking_metrics(["x", "a", "b"], {"a": 2, "b": 1}, k=2)
+    assert metrics["recall@2"] == 0.5
+    assert metrics["precision@2"] == 0.5
+    assert metrics["mrr"] == 0.5
 
 
 @pytest.mark.asyncio
@@ -180,6 +204,29 @@ async def test_index_retrieve_idempotency_and_replacement(tmp_path: Path):
             assert result["results"], result
             assert result["results"][0]["reranker_raw_score"] is not None
             assert result["results"][0]["source_url"] == "https://example.org/a"
+            assert (
+                await client.post(
+                    f"/api/v1/research/{job_id}/retrieve",
+                    json={"query": "GraphRAG", "source_domain": "other.example", "rerank": False},
+                )
+            ).json()["results"] == []
+            assert (
+                await client.post(
+                    f"/api/v1/research/{job_id}/retrieve",
+                    json={"query": "GraphRAG", "subquestion_id": "other", "rerank": False},
+                )
+            ).json()["results"] == []
+            async with app.state.index_service.sessions() as session:
+                fallback = await fallback_bm25(session, "GraphRAG", job_id, 5, None)
+                assert fallback
+                chunks = (await session.execute(select(KnowledgeChunk))).scalars().all()
+            points = await app.state.index_service.vectors.search(
+                await FakeEmbedding().embed("GraphRAG"),
+                "00000000-0000-0000-0000-000000000001",
+                5,
+                {chunk.vector_id for chunk in chunks},
+            )
+            assert points == []
             await client.post(f"/api/v1/research/{job_id}/index")
             await asyncio.gather(*app.state.index_service.tasks)
             second = (await client.get(f"/api/v1/research/{job_id}/index")).json()
@@ -224,3 +271,118 @@ async def test_index_retrieve_idempotency_and_replacement(tmp_path: Path):
                     await session.execute(text("SELECT count(*) FROM knowledge_chunks_fts"))
                 ).scalar_one()
                 assert count == fts == changed["vector_records"]
+
+            # The same passage on another page reuses a point but keeps both sources.
+            async with app.state.index_service.sessions() as session:
+                sub = (
+                    await session.execute(
+                        select(ResearchSubquestion).where(
+                            ResearchSubquestion.research_job_id == job_id
+                        )
+                    )
+                ).scalar_one()
+                original = await session.get(CrawledPage, page_id)
+                crawl2 = CrawlJob(
+                    start_url="https://example.org/b",
+                    max_depth=0,
+                    max_pages=1,
+                    timeout=10,
+                    max_content_size=100000,
+                )
+                result2 = ResearchSearchResult(
+                    research_job_id=job_id,
+                    normalized_url="https://example.org/b",
+                    url="https://example.org/b",
+                    title="BM25 overview",
+                    snippet="BM25",
+                    domain="example.org",
+                    provider="fixture",
+                    best_rank=1,
+                )
+                session.add_all([crawl2, result2])
+                await session.flush()
+                page2 = CrawledPage(
+                    crawl_job_id=crawl2.id,
+                    url="https://example.org/b",
+                    normalized_url="https://example.org/b",
+                    depth=0,
+                    title=original.title,
+                    text_content=original.text_content,
+                    crawl_status="COMPLETED",
+                )
+                session.add(page2)
+                await session.flush()
+                page2_id = page2.id
+                session.add(
+                    ResearchSeed(
+                        research_job_id=job_id,
+                        subquestion_id=sub.id,
+                        result_id=result2.id,
+                        semantic_relevance=0.9,
+                        seed_score=0.9,
+                        selected=True,
+                        crawl_job_id=crawl2.id,
+                    )
+                )
+                await session.commit()
+            await client.post(f"/api/v1/research/{job_id}/index")
+            await asyncio.gather(*app.state.index_service.tasks)
+            duplicated = (await client.get(f"/api/v1/research/{job_id}/index")).json()
+            assert duplicated["status"] == "COMPLETED", duplicated
+            assert duplicated["vector_records"] == changed["vector_records"]
+            assert duplicated["chunks_deduplicated"] > 0
+
+            async with app.state.index_service.sessions() as session:
+                original = await session.get(CrawledPage, page_id)
+                original.title = "GraphRAG again"
+                original.text_content = "GraphRAG traverses entity edges for evidence. " * 8
+                await session.commit()
+            await client.post(f"/api/v1/research/{job_id}/index")
+            await asyncio.gather(*app.state.index_service.tasks)
+            async with app.state.index_service.sessions() as session:
+                doc2 = (
+                    await session.execute(
+                        select(KnowledgeDocument).where(
+                            KnowledgeDocument.crawled_page_id == page2_id
+                        )
+                    )
+                ).scalar_one()
+                shared = (
+                    (
+                        await session.execute(
+                            select(KnowledgeChunk)
+                            .join(
+                                KnowledgeChunkSource,
+                                KnowledgeChunkSource.chunk_id == KnowledgeChunk.id,
+                            )
+                            .where(KnowledgeChunkSource.document_id == doc2.id)
+                        )
+                    )
+                    .scalars()
+                    .all()
+                )
+                assert shared and all(chunk.document_id == doc2.id for chunk in shared)
+            bm25 = (
+                await client.post(
+                    f"/api/v1/research/{job_id}/retrieve",
+                    json={"query": "BM25", "retrieval_mode": "lexical", "rerank": False},
+                )
+            ).json()
+            assert bm25["results"][0]["source_url"] == "https://example.org/b"
+            async with app.state.index_service.sessions() as session:
+                page2 = await session.get(CrawledPage, page2_id)
+                page2.crawl_status = "FAILED"
+                await session.commit()
+            await client.post(f"/api/v1/research/{job_id}/index")
+            await asyncio.gather(*app.state.index_service.tasks)
+            removed = (
+                await client.post(
+                    f"/api/v1/research/{job_id}/retrieve",
+                    json={"query": "BM25", "retrieval_mode": "lexical", "rerank": False},
+                )
+            ).json()
+            assert removed["results"] == []
+            final_consistency = (
+                await client.get(f"/api/v1/research/{job_id}/index/consistency")
+            ).json()
+            assert final_consistency["consistent"], final_consistency

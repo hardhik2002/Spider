@@ -40,12 +40,16 @@ async def check_consistency(
         fts_error = None
         fts_records = None
         try:
-            fts_records = (await session.execute(
-                text("SELECT count(*) FROM knowledge_chunks_fts f "
-                     "JOIN knowledge_chunks c ON c.id = f.rowid "
-                     "WHERE c.research_job_id = :job_id"),
-                {"job_id": research_job_id},
-            )).scalar_one()
+            fts_records = (
+                await session.execute(
+                    text(
+                        "SELECT count(*) FROM knowledge_chunks_fts f "
+                        "JOIN knowledge_chunks c ON c.id = f.rowid "
+                        "WHERE c.research_job_id = :job_id"
+                    ),
+                    {"job_id": research_job_id},
+                )
+            ).scalar_one()
             await session.execute(
                 text(
                     "INSERT INTO knowledge_chunks_fts(knowledge_chunks_fts, rank) "
