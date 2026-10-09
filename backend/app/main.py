@@ -1,9 +1,14 @@
+import os
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 import httpx
 from fastapi import FastAPI
+from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
 
-from app.api.routes import crawl, health, rag, research
+from app.agent.llm import OllamaAgentLLM
+from app.agent.service import AgentService
+from app.api.routes import agent, crawl, health, rag, research
 from app.core.config import Settings, get_settings
 from app.core.logging import configure_logging
 from app.crawler.embedding import EmbeddingProvider
@@ -27,6 +32,8 @@ def create_app(
     vector_index: VectorIndex | None = None,
     reranker: Reranker | None = None,
     tokenizer: Tokenizer | None = None,
+    agent_assessor=None,
+    gap_query_generator=None,
 ) -> FastAPI:
     config = settings or get_settings()
 
@@ -73,25 +80,46 @@ def create_app(
                     config.reranker_model, config.reranker_device, config.reranker_batch_size
                 ),
             )
-            app.state.db_engine = engine
-            app.state.crawl_service = service
-            app.state.research_service = research_service
-            app.state.index_service = index_service
-            app.state.retrieval_service = retrieval_service
-            try:
-                yield
-            finally:
-                await research_service.shutdown()
-                await index_service.shutdown()
-                await service.shutdown()
-                await vectors.close()
-                await engine.dispose()
+            Path(config.agent_checkpoint_path).parent.mkdir(parents=True, exist_ok=True)
+            os.environ.setdefault("LANGGRAPH_STRICT_MSGPACK", "true")
+            async with AsyncSqliteSaver.from_conn_string(config.agent_checkpoint_path) as saver:
+                llm = OllamaAgentLLM(
+                    config.ollama_model, config.ollama_url, config.planner_timeout_seconds
+                )
+                agent_service = AgentService(
+                    session_factory,
+                    config,
+                    research_service,
+                    service,
+                    index_service,
+                    retrieval_service,
+                    agent_assessor or llm,
+                    gap_query_generator or llm,
+                    saver,
+                )
+                await agent_service.recover_jobs()
+                app.state.db_engine = engine
+                app.state.crawl_service = service
+                app.state.research_service = research_service
+                app.state.index_service = index_service
+                app.state.retrieval_service = retrieval_service
+                app.state.agent_service = agent_service
+                try:
+                    yield
+                finally:
+                    await agent_service.shutdown()
+                    await research_service.shutdown()
+                    await index_service.shutdown()
+                    await service.shutdown()
+                    await vectors.close()
+                    await engine.dispose()
 
-    app = FastAPI(title="SpiderMind", version="0.4.0", lifespan=lifespan)
+    app = FastAPI(title="SpiderMind", version="0.5.0", lifespan=lifespan)
     app.include_router(health.router)
     app.include_router(crawl.router)
     app.include_router(research.router)
     app.include_router(rag.router)
+    app.include_router(agent.router)
     return app
 
 

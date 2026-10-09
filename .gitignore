@@ -9,3 +9,5 @@ __pycache__/
 data/qdrant/
 backend/data/qdrant/
 .env
+data/langgraph-checkpoints.sqlite*
+backend/data/langgraph-checkpoints.sqlite*

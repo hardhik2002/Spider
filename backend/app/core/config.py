@@ -36,6 +36,7 @@ class Settings(BaseSettings):
     chunk_min_tokens: int = Field(default=80, ge=1, le=500)
     qdrant_path: str = "data/qdrant"
     qdrant_collection: str = "spidermind_chunks"
+    agent_checkpoint_path: str = "data/langgraph-checkpoints.sqlite"
     dense_top_k: int = Field(default=50, ge=1, le=200)
     lexical_top_k: int = Field(default=50, ge=1, le=200)
     fusion_top_k: int = Field(default=30, ge=1, le=100)

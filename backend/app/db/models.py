@@ -179,6 +179,10 @@ class ResearchSearchQuery(Base):
     started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     error_message: Mapped[str | None] = mapped_column(Text)
+    origin: Mapped[str] = mapped_column(String(20), default="PLAN")
+    agent_run_id: Mapped[str | None] = mapped_column(String(36))
+    gap_id: Mapped[str | None] = mapped_column(String(36))
+    agent_iteration: Mapped[int | None] = mapped_column(Integer)
 
 
 class ResearchQuerySubquestion(Base):

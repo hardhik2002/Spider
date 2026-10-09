@@ -49,6 +49,12 @@ ADDITIONS: dict[str, dict[str, str]] = {
         "chunking_profile": "TEXT",
         "embedding_model": "TEXT",
     },
+    "research_search_queries": {
+        "origin": "VARCHAR(20) NOT NULL DEFAULT 'PLAN'",
+        "agent_run_id": "VARCHAR(36)",
+        "gap_id": "VARCHAR(36)",
+        "agent_iteration": "INTEGER",
+    },
 }
 
 
@@ -74,7 +80,7 @@ async def migrate_sqlite(connection: AsyncConnection) -> None:
         if "no such module: fts5" not in str(exc).lower():
             raise
         logger.warning("SQLite FTS5 unavailable; using local BM25 fallback")
-        await connection.exec_driver_sql("PRAGMA user_version = 4")
+        await connection.exec_driver_sql("PRAGMA user_version = 5")
         return
     await connection.exec_driver_sql(
         """CREATE TRIGGER IF NOT EXISTS knowledge_chunks_ai AFTER INSERT ON knowledge_chunks BEGIN
@@ -97,4 +103,4 @@ async def migrate_sqlite(connection: AsyncConnection) -> None:
         await connection.exec_driver_sql(
             "INSERT INTO knowledge_chunks_fts(knowledge_chunks_fts) VALUES('rebuild')"
         )
-    await connection.exec_driver_sql("PRAGMA user_version = 4")
+    await connection.exec_driver_sql("PRAGMA user_version = 5")

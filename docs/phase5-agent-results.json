@@ -1,0 +1,621 @@
+{
+  "evaluation": "controlled Phase 5 fixture; actual graph, crawler, index and retrieval",
+  "generated_at_utc": "2026-10-09T13:56:06.859663+00:00",
+  "fixture": {
+    "question": "What are the benchmark metrics?",
+    "subquestions": 1,
+    "gold_relevant_source_urls": [
+      "https://fresh.example/new",
+      "https://research.example/old"
+    ],
+    "gold_relevant_chunk_count": 6,
+    "source_label_basis": "two fixture documents known relevant by construction",
+    "search_provider": "deterministic local fixture",
+    "embedding_model": "fixture two-dimensional embedding",
+    "assessor": "deterministic source-count assessor",
+    "reranker": "disabled",
+    "k": 8
+  },
+  "one_pass_vs_agentic": {
+    "one_pass": {
+      "relevant_evidence_recall@8": 0.5,
+      "mrr": 1.0,
+      "unique_relevant_sources": 1,
+      "relevant_source_recall@8": 0.5,
+      "retrieved_chunks": 3,
+      "retrieved_sources": 1,
+      "subquestion_sufficiency_rate": 0.0,
+      "search_queries": 0,
+      "crawl_pages": 0
+    },
+    "agentic": {
+      "relevant_evidence_recall@8": 1.0,
+      "mrr": 1.0,
+      "unique_relevant_sources": 2,
+      "relevant_source_recall@8": 1.0,
+      "retrieved_chunks": 6,
+      "retrieved_sources": 2,
+      "subquestion_sufficiency_rate": 1.0,
+      "search_queries": 1,
+      "crawl_pages": 1
+    },
+    "source_expansion": {
+      "sources_before": 1,
+      "sources_after": 2,
+      "chunks_before": 3,
+      "chunks_after": 6,
+      "new_chunk_ids": [
+        4,
+        5,
+        6
+      ]
+    }
+  },
+  "scenarios": {
+    "enough": {
+      "metrics": {
+        "subquestion_sufficiency_rate": 1.0,
+        "gaps_created": 0,
+        "gaps_resolved": 0,
+        "gaps_unresolved": 0,
+        "gap_closure_rate": 1.0,
+        "queries": 0,
+        "searches": 0,
+        "seeds": 0,
+        "pages": 0,
+        "iterations": 0,
+        "runtime_ms": 158,
+        "budget_adherence": true,
+        "stop_reason": "SUFFICIENT_EVIDENCE"
+      },
+      "iteration_trace": [
+        {
+          "iteration": 0,
+          "nodes": [
+            "initialize",
+            "retrieve",
+            "assess",
+            "update_gaps",
+            "check_stop",
+            "finalize"
+          ],
+          "events": [
+            {
+              "node": "initialize",
+              "at": "2026-10-09T13:55:55.465509+00:00",
+              "subquestions": 1
+            },
+            {
+              "node": "retrieve",
+              "at": "2026-10-09T13:55:55.490303+00:00",
+              "evidence_counts": {
+                "1": 3
+              }
+            },
+            {
+              "node": "assess",
+              "at": "2026-10-09T13:55:55.553919+00:00"
+            },
+            {
+              "node": "update_gaps",
+              "at": "2026-10-09T13:55:55.569409+00:00",
+              "open_gap_count": 0
+            },
+            {
+              "node": "check_stop",
+              "at": "2026-10-09T13:55:55.598063+00:00",
+              "reason": "SUFFICIENT_EVIDENCE",
+              "subquestions_total": 1,
+              "subquestions_sufficient": 1,
+              "subquestions_with_gaps": 0,
+              "coverage_rate": 1.0,
+              "stagnant_iterations": 0
+            },
+            {
+              "node": "finalize",
+              "at": "2026-10-09T13:55:55.622838+00:00",
+              "reason": "SUFFICIENT_EVIDENCE"
+            }
+          ]
+        }
+      ]
+    },
+    "budget": {
+      "metrics": {
+        "subquestion_sufficiency_rate": 0.0,
+        "gaps_created": 1,
+        "gaps_resolved": 0,
+        "gaps_unresolved": 1,
+        "gap_closure_rate": 0.0,
+        "queries": 0,
+        "searches": 0,
+        "seeds": 0,
+        "pages": 0,
+        "iterations": 0,
+        "runtime_ms": 310,
+        "budget_adherence": true,
+        "stop_reason": "MAX_ITERATIONS"
+      },
+      "iteration_trace": [
+        {
+          "iteration": 0,
+          "nodes": [
+            "initialize",
+            "retrieve",
+            "assess",
+            "update_gaps",
+            "check_stop",
+            "finalize"
+          ],
+          "events": [
+            {
+              "node": "initialize",
+              "at": "2026-10-09T13:55:56.777996+00:00",
+              "subquestions": 1
+            },
+            {
+              "node": "retrieve",
+              "at": "2026-10-09T13:55:56.818611+00:00",
+              "evidence_counts": {
+                "1": 0
+              }
+            },
+            {
+              "node": "assess",
+              "at": "2026-10-09T13:55:56.928190+00:00"
+            },
+            {
+              "node": "update_gaps",
+              "at": "2026-10-09T13:55:56.957752+00:00",
+              "open_gap_count": 1
+            },
+            {
+              "node": "check_stop",
+              "at": "2026-10-09T13:55:57.038774+00:00",
+              "reason": "MAX_ITERATIONS",
+              "subquestions_total": 1,
+              "subquestions_sufficient": 0,
+              "subquestions_with_gaps": 1,
+              "coverage_rate": 0.0,
+              "stagnant_iterations": 0
+            },
+            {
+              "node": "finalize",
+              "at": "2026-10-09T13:55:57.080810+00:00",
+              "reason": "MAX_ITERATIONS"
+            }
+          ]
+        }
+      ]
+    },
+    "stagnation": {
+      "metrics": {
+        "subquestion_sufficiency_rate": 0.0,
+        "gaps_created": 1,
+        "gaps_resolved": 0,
+        "gaps_unresolved": 1,
+        "gap_closure_rate": 0.0,
+        "queries": 2,
+        "searches": 2,
+        "seeds": 0,
+        "pages": 0,
+        "iterations": 2,
+        "runtime_ms": 1179,
+        "budget_adherence": true,
+        "stop_reason": "STAGNATION"
+      },
+      "iteration_trace": [
+        {
+          "iteration": 0,
+          "nodes": [
+            "initialize",
+            "retrieve",
+            "assess",
+            "update_gaps",
+            "check_stop"
+          ],
+          "events": [
+            {
+              "node": "initialize",
+              "at": "2026-10-09T13:55:58.343491+00:00",
+              "subquestions": 1
+            },
+            {
+              "node": "retrieve",
+              "at": "2026-10-09T13:55:58.385702+00:00",
+              "evidence_counts": {
+                "1": 0
+              }
+            },
+            {
+              "node": "assess",
+              "at": "2026-10-09T13:55:58.435153+00:00"
+            },
+            {
+              "node": "update_gaps",
+              "at": "2026-10-09T13:55:58.467139+00:00",
+              "open_gap_count": 1
+            },
+            {
+              "node": "check_stop",
+              "at": "2026-10-09T13:55:58.498019+00:00",
+              "reason": null,
+              "subquestions_total": 1,
+              "subquestions_sufficient": 0,
+              "subquestions_with_gaps": 1,
+              "coverage_rate": 0.0,
+              "stagnant_iterations": 0
+            }
+          ]
+        },
+        {
+          "iteration": 1,
+          "nodes": [
+            "select_gap",
+            "generate_queries",
+            "search",
+            "select_seeds",
+            "crawl",
+            "index",
+            "advance",
+            "retrieve",
+            "assess",
+            "update_gaps",
+            "check_stop"
+          ],
+          "events": [
+            {
+              "node": "select_gap",
+              "at": "2026-10-09T13:55:58.525731+00:00",
+              "gap_id": "064d5e25-ecef-4b09-8bc1-0855d77af198",
+              "priority": "HIGH",
+              "description": "Need a primary source for the metric"
+            },
+            {
+              "node": "generate_queries",
+              "at": "2026-10-09T13:55:58.574975+00:00",
+              "queries": [
+                "unique metric query 1"
+              ]
+            },
+            {
+              "node": "search",
+              "at": "2026-10-09T13:55:58.629924+00:00",
+              "searches": 1
+            },
+            {
+              "node": "select_seeds",
+              "at": "2026-10-09T13:55:58.703507+00:00",
+              "candidates": 0,
+              "selected": 0
+            },
+            {
+              "node": "crawl",
+              "at": "2026-10-09T13:55:58.731058+00:00",
+              "crawl_job_ids": []
+            },
+            {
+              "node": "index",
+              "at": "2026-10-09T13:55:58.780643+00:00",
+              "indexed": 0
+            },
+            {
+              "node": "advance",
+              "at": "2026-10-09T13:55:58.792939+00:00"
+            },
+            {
+              "node": "retrieve",
+              "at": "2026-10-09T13:55:58.841161+00:00",
+              "evidence_counts": {
+                "1": 0
+              }
+            },
+            {
+              "node": "assess",
+              "at": "2026-10-09T13:55:58.929230+00:00"
+            },
+            {
+              "node": "update_gaps",
+              "at": "2026-10-09T13:55:58.970312+00:00",
+              "open_gap_count": 1
+            },
+            {
+              "node": "check_stop",
+              "at": "2026-10-09T13:55:58.998365+00:00",
+              "reason": null,
+              "subquestions_total": 1,
+              "subquestions_sufficient": 0,
+              "subquestions_with_gaps": 1,
+              "coverage_rate": 0.0,
+              "stagnant_iterations": 1
+            }
+          ]
+        },
+        {
+          "iteration": 2,
+          "nodes": [
+            "select_gap",
+            "generate_queries",
+            "search",
+            "select_seeds",
+            "crawl",
+            "index",
+            "advance",
+            "retrieve",
+            "assess",
+            "update_gaps",
+            "check_stop",
+            "finalize"
+          ],
+          "events": [
+            {
+              "node": "select_gap",
+              "at": "2026-10-09T13:55:59.024981+00:00",
+              "gap_id": "064d5e25-ecef-4b09-8bc1-0855d77af198",
+              "priority": "HIGH",
+              "description": "Need a primary source for the metric"
+            },
+            {
+              "node": "generate_queries",
+              "at": "2026-10-09T13:55:59.083238+00:00",
+              "queries": [
+                "unique metric query 2"
+              ]
+            },
+            {
+              "node": "search",
+              "at": "2026-10-09T13:55:59.136006+00:00",
+              "searches": 1
+            },
+            {
+              "node": "select_seeds",
+              "at": "2026-10-09T13:55:59.225339+00:00",
+              "candidates": 0,
+              "selected": 0
+            },
+            {
+              "node": "crawl",
+              "at": "2026-10-09T13:55:59.268403+00:00",
+              "crawl_job_ids": []
+            },
+            {
+              "node": "index",
+              "at": "2026-10-09T13:55:59.323017+00:00",
+              "indexed": 0
+            },
+            {
+              "node": "advance",
+              "at": "2026-10-09T13:55:59.341153+00:00"
+            },
+            {
+              "node": "retrieve",
+              "at": "2026-10-09T13:55:59.388719+00:00",
+              "evidence_counts": {
+                "1": 0
+              }
+            },
+            {
+              "node": "assess",
+              "at": "2026-10-09T13:55:59.432695+00:00"
+            },
+            {
+              "node": "update_gaps",
+              "at": "2026-10-09T13:55:59.454728+00:00",
+              "open_gap_count": 1
+            },
+            {
+              "node": "check_stop",
+              "at": "2026-10-09T13:55:59.489403+00:00",
+              "reason": "STAGNATION",
+              "subquestions_total": 1,
+              "subquestions_sufficient": 0,
+              "subquestions_with_gaps": 1,
+              "coverage_rate": 0.0,
+              "stagnant_iterations": 2
+            },
+            {
+              "node": "finalize",
+              "at": "2026-10-09T13:55:59.522235+00:00",
+              "reason": "STAGNATION"
+            }
+          ]
+        }
+      ]
+    },
+    "acquisition": {
+      "metrics": {
+        "subquestion_sufficiency_rate": 1.0,
+        "gaps_created": 1,
+        "gaps_resolved": 1,
+        "gaps_unresolved": 0,
+        "gap_closure_rate": 1.0,
+        "queries": 1,
+        "searches": 1,
+        "seeds": 1,
+        "pages": 1,
+        "iterations": 1,
+        "runtime_ms": 1374,
+        "budget_adherence": true,
+        "stop_reason": "SUFFICIENT_EVIDENCE"
+      },
+      "iteration_trace": [
+        {
+          "iteration": 0,
+          "nodes": [
+            "initialize",
+            "retrieve",
+            "assess",
+            "update_gaps",
+            "check_stop"
+          ],
+          "events": [
+            {
+              "node": "initialize",
+              "at": "2026-10-09T13:56:03.883828+00:00",
+              "subquestions": 1
+            },
+            {
+              "node": "retrieve",
+              "at": "2026-10-09T13:56:03.984787+00:00",
+              "evidence_counts": {
+                "1": 3
+              }
+            },
+            {
+              "node": "assess",
+              "at": "2026-10-09T13:56:04.069303+00:00"
+            },
+            {
+              "node": "update_gaps",
+              "at": "2026-10-09T13:56:04.104286+00:00",
+              "open_gap_count": 1
+            },
+            {
+              "node": "check_stop",
+              "at": "2026-10-09T13:56:04.132417+00:00",
+              "reason": null,
+              "subquestions_total": 1,
+              "subquestions_sufficient": 0,
+              "subquestions_with_gaps": 1,
+              "coverage_rate": 0.0,
+              "stagnant_iterations": 0
+            }
+          ]
+        },
+        {
+          "iteration": 1,
+          "nodes": [
+            "select_gap",
+            "generate_queries",
+            "search",
+            "select_seeds",
+            "crawl",
+            "index",
+            "advance",
+            "retrieve",
+            "assess",
+            "update_gaps",
+            "check_stop",
+            "finalize"
+          ],
+          "events": [
+            {
+              "node": "select_gap",
+              "at": "2026-10-09T13:56:04.199154+00:00",
+              "gap_id": "11de1854-dfd7-4e60-8c53-e9ed819260ad",
+              "priority": "HIGH",
+              "description": "Need a primary source for the metric"
+            },
+            {
+              "node": "generate_queries",
+              "at": "2026-10-09T13:56:04.244296+00:00",
+              "queries": [
+                "unique metric query 1"
+              ]
+            },
+            {
+              "node": "search",
+              "at": "2026-10-09T13:56:04.294285+00:00",
+              "searches": 1
+            },
+            {
+              "node": "select_seeds",
+              "at": "2026-10-09T13:56:04.341800+00:00",
+              "candidates": 1,
+              "selected": 1
+            },
+            {
+              "node": "crawl",
+              "at": "2026-10-09T13:56:04.724025+00:00",
+              "crawl_job_ids": [
+                "1fd1926c-5fcb-4ac5-9188-099db91516bd"
+              ]
+            },
+            {
+              "node": "index",
+              "at": "2026-10-09T13:56:05.011937+00:00",
+              "index_job_id": "94d088a9-4e4b-421b-bd1b-39d08abf4e94",
+              "documents_indexed": 1,
+              "consistency": {
+                "research_job_id": "c6b8f99d-78e0-4cc1-8c33-40e5b6439395",
+                "sql_chunks": 6,
+                "active_chunks": 6,
+                "fts_records": 6,
+                "vector_records": 6,
+                "missing_vector_ids": [],
+                "unexpected_vector_ids": [],
+                "orphan_chunk_ids": [],
+                "fts5_integrity_ok": true,
+                "fts5_detail": null,
+                "consistent": true
+              }
+            },
+            {
+              "node": "advance",
+              "at": "2026-10-09T13:56:05.024841+00:00"
+            },
+            {
+              "node": "retrieve",
+              "at": "2026-10-09T13:56:05.089542+00:00",
+              "evidence_counts": {
+                "1": 6
+              }
+            },
+            {
+              "node": "assess",
+              "at": "2026-10-09T13:56:05.166725+00:00"
+            },
+            {
+              "node": "update_gaps",
+              "at": "2026-10-09T13:56:05.190242+00:00",
+              "open_gap_count": 0
+            },
+            {
+              "node": "check_stop",
+              "at": "2026-10-09T13:56:05.213508+00:00",
+              "reason": "SUFFICIENT_EVIDENCE",
+              "subquestions_total": 1,
+              "subquestions_sufficient": 1,
+              "subquestions_with_gaps": 0,
+              "coverage_rate": 1.0,
+              "stagnant_iterations": 0
+            },
+            {
+              "node": "finalize",
+              "at": "2026-10-09T13:56:05.236109+00:00",
+              "reason": "SUFFICIENT_EVIDENCE"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "failure": {
+    "scenario": "failure",
+    "status": "FAILED",
+    "stop_reason": "ERROR",
+    "error": "ValueError: Research job has no planned subquestions",
+    "search_calls": 0
+  },
+  "resume": {
+    "scenario": "resume",
+    "stop_reason": "SUFFICIENT_EVIDENCE",
+    "retrieval_calls_before_resume": 1,
+    "retrieval_calls_after_resume": 2,
+    "checkpoint_next_before_resume": [
+      "assess"
+    ]
+  },
+  "prompt_injection": {
+    "scenario": "prompt_injection",
+    "escaped_delimiter": true,
+    "trusted_closing_delimiters": 1,
+    "bounded": true,
+    "passed": true
+  },
+  "limitations": [
+    "Single controlled research question and two relevant fixture sources.",
+    "The deterministic assessor tests orchestration, not real model judgment.",
+    "MRR is based on labeled relevant chunks in a small fixture."
+  ]
+}
