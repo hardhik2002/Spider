@@ -1,6 +1,6 @@
 # SpiderMind — research, crawling, and evidence retrieval
 
-SpiderMind is an incremental AI research project. Phase 3 accepts a question, creates a structured local-LLM research plan, searches the web, selects semantically ranked public seeds, and runs targeted Phase 2 crawls. Phase 4 indexes those pages and retrieves traceable evidence. It does not generate answers, verify claims, build a knowledge graph, or provide a frontend.
+SpiderMind is an incremental AI research project. Phase 3 plans a question and collects sources with targeted crawls. Phase 4 indexes and retrieves traceable evidence. Phase 5 uses a bounded LangGraph loop to assess coverage, identify gaps, search, crawl, index, and reassess. It does not generate final answers, verify claims, build a knowledge graph, or provide a frontend.
 
 ## Phase 1 foundation
 
@@ -238,6 +238,50 @@ The [controlled fixture](backend/tests/fixtures/phase4_benchmark.json) has eight
 
 See [architecture.md](docs/architecture.md) for the data flow and recovery limits.
 
+## Phase 5 research agent
+
+Install `backend/requirements-agent.txt` and start the API. Run Phase 3 research and Phase 4 indexing before starting the agent. The agent reads every original subquestion, performs hybrid retrieval, applies configurable chunk and independent-source minimums, asks the local Ollama model for structured coverage assessments, and persists missing aspects as prioritized gaps. If evidence is insufficient, it generates at most two queries per gap, deduplicates them against Phase 3 and earlier agent queries, searches with the existing DDGS provider, applies the existing URL safety and semantic seed scoring rules, runs an intelligent crawl with the **gap description** as its query, incrementally indexes the result, and reassesses. Search and crawl actions are recorded with IDs, outcomes, and timings. It stops on sufficient evidence, explicit budgets, cancellation, two stagnant iterations, or a failure that prevents continuation. Coverage minimums are operating rules, not truth or confidence estimates.
+
+The graph uses `StateGraph` with conditional stop routes. Its bounded state contains IDs, evidence counts, budgets, and routing fields. SQLite LangGraph checkpoints live at `data/langgraph-checkpoints.sqlite` by default (`SPIDERMIND_AGENT_CHECKPOINT_PATH`); agent runs, iterations, gaps, evidence assessments, and actions live in the SpiderMind domain database. Startup resumes unfinished checkpointed runs. The additive database schema version is 5. SQLite checkpointing and in-process task execution suit a single local API worker; distributed deployment needs a worker queue and a server-grade checkpointer.
+
+Retrieved passages are placed in a bounded `UNTRUSTED_EVIDENCE` envelope. Angle brackets in source text are escaped. The Ollama assessor receives only top passages with per-passage and total character limits, plus an instruction to treat all webpage text as data. It has no tool access. The query generator sees the gap description and prior queries, never the full page body. Both use Pydantic JSON schemas, temperature zero, and one repair attempt. No model chain of thought or final research conclusion is stored.
+
+From the repository root in PowerShell:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r backend\requirements-agent.txt
+ollama pull Qwen3:latest
+$env:SPIDERMIND_OLLAMA_MODEL = "Qwen3:latest"
+$env:PYTHONPATH = "backend"
+.\.venv\Scripts\python.exe -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000
+```
+
+In another PowerShell window, after a research job and its initial `/index` job complete:
+
+```powershell
+$researchJobId = "<research job UUID>"
+$body = @{
+  max_iterations = 5
+  max_new_search_queries = 12
+  max_new_seeds = 10
+  max_new_pages = 40
+  max_runtime_seconds = 900
+  min_evidence_chunks_per_subquestion = 3
+  min_unique_sources_per_subquestion = 2
+  retrieval_top_k = 8
+  rerank = $true
+} | ConvertTo-Json
+$run = Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/api/v1/research/$researchJobId/agent" -ContentType "application/json" -Body $body
+$runId = $run.agent_run_id
+Invoke-RestMethod "http://127.0.0.1:8000/api/v1/research/$researchJobId/agent/$runId"
+Invoke-RestMethod "http://127.0.0.1:8000/api/v1/research/$researchJobId/agent/$runId/iterations"
+Invoke-RestMethod "http://127.0.0.1:8000/api/v1/research/$researchJobId/agent/$runId/gaps"
+# Optional:
+Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/api/v1/research/$researchJobId/agent/$runId/cancel"
+```
+
+The [controlled Phase 5 results](docs/phase5-agent-results.json) come from a repeatable local fixture with labeled sources. Run `cd backend; ..\.venv\Scripts\python.exe scripts/evaluate_phase5.py` to regenerate them. The [live Phase 5 smoke](docs/phase5-live-smoke-results.json) uses a copy of the prior Phase 3 job, real local models, and public search; it is a connectivity check and is not a labeled benchmark. Run `cd backend; ..\.venv\Scripts\python.exe scripts/live_phase5_smoke.py` to repeat with a new copied database. The smoke caps the agent at one iteration, query, seed, and page. Its initial index step can take several minutes on CPU.
+
 ## Tests and checks
 
 ```powershell
@@ -247,8 +291,8 @@ See [architecture.md](docs/architecture.md) for the data flow and recovery limit
 .\.venv\Scripts\python.exe -m compileall -q backend\app
 ```
 
-The suite uses HTTPX mock transports and temporary SQLite databases, with no dependency on public websites.
+The suite uses HTTPX mock transports and temporary SQLite databases, with no dependency on public websites or Ollama. Phase 5 tests cover no-gap stopping, budgets, stagnation, fixture crawl/index acquisition, prompt-envelope escaping, checkpoint resume, and failed plan handling.
 
 ## Current limits and roadmap
 
-Jobs run as in-process tasks. Restarting the API marks unfinished jobs failed or partial; there is no durable worker or distributed scheduling. The SQLite migration is additive, not a general migration framework. BGE-M3, BGE-reranker-v2-m3, and Qwen3 have substantial memory and startup costs. Search quality and availability depend on public engines used by `ddgs`; timeout or rate limiting can produce partial jobs. Facet alias matching is a small controlled proxy for coverage and needs human review for production evaluation. A threshold may exclude useful low-scoring pages, and link context can be sparse or misleading. The crawler does not run JavaScript, authenticate to sites, enforce site-specific crawl-delay directives, or parse sitemaps. Robots retrieval fails closed when unavailable, except 404/410. The URL guard rejects local/private and non-global resolved IPs, validates every redirect hop, and disables environment proxies. DNS validation and connection resolution are separate, so DNS rebinding remains a known SSRF limit; production exposure to untrusted users needs connection-level address pinning and network egress controls. Retrieved web passages are untrusted data and may contain prompt injection; Phase 4 never executes instructions found in them. Answer generation, claim verification, and knowledge graph engines remain future work.
+Jobs run as in-process tasks. The Phase 5 agent resumes from its SQLite LangGraph checkpoint on restart; earlier research and index jobs retain their separate interruption behavior. There is no distributed worker scheduling. The SQLite migration is additive, not a general migration framework. BGE-M3, BGE-reranker-v2-m3, and Qwen3 have substantial memory and startup costs. Search quality and availability depend on public engines used by `ddgs`; timeout or rate limiting can produce partial jobs. The controlled Phase 5 assessor is deterministic and does not establish real-world coverage accuracy. A threshold may exclude useful low-scoring pages, and link context can be sparse or misleading. The crawler does not run JavaScript, authenticate to sites, enforce site-specific crawl-delay directives, or parse sitemaps. Robots retrieval fails closed when unavailable, except 404/410. The URL guard rejects local/private and non-global resolved IPs, validates every redirect hop, and disables environment proxies. DNS validation and connection resolution are separate, so DNS rebinding remains a known SSRF limit; production exposure to untrusted users needs connection-level address pinning and network egress controls. Retrieved passages may contain prompt injection; Phase 5 treats them as untrusted data but model output still requires independent review. Answer generation, claim verification, and knowledge graph engines remain future work.

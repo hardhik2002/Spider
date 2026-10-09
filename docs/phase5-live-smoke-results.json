@@ -1,0 +1,577 @@
+{
+  "kind": "bounded_live_smoke_not_labeled_benchmark",
+  "source_database": "spidermind-phase3-smoke-final.db",
+  "copied_database": "C:\\My3TechAi\\spider\\data\\phase5-live-20261009-135809.db",
+  "research_job_id": "38f3b146-6170-49c2-8b5c-64677210dd3f",
+  "agent_run_id": "6c6a736f-5913-40ee-b144-3521cbd50fd5",
+  "model": "Qwen3:latest",
+  "initial_index": {
+    "status": "COMPLETED",
+    "documents_indexed": 1,
+    "chunks_created": 43
+  },
+  "request": {
+    "max_iterations": 1,
+    "max_new_search_queries": 1,
+    "max_new_seeds": 1,
+    "max_new_pages": 1,
+    "max_runtime_seconds": 360,
+    "min_evidence_chunks_per_subquestion": 3,
+    "min_unique_sources_per_subquestion": 2,
+    "retrieval_top_k": 4,
+    "rerank": false
+  },
+  "initial_evidence": {
+    "sources": 1,
+    "chunks": 43
+  },
+  "final_evidence": {
+    "sources": 1,
+    "chunks": 43
+  },
+  "status": {
+    "agent_run_id": "6c6a736f-5913-40ee-b144-3521cbd50fd5",
+    "research_job_id": "38f3b146-6170-49c2-8b5c-64677210dd3f",
+    "status": "BUDGET_EXHAUSTED",
+    "current_iteration": 1,
+    "current_node": "FINALIZE",
+    "stop_reason": "MAX_ITERATIONS",
+    "subquestions_total": 2,
+    "subquestions_sufficient": 0,
+    "subquestions_with_gaps": 0,
+    "new_queries_generated": 1,
+    "new_searches_executed": 1,
+    "new_seeds_selected": 1,
+    "new_pages_crawled": 0,
+    "new_documents_indexed": 0,
+    "iterations_used": 1,
+    "remaining_budgets": {
+      "iterations": 0,
+      "queries": 0,
+      "seeds": 0,
+      "pages": 1,
+      "runtime_seconds": 34
+    },
+    "started_at": "2026-10-09T14:00:40.594241",
+    "completed_at": "2026-10-09T14:06:06.196519",
+    "duration_ms": 325602,
+    "error_message": null
+  },
+  "initial_gaps": [
+    {
+      "id": "70bab3b3-ea86-46a2-b17d-72b0c5c2f3f6",
+      "subquestion_id": "subq1",
+      "subquestion": "What are the key architectural differences between GraphRAG and traditional RAG?",
+      "description": "Evidence coverage could not be established",
+      "gap_type": "other",
+      "priority": "HIGH",
+      "status": "BUDGET_EXHAUSTED",
+      "evidence_count": 0,
+      "iteration_created": 0,
+      "actions": [
+        {
+          "kind": "SEARCH",
+          "status": "COMPLETED",
+          "data": {
+            "query": "key architectural components of GraphRAG versus traditional RAG",
+            "results": 8,
+            "valid_urls": 8
+          }
+        },
+        {
+          "kind": "SEEDS",
+          "status": "COMPLETED",
+          "data": {
+            "seed_ids": [
+              5
+            ],
+            "candidates": 5
+          }
+        },
+        {
+          "kind": "CRAWL",
+          "status": "COMPLETED",
+          "data": {
+            "crawl_job_id": "61846dc2-6ef1-4d32-b437-9f5816247530",
+            "url": "https://www.aiplusinfo.com/blog/graphrag-vs-traditional-rag",
+            "pages_crawled": 0,
+            "status": "COMPLETED"
+          }
+        },
+        {
+          "kind": "INDEX",
+          "status": "COMPLETED",
+          "data": {
+            "index_job_id": "93460f65-d1ca-4206-8672-93af30259dff",
+            "documents_indexed": 0,
+            "consistency": {
+              "research_job_id": "38f3b146-6170-49c2-8b5c-64677210dd3f",
+              "sql_chunks": 43,
+              "active_chunks": 43,
+              "fts_records": 43,
+              "vector_records": 43,
+              "missing_vector_ids": [],
+              "unexpected_vector_ids": [],
+              "orphan_chunk_ids": [],
+              "fts5_integrity_ok": true,
+              "fts5_detail": null,
+              "consistent": true
+            }
+          }
+        }
+      ],
+      "derived_search_queries": [
+        "key architectural components of GraphRAG versus traditional RAG"
+      ],
+      "resolved_at": null,
+      "resolution_iteration": null
+    },
+    {
+      "id": "40cea5b2-ed59-40fa-a495-65abc122bed9",
+      "subquestion_id": "subq2",
+      "subquestion": "How do GraphRAG and traditional RAG perform in terms of information retrieval and question answering?",
+      "description": "Specific quantitative results (e.g., accuracy, F1 scores, response quality metrics) comparing RAG and GraphRAG",
+      "gap_type": "missing_comparison",
+      "priority": "HIGH",
+      "status": "BUDGET_EXHAUSTED",
+      "evidence_count": 2,
+      "iteration_created": 0,
+      "actions": [],
+      "derived_search_queries": [],
+      "resolved_at": null,
+      "resolution_iteration": null
+    },
+    {
+      "id": "751fe893-9256-4052-ac95-c853130ddc8b",
+      "subquestion_id": "subq2",
+      "subquestion": "How do GraphRAG and traditional RAG perform in terms of information retrieval and question answering?",
+      "description": "Detailed benchmarking studies across multiple datasets and tasks",
+      "gap_type": "missing_metric",
+      "priority": "HIGH",
+      "status": "BUDGET_EXHAUSTED",
+      "evidence_count": 2,
+      "iteration_created": 0,
+      "actions": [],
+      "derived_search_queries": [],
+      "resolved_at": null,
+      "resolution_iteration": null
+    },
+    {
+      "id": "234472c9-d691-4d67-b1b9-5ce3361a897e",
+      "subquestion_id": "subq2",
+      "subquestion": "How do GraphRAG and traditional RAG perform in terms of information retrieval and question answering?",
+      "description": "Comparative analysis of information retrieval and question answering performance",
+      "gap_type": "missing_limitations",
+      "priority": "HIGH",
+      "status": "BUDGET_EXHAUSTED",
+      "evidence_count": 2,
+      "iteration_created": 0,
+      "actions": [],
+      "derived_search_queries": [],
+      "resolved_at": null,
+      "resolution_iteration": null
+    },
+    {
+      "id": "b6c6ed1c-fdab-49b2-898e-8bcabc221c40",
+      "subquestion_id": "subq2",
+      "subquestion": "How do GraphRAG and traditional RAG perform in terms of information retrieval and question answering?",
+      "description": "Discussion of limitations or gaps in the current evaluation",
+      "gap_type": "missing_comparison",
+      "priority": "HIGH",
+      "status": "BUDGET_EXHAUSTED",
+      "evidence_count": 2,
+      "iteration_created": 0,
+      "actions": [],
+      "derived_search_queries": [],
+      "resolved_at": null,
+      "resolution_iteration": null
+    }
+  ],
+  "gaps": [
+    {
+      "id": "70bab3b3-ea86-46a2-b17d-72b0c5c2f3f6",
+      "subquestion_id": "subq1",
+      "subquestion": "What are the key architectural differences between GraphRAG and traditional RAG?",
+      "description": "Evidence coverage could not be established",
+      "gap_type": "other",
+      "priority": "HIGH",
+      "status": "BUDGET_EXHAUSTED",
+      "evidence_count": 0,
+      "iteration_created": 0,
+      "actions": [
+        {
+          "kind": "SEARCH",
+          "status": "COMPLETED",
+          "data": {
+            "query": "key architectural components of GraphRAG versus traditional RAG",
+            "results": 8,
+            "valid_urls": 8
+          }
+        },
+        {
+          "kind": "SEEDS",
+          "status": "COMPLETED",
+          "data": {
+            "seed_ids": [
+              5
+            ],
+            "candidates": 5
+          }
+        },
+        {
+          "kind": "CRAWL",
+          "status": "COMPLETED",
+          "data": {
+            "crawl_job_id": "61846dc2-6ef1-4d32-b437-9f5816247530",
+            "url": "https://www.aiplusinfo.com/blog/graphrag-vs-traditional-rag",
+            "pages_crawled": 0,
+            "status": "COMPLETED"
+          }
+        },
+        {
+          "kind": "INDEX",
+          "status": "COMPLETED",
+          "data": {
+            "index_job_id": "93460f65-d1ca-4206-8672-93af30259dff",
+            "documents_indexed": 0,
+            "consistency": {
+              "research_job_id": "38f3b146-6170-49c2-8b5c-64677210dd3f",
+              "sql_chunks": 43,
+              "active_chunks": 43,
+              "fts_records": 43,
+              "vector_records": 43,
+              "missing_vector_ids": [],
+              "unexpected_vector_ids": [],
+              "orphan_chunk_ids": [],
+              "fts5_integrity_ok": true,
+              "fts5_detail": null,
+              "consistent": true
+            }
+          }
+        }
+      ],
+      "derived_search_queries": [
+        "key architectural components of GraphRAG versus traditional RAG"
+      ],
+      "resolved_at": null,
+      "resolution_iteration": null
+    },
+    {
+      "id": "40cea5b2-ed59-40fa-a495-65abc122bed9",
+      "subquestion_id": "subq2",
+      "subquestion": "How do GraphRAG and traditional RAG perform in terms of information retrieval and question answering?",
+      "description": "Specific quantitative results (e.g., accuracy, F1 scores, response quality metrics) comparing RAG and GraphRAG",
+      "gap_type": "missing_comparison",
+      "priority": "HIGH",
+      "status": "BUDGET_EXHAUSTED",
+      "evidence_count": 2,
+      "iteration_created": 0,
+      "actions": [],
+      "derived_search_queries": [],
+      "resolved_at": null,
+      "resolution_iteration": null
+    },
+    {
+      "id": "751fe893-9256-4052-ac95-c853130ddc8b",
+      "subquestion_id": "subq2",
+      "subquestion": "How do GraphRAG and traditional RAG perform in terms of information retrieval and question answering?",
+      "description": "Detailed benchmarking studies across multiple datasets and tasks",
+      "gap_type": "missing_metric",
+      "priority": "HIGH",
+      "status": "BUDGET_EXHAUSTED",
+      "evidence_count": 2,
+      "iteration_created": 0,
+      "actions": [],
+      "derived_search_queries": [],
+      "resolved_at": null,
+      "resolution_iteration": null
+    },
+    {
+      "id": "234472c9-d691-4d67-b1b9-5ce3361a897e",
+      "subquestion_id": "subq2",
+      "subquestion": "How do GraphRAG and traditional RAG perform in terms of information retrieval and question answering?",
+      "description": "Comparative analysis of information retrieval and question answering performance",
+      "gap_type": "missing_limitations",
+      "priority": "HIGH",
+      "status": "BUDGET_EXHAUSTED",
+      "evidence_count": 2,
+      "iteration_created": 0,
+      "actions": [],
+      "derived_search_queries": [],
+      "resolved_at": null,
+      "resolution_iteration": null
+    },
+    {
+      "id": "b6c6ed1c-fdab-49b2-898e-8bcabc221c40",
+      "subquestion_id": "subq2",
+      "subquestion": "How do GraphRAG and traditional RAG perform in terms of information retrieval and question answering?",
+      "description": "Discussion of limitations or gaps in the current evaluation",
+      "gap_type": "missing_comparison",
+      "priority": "HIGH",
+      "status": "BUDGET_EXHAUSTED",
+      "evidence_count": 2,
+      "iteration_created": 0,
+      "actions": [],
+      "derived_search_queries": [],
+      "resolved_at": null,
+      "resolution_iteration": null
+    },
+    {
+      "id": "d8d721b8-d279-4875-bd70-ecc28c411ec5",
+      "subquestion_id": "subq1",
+      "subquestion": "What are the key architectural differences between GraphRAG and traditional RAG?",
+      "description": "Architectural diagrams or descriptions of GraphRAG",
+      "gap_type": "missing_primary_evidence",
+      "priority": "HIGH",
+      "status": "BUDGET_EXHAUSTED",
+      "evidence_count": 0,
+      "iteration_created": 1,
+      "actions": [],
+      "derived_search_queries": [],
+      "resolved_at": null,
+      "resolution_iteration": null
+    },
+    {
+      "id": "a70af6e7-5c7b-4f25-925e-b51f060bbfb4",
+      "subquestion_id": "subq1",
+      "subquestion": "What are the key architectural differences between GraphRAG and traditional RAG?",
+      "description": "Architectural descriptions of traditional RAG",
+      "gap_type": "insufficient_source_diversity",
+      "priority": "HIGH",
+      "status": "BUDGET_EXHAUSTED",
+      "evidence_count": 0,
+      "iteration_created": 1,
+      "actions": [],
+      "derived_search_queries": [],
+      "resolved_at": null,
+      "resolution_iteration": null
+    },
+    {
+      "id": "2a288fc2-8194-4993-8231-e9f7dbd305eb",
+      "subquestion_id": "subq2",
+      "subquestion": "How do GraphRAG and traditional RAG perform in terms of information retrieval and question answering?",
+      "description": "Specific experimental results comparing RAG and GraphRAG in terms of information retrieval and question answering",
+      "gap_type": "missing_comparison",
+      "priority": "HIGH",
+      "status": "BUDGET_EXHAUSTED",
+      "evidence_count": 2,
+      "iteration_created": 1,
+      "actions": [],
+      "derived_search_queries": [],
+      "resolved_at": null,
+      "resolution_iteration": null
+    },
+    {
+      "id": "e0fa300c-add9-4917-990a-e4af05fb67fd",
+      "subquestion_id": "subq2",
+      "subquestion": "How do GraphRAG and traditional RAG perform in terms of information retrieval and question answering?",
+      "description": "Benchmarking studies that provide quantitative comparisons between the two architectures",
+      "gap_type": "missing_metric",
+      "priority": "HIGH",
+      "status": "BUDGET_EXHAUSTED",
+      "evidence_count": 2,
+      "iteration_created": 1,
+      "actions": [],
+      "derived_search_queries": [],
+      "resolved_at": null,
+      "resolution_iteration": null
+    }
+  ],
+  "iterations": [
+    {
+      "iteration": 0,
+      "status": "COMPLETED",
+      "selected_gap_id": null,
+      "action": null,
+      "started_at": "2026-10-09T14:00:40.623489",
+      "completed_at": "2026-10-09T14:03:23.626445",
+      "trace": [
+        {
+          "node": "initialize",
+          "at": "2026-10-09T14:00:40.622152+00:00",
+          "subquestions": 2
+        },
+        {
+          "node": "retrieve",
+          "at": "2026-10-09T14:00:40.886295+00:00",
+          "evidence_counts": {
+            "1": 0,
+            "2": 2
+          }
+        },
+        {
+          "node": "assess",
+          "at": "2026-10-09T14:03:23.228306+00:00"
+        },
+        {
+          "node": "update_gaps",
+          "at": "2026-10-09T14:03:23.540834+00:00",
+          "open_gap_count": 5
+        },
+        {
+          "node": "check_stop",
+          "at": "2026-10-09T14:03:23.653476+00:00",
+          "reason": null,
+          "subquestions_total": 2,
+          "subquestions_sufficient": 0,
+          "subquestions_with_gaps": 5,
+          "coverage_rate": 0.0,
+          "stagnant_iterations": 0
+        }
+      ]
+    },
+    {
+      "iteration": 1,
+      "status": "COMPLETED",
+      "selected_gap_id": "70bab3b3-ea86-46a2-b17d-72b0c5c2f3f6",
+      "action": "SEARCH_GAP",
+      "started_at": "2026-10-09T14:03:23.776254",
+      "completed_at": "2026-10-09T14:06:06.098306",
+      "trace": [
+        {
+          "node": "select_gap",
+          "at": "2026-10-09T14:03:23.802915+00:00",
+          "gap_id": "70bab3b3-ea86-46a2-b17d-72b0c5c2f3f6",
+          "priority": "HIGH",
+          "description": "Evidence coverage could not be established"
+        },
+        {
+          "node": "generate_queries",
+          "at": "2026-10-09T14:04:02.171793+00:00",
+          "queries": [
+            "key architectural components of GraphRAG versus traditional RAG"
+          ]
+        },
+        {
+          "node": "search",
+          "at": "2026-10-09T14:04:07.554869+00:00",
+          "searches": 1
+        },
+        {
+          "node": "select_seeds",
+          "at": "2026-10-09T14:04:24.046734+00:00",
+          "candidates": 5,
+          "selected": 1
+        },
+        {
+          "node": "crawl",
+          "at": "2026-10-09T14:04:33.795952+00:00",
+          "crawl_job_ids": [
+            "61846dc2-6ef1-4d32-b437-9f5816247530"
+          ]
+        },
+        {
+          "node": "index",
+          "at": "2026-10-09T14:04:34.821877+00:00",
+          "index_job_id": "93460f65-d1ca-4206-8672-93af30259dff",
+          "documents_indexed": 0,
+          "consistency": {
+            "research_job_id": "38f3b146-6170-49c2-8b5c-64677210dd3f",
+            "sql_chunks": 43,
+            "active_chunks": 43,
+            "fts_records": 43,
+            "vector_records": 43,
+            "missing_vector_ids": [],
+            "unexpected_vector_ids": [],
+            "orphan_chunk_ids": [],
+            "fts5_integrity_ok": true,
+            "fts5_detail": null,
+            "consistent": true
+          }
+        },
+        {
+          "node": "advance",
+          "at": "2026-10-09T14:04:34.849267+00:00"
+        },
+        {
+          "node": "retrieve",
+          "at": "2026-10-09T14:04:37.113436+00:00",
+          "evidence_counts": {
+            "1": 0,
+            "2": 2
+          }
+        },
+        {
+          "node": "assess",
+          "at": "2026-10-09T14:06:05.476431+00:00"
+        },
+        {
+          "node": "update_gaps",
+          "at": "2026-10-09T14:06:06.011514+00:00",
+          "open_gap_count": 4
+        },
+        {
+          "node": "check_stop",
+          "at": "2026-10-09T14:06:06.127227+00:00",
+          "reason": "MAX_ITERATIONS",
+          "subquestions_total": 2,
+          "subquestions_sufficient": 0,
+          "subquestions_with_gaps": 4,
+          "coverage_rate": 0.0,
+          "stagnant_iterations": 1
+        },
+        {
+          "node": "finalize",
+          "at": "2026-10-09T14:06:06.272851+00:00",
+          "reason": "MAX_ITERATIONS"
+        }
+      ]
+    }
+  ],
+  "assessments": [
+    {
+      "iteration": 0,
+      "subquestion_id": 1,
+      "coverage": "insufficient",
+      "deterministic_minimum_met": false,
+      "needs_more_research": true,
+      "chunk_ids": [],
+      "unique_document_count": 0
+    },
+    {
+      "iteration": 0,
+      "subquestion_id": 2,
+      "coverage": "insufficient",
+      "deterministic_minimum_met": false,
+      "needs_more_research": true,
+      "chunk_ids": [
+        3,
+        5
+      ],
+      "unique_document_count": 1
+    },
+    {
+      "iteration": 1,
+      "subquestion_id": 1,
+      "coverage": "insufficient",
+      "deterministic_minimum_met": false,
+      "needs_more_research": true,
+      "chunk_ids": [],
+      "unique_document_count": 0
+    },
+    {
+      "iteration": 1,
+      "subquestion_id": 2,
+      "coverage": "insufficient",
+      "deterministic_minimum_met": false,
+      "needs_more_research": true,
+      "chunk_ids": [
+        3,
+        5
+      ],
+      "unique_document_count": 1
+    }
+  ],
+  "generated_searches": 1,
+  "new_sources": 0,
+  "new_evidence_chunks": 0,
+  "remaining_gaps": 9,
+  "stop_reason": "MAX_ITERATIONS",
+  "crawl_page_outcomes": [
+    {
+      "url": "https://www.aiplusinfo.com/blog/graphrag-vs-traditional-rag",
+      "status": "FAILED",
+      "error": "Redirect limit exceeded"
+    }
+  ]
+}

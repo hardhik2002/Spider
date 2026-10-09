@@ -1,4 +1,4 @@
-# SpiderMind architecture: Phases 1 to 3
+# SpiderMind architecture: Phases 1 to 5
 
 ## Lifecycle and boundaries
 
@@ -123,3 +123,30 @@ The controlled evaluation fixture labels relevant **documents** for eight querie
 ## Security and operational limits
 
 The validator resolves public hosts before requests, but HTTPX resolves again when connecting; DNS rebinding between those steps is still possible. A production deployment with untrusted users should pin resolved addresses at connection time and enforce outbound firewall rules. Subdomains are distinct hosts. The crawler does not process JavaScript-rendered content, canonical URLs as crawl identity, sitemaps, authentication, or robots crawl-delay directives. Public-site policies and terms remain the operator's responsibility.
+## Phase 5 bounded research agent
+
+```mermaid
+flowchart TD
+    START --> initialize --> retrieve
+    retrieve --> assess --> update_gaps --> check_stop
+    check_stop -->|sufficient, budget, cancellation, stagnation| finalize --> END
+    check_stop -->|continue| select_gap --> generate_queries --> search
+    search --> select_seeds --> crawl --> index --> advance --> retrieve
+    generate_queries -->|stop| finalize
+    search -->|stop| finalize
+    select_seeds -->|stop| finalize
+    crawl -->|stop| finalize
+    index -->|stop| finalize
+```
+
+`AgentService` compiles a `StateGraph` with a persistent `AsyncSqliteSaver` and uses the agent run UUID as `thread_id`. `data/langgraph-checkpoints.sqlite` holds bounded routing state: research/run IDs, iteration, subquestion IDs, evidence chunk/document/domain ID snapshots, selected gap ID, pending query/seed/crawl/index IDs, counters, and stop reason. Full passages, vectors, and search result dumps stay outside graph state. Startup resumes `PENDING` or running agent runs from a checkpoint. Expensive nodes check domain action records, query status, seed IDs, crawl IDs, and index IDs before repeating work. Checkpoints and domain rows are separate SQLite files; a crash between a domain commit and a checkpoint can replay a node, so its persisted actions are the idempotency boundary.
+
+The domain schema adds `agent_runs`, `agent_iterations`, `research_gaps`, `evidence_assessments`, and `agent_actions` without changing prior data. Phase 3 search queries gain `origin`, `agent_run_id`, `gap_id`, and `agent_iteration` for lineage. Schema version 5 is additive. Run and iteration endpoints expose structured trace events, budgets, gap status, search and crawl outcomes, and timing. They do not expose model reasoning. `AgentRun.cancel_requested` is checked between expensive nodes.
+
+Every planned subquestion first gets hybrid Phase 4 retrieval scoped to its selected crawl jobs. The deterministic minimum requires the configured number of distinct chunk IDs and distinct document IDs. The model then returns a Pydantic `AssessmentResult` (`insufficient`, `partial`, or `sufficient`, summary, missing aspects, need for more research, gap types). A `sufficient` model verdict cannot override a failed deterministic minimum. The assessor receives at most six passages by default, each bounded to 1,200 characters and the pack to 7,000 characters. Passage text is JSON encoded inside `UNTRUSTED_EVIDENCE` delimiters with angle brackets escaped. The system prompt forbids following source instructions, and the assessor has no tool interface. Ollama uses the Phase 3 model, temperature zero, and one schema-repair attempt.
+
+Missing aspects become gap rows tied to the original subquestion. Priority combines the parent's high/medium/low priority (3/2/1) with one extra point for missing primary evidence, metrics, or recent evidence; scores of at least 3 are high, 2 medium, and 1 low. Selection sorts by priority, least current evidence, creation time, then ID. A gap query generator returns a typed plan. Case and whitespace normalized queries are deduplicated against all Phase 3 and Phase 5 queries for that research job. Search uses Phase 3's provider and public-target validator. Candidate title/snippet/URL representations are embedded with the shared provider and scored by Phase 3's semantic/rank formula and domain cap. Selected seeds launch Phase 2 intelligent crawling with the gap description as `research_query`; previously crawled normalized URLs are excluded. Phase 4 indexing then refreshes SQLite FTS and Qdrant, checks cross-store consistency, and hybrid retrieval runs again. This loop collects evidence only. It does not synthesize an answer, verify claims, or detect contradictions.
+
+Hard budgets are enforced on completed gap iterations, generated queries, selected seeds, completed pages, and wall-clock runtime. A sequential graph reserves query and seed counts before work; each crawl's `max_pages` is capped by its remaining page budget. A successful stop requires every subquestion to pass the deterministic minimum and the assessor to say sufficient, with no open high-priority gap. Two iterations without new chunk IDs or resolved gaps stop for stagnation. Cancellation stops with `CANCELLED`; failures are recorded per action where possible. A graph-wide error becomes `PARTIAL` if work was already acquired or `FAILED` otherwise. Optional CPU reranking can add substantial latency; the agent request exposes `rerank`, and time budgets include retrieval and model work.
+
+The [controlled benchmark](phase5-agent-results.json) uses deterministic fake search, embeddings, and assessor, while its acquisition path uses the real crawler, indexer, retrieval service, and SQLite/Qdrant stores against a local HTTP fixture. It compares one-pass and agentic retrieval on two labeled relevant fixture sources; its labels are known by construction. The separate [live smoke](phase5-live-smoke-results.json) uses a copy of prior research data, local BGE-M3/Qwen3, and public search. A single smoke run is not an accuracy benchmark. A production rollout needs a durable worker queue, a server-grade checkpoint store, stronger cross-process budget coordination, and connection-level SSRF defenses; these are deployment hardening needs, separate from Phase 5 research-loop behavior.

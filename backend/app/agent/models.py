@@ -23,6 +23,7 @@ class AgentRun(Base):
     searches_used: Mapped[int] = mapped_column(Integer, default=0)
     seeds_used: Mapped[int] = mapped_column(Integer, default=0)
     pages_used: Mapped[int] = mapped_column(Integer, default=0)
+    pages_crawled: Mapped[int] = mapped_column(Integer, default=0)
     documents_indexed: Mapped[int] = mapped_column(Integer, default=0)
     error_message: Mapped[str | None] = mapped_column(Text)
     cancel_requested: Mapped[bool] = mapped_column(Boolean, default=False)

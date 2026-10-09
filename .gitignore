@@ -11,3 +11,4 @@ backend/data/qdrant/
 .env
 data/langgraph-checkpoints.sqlite*
 backend/data/langgraph-checkpoints.sqlite*
+data/phase5-live-*

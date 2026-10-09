@@ -55,6 +55,9 @@ ADDITIONS: dict[str, dict[str, str]] = {
         "gap_id": "VARCHAR(36)",
         "agent_iteration": "INTEGER",
     },
+    "agent_runs": {
+        "pages_crawled": "INTEGER NOT NULL DEFAULT 0",
+    },
 }
 
 

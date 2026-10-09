@@ -1,5 +1,6 @@
 """Structured local model calls. Retrieved passages are always untrusted data."""
 
+import asyncio
 import json
 import logging
 from typing import Protocol
@@ -41,10 +42,16 @@ def evidence_envelope(
         remaining = chars_total - used - len("<UNTRUSTED_EVIDENCE></UNTRUSTED_EVIDENCE>")
         if remaining <= 0:
             break
-        passage = json.dumps(data, ensure_ascii=False).replace("<", "\\u003c").replace(">", "\\u003e")
+        passage = (
+            json.dumps(data, ensure_ascii=False).replace("<", "\\u003c").replace(">", "\\u003e")
+        )
         while len(passage) > remaining and data["passage"]:
-            data["passage"] = data["passage"][: max(0, len(data["passage"]) - (len(passage) - remaining))]
-            passage = json.dumps(data, ensure_ascii=False).replace("<", "\\u003c").replace(">", "\\u003e")
+            data["passage"] = data["passage"][
+                : max(0, len(data["passage"]) - (len(passage) - remaining))
+            ]
+            passage = (
+                json.dumps(data, ensure_ascii=False).replace("<", "\\u003c").replace(">", "\\u003e")
+            )
         if len(passage) > remaining:
             break
         envelope = f"<UNTRUSTED_EVIDENCE>{passage}</UNTRUSTED_EVIDENCE>"
@@ -77,22 +84,35 @@ class OllamaAgentLLM:
         messages = [{"role": "system", "content": system}, {"role": "user", "content": prompt}]
         async with httpx.AsyncClient(timeout=self.timeout, trust_env=False) as client:
             for attempt in range(2):
-                response = await client.post(
-                    f"{self.base_url}/api/chat",
-                    json={
-                        "model": self.model,
-                        "messages": messages,
-                        "format": schema.model_json_schema(),
-                        "stream": False,
-                        "think": False,
-                        "options": {"temperature": 0},
-                    },
-                )
-                response.raise_for_status()
-                content = response.json()["message"]["content"]
+                content = None
+                for transient_attempt in range(2):
+                    try:
+                        response = await client.post(
+                            f"{self.base_url}/api/chat",
+                            json={
+                                "model": self.model,
+                                "messages": messages,
+                                "format": schema.model_json_schema(),
+                                "stream": False,
+                                "think": False,
+                                "options": {"temperature": 0},
+                            },
+                        )
+                        if response.status_code >= 500 and transient_attempt == 0:
+                            await asyncio.sleep(0.5)
+                            continue
+                        response.raise_for_status()
+                        break
+                    except httpx.TransportError:
+                        if transient_attempt:
+                            raise
+                        await asyncio.sleep(0.5)
                 try:
+                    content = response.json()["message"]["content"]
+                    if not isinstance(content, str):
+                        raise ValueError("Agent model content must be a JSON string")
                     return schema.model_validate_json(content)
-                except (ValidationError, ValueError, TypeError) as exc:
+                except (ValidationError, ValueError, TypeError, KeyError) as exc:
                     if attempt:
                         raise ValueError(f"Agent model returned invalid JSON twice: {exc}") from exc
                     logger.warning(
