@@ -57,6 +57,9 @@ ADDITIONS: dict[str, dict[str, str]] = {
     },
     "agent_runs": {
         "pages_crawled": "INTEGER NOT NULL DEFAULT 0",
+        "chunks_indexed": "INTEGER NOT NULL DEFAULT 0",
+        "llm_calls": "INTEGER NOT NULL DEFAULT 0",
+        "llm_failures": "INTEGER NOT NULL DEFAULT 0",
     },
 }
 

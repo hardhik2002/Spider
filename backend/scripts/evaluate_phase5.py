@@ -45,6 +45,8 @@ def main() -> None:
         "failed_page_budget",
         "time_budget",
         "cancel",
+        "url_security",
+        "query_dedup",
     }
     if required - cases.keys():
         raise RuntimeError(f"Missing fixture outputs: {sorted(required - cases.keys())}")
@@ -113,6 +115,8 @@ def main() -> None:
         "failure": cases["failure"],
         "time_budget": cases["time_budget"],
         "cancel": cases["cancel"],
+        "url_security": cases["url_security"],
+        "query_dedup": cases["query_dedup"],
         "resume": cases["resume"],
         "prompt_injection": cases["prompt_injection"],
         "limitations": [

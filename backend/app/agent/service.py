@@ -14,7 +14,7 @@ from sqlalchemy import func, or_, select
 from app.agent.llm import EvidenceAssessor, GapQueryGenerator
 from app.agent.models import AgentAction, AgentIteration, AgentRun, EvidenceAssessment, ResearchGap
 from app.agent.schemas import AgentRequest, AssessmentResult
-from app.crawler.normalizer import InvalidURL, hostname, normalize_url
+from app.crawler.normalizer import hostname, normalize_url
 from app.crawler.scoring import cosine_similarity
 from app.db.models import (
     CrawledPage,
@@ -42,9 +42,11 @@ PRIORITY = {"HIGH": 0, "MEDIUM": 1, "LOW": 2}
 def gap_priority(parent_priority: str, gap_type: str) -> str:
     """Combine the plan's priority with the missing evidence's importance."""
     base = {"high": 3, "medium": 2, "low": 1}.get(parent_priority.lower(), 1)
-    importance = 1 if gap_type in {
-        "missing_primary_evidence", "missing_metric", "missing_recent_evidence"
-    } else 0
+    importance = (
+        1
+        if gap_type in {"missing_primary_evidence", "missing_metric", "missing_recent_evidence"}
+        else 0
+    )
     score = base + importance
     return "HIGH" if score >= 3 else "MEDIUM" if score == 2 else "LOW"
 
@@ -158,7 +160,7 @@ class AgentService:
             ("advance", self.advance),
             ("finalize", self.finalize),
         ):
-            graph.add_node(name, node)
+            graph.add_node(name, self._instrument(name, node))
         graph.add_edge(START, "initialize")
         for a, b in (
             ("initialize", "retrieve"),
@@ -192,6 +194,51 @@ class AgentService:
                 {"finalize": "finalize", next_node: next_node},
             )
         self.graph = graph.compile(checkpointer=checkpointer)
+
+    def _instrument(self, name, node):
+        async def invoke(state: ResearchAgentState):
+            started = time.monotonic()
+            run_id = state["agent_run_id"]
+            before = await self._budget_snapshot(run_id)
+            context = {
+                "agent_run_id": run_id,
+                "research_job_id": state["research_job_id"],
+                "iteration": state["iteration"],
+                "gap_id": state.get("selected_gap_id"),
+            }
+            logger.info("agent_%s_started", name, extra=context)
+            try:
+                result = await node(state)
+            except Exception:
+                logger.exception("agent_%s_failed", name, extra=context)
+                raise
+            duration = int((time.monotonic() - started) * 1000)
+            after = await self._budget_snapshot(run_id)
+            await self._trace(
+                {**state, **result},
+                "node_timing",
+                operation=name,
+                duration_ms=duration,
+                budget_before=before,
+                budget_after=after,
+            )
+            logger.info("agent_%s_completed", name, extra={**context, "duration_ms": duration})
+            return result
+
+        return invoke
+
+    async def _budget_snapshot(self, run_id: str) -> dict:
+        run = await self._run_row(run_id)
+        return BudgetManager(AgentRequest.model_validate_json(run.request_json), run).remaining()
+
+    async def _llm_counter(self, run_id: str, *, failure: bool = False) -> None:
+        async with self.sessions() as session:
+            run = await session.get(AgentRun, run_id)
+            if failure:
+                run.llm_failures += 1
+            else:
+                run.llm_calls += 1
+            await session.commit()
 
     async def _run_row(self, run_id: str) -> AgentRun:
         async with self.sessions() as session:
@@ -269,12 +316,58 @@ class AgentService:
             await session.commit()
 
     async def start(self, research_job_id: str, request: AgentRequest) -> AgentRun:
+        defaults = {
+            "max_iterations": self.settings.agent_max_iterations,
+            "max_new_search_queries": self.settings.agent_max_queries,
+            "max_new_seeds": self.settings.agent_max_seeds,
+            "max_new_pages": self.settings.agent_max_pages,
+            "max_runtime_seconds": self.settings.agent_max_runtime_seconds,
+            "min_evidence_chunks_per_subquestion": self.settings.agent_min_evidence_chunks,
+            "min_unique_sources_per_subquestion": self.settings.agent_min_unique_sources,
+            "retrieval_top_k": self.settings.agent_retrieval_top_k,
+            "rerank": self.settings.agent_rerank_enabled,
+            "max_queries_per_gap": self.settings.agent_max_queries_per_gap,
+            "max_assessment_chunks": self.settings.agent_max_assessment_chunks,
+            "max_assessment_chars_per_chunk": self.settings.agent_max_assessment_chars_per_chunk,
+            "max_total_assessment_chars": self.settings.agent_max_total_assessment_chars,
+        }
+        effective = request.model_dump()
+        for field, value in defaults.items():
+            if field not in request.model_fields_set:
+                effective[field] = value
+        request = AgentRequest.model_validate(effective)
         async with self.sessions() as session:
             job = await session.get(ResearchJob, research_job_id)
             if job is None:
                 raise KeyError(research_job_id)
             if job.status not in {"completed", "partial"}:
                 raise ValueError("Research plan and initial crawl must finish before agent start")
+            existing_pages = (
+                await session.scalar(
+                    select(func.count())
+                    .select_from(CrawledPage)
+                    .join(ResearchSeed, ResearchSeed.crawl_job_id == CrawledPage.crawl_job_id)
+                    .where(
+                        ResearchSeed.research_job_id == research_job_id,
+                        ResearchSeed.selected.is_(True),
+                        CrawledPage.crawl_status == "COMPLETED",
+                        CrawledPage.duplicate_of_page_id.is_(None),
+                    )
+                )
+            ) or 0
+            if existing_pages:
+                indexed = (
+                    await session.execute(
+                        select(IndexJob.id)
+                        .where(
+                            IndexJob.research_job_id == research_job_id,
+                            IndexJob.status.in_(["COMPLETED", "PARTIAL"]),
+                        )
+                        .limit(1)
+                    )
+                ).scalar_one_or_none()
+                if indexed is None:
+                    raise ValueError("Index existing research pages before starting the agent")
             active = (
                 await session.execute(
                     select(AgentRun).where(
@@ -467,6 +560,7 @@ class AgentService:
                 len(snap.get("chunk_ids", [])) >= request.min_evidence_chunks_per_subquestion
                 and len(snap.get("document_ids", [])) >= request.min_unique_sources_per_subquestion
             )
+            llm_called = False
             try:
                 result = await self._within_time(
                     state["agent_run_id"],
@@ -482,6 +576,8 @@ class AgentService:
                         ),
                     ),
                 )
+                await self._llm_counter(state["agent_run_id"])
+                llm_called = True
                 assessed = await self._within_time(
                     state["agent_run_id"],
                     self.assessor.assess(
@@ -497,8 +593,12 @@ class AgentService:
                 if assessed.subquestion_id != sub.plan_id:
                     raise ValueError("Assessor changed subquestion ID")
             except TimeoutError:
+                if llm_called:
+                    await self._llm_counter(state["agent_run_id"], failure=True)
                 return {"stop_reason": "TIME_BUDGET"}
             except Exception as exc:
+                if llm_called:
+                    await self._llm_counter(state["agent_run_id"], failure=True)
                 logger.warning("assessment failed for subquestion %s: %s", sub.id, exc)
                 assessed = AssessmentResult(
                     subquestion_id=sub.plan_id,
@@ -688,7 +788,7 @@ class AgentService:
                 reason = "TIME_BUDGET"
             if not reason and sufficient == total and not high_gaps:
                 reason = "SUFFICIENT_EVIDENCE"
-            if not reason and stagnant >= 2:
+            if not reason and stagnant >= self.settings.agent_max_stagnant_iterations:
                 reason = "STAGNATION"
             if not reason:
                 reason = BudgetManager(req, run).stop_reason()
@@ -832,6 +932,7 @@ class AgentService:
         capacity = min(req.max_queries_per_gap, req.max_new_search_queries - run.queries_used)
         if capacity <= 0:
             return {"stop_reason": "QUERY_BUDGET"}
+        await self._llm_counter(state["agent_run_id"])
         try:
             plan = await self._within_time(
                 state["agent_run_id"],
@@ -844,8 +945,10 @@ class AgentService:
             )
             candidates = plan.queries
         except TimeoutError:
+            await self._llm_counter(state["agent_run_id"], failure=True)
             return {"stop_reason": "TIME_BUDGET"}
         except Exception as exc:
+            await self._llm_counter(state["agent_run_id"], failure=True)
             logger.warning("query generation failed for gap %s: %s", gap.id, exc)
             # A local model outage must not leave an actionable gap inert.
             # This fallback can only feed the fixed search provider.
@@ -909,20 +1012,22 @@ class AgentService:
             try:
                 hits = await self._within_time(
                     state["agent_run_id"],
-                    self.research.search_provider.search(query.query, 8),
+                    self.research.search_provider.search(
+                        query.query, self.settings.agent_search_results_per_query
+                    ),
                 )
             except Exception as exc:
                 hits = []
                 error = f"{type(exc).__name__}: {exc}"[:1000]
             valid = []
-            for hit in hits[:8]:
+            for hit in hits[: self.settings.agent_search_results_per_query]:
                 try:
                     url = normalize_url(hit.url)
                     await self._within_time(
                         state["agent_run_id"], self.crawl.validator.validate(url)
                     )
                     valid.append((hit, url))
-                except (InvalidURL, ValueError, Exception) as exc:
+                except Exception as exc:
                     logger.info("agent search URL rejected: %s", exc)
             async with self.sessions() as session:
                 row = await session.get(ResearchSearchQuery, query.id)
@@ -931,6 +1036,7 @@ class AgentService:
                 row.result_count = len(hits)
                 row.completed_at = utc_now()
                 seen_urls = set()
+                result_ids = []
                 for hit, url in valid:
                     if url in seen_urls:
                         continue
@@ -956,6 +1062,7 @@ class AgentService:
                         )
                         session.add(result)
                         await session.flush()
+                    result_ids.append(result.id)
                     occurrence = (
                         await session.execute(
                             select(ResearchResultOccurrence).where(
@@ -985,6 +1092,7 @@ class AgentService:
                                 "query": query.query,
                                 "results": len(hits),
                                 "valid_urls": len(seen_urls),
+                                "result_ids": result_ids,
                             }
                         ),
                         error_message=error,
@@ -1217,8 +1325,8 @@ class AgentService:
                             start_url=result.normalized_url,
                             research_query=gap.description,
                             crawl_mode="intelligent",
-                            max_depth=2,
-                            max_pages=min(remaining, 4),
+                            max_depth=self.settings.agent_crawl_max_depth,
+                            max_pages=min(remaining, self.settings.agent_max_pages_per_seed),
                             allow_external_domains=False,
                         ),
                         excluded_urls=known,
@@ -1387,6 +1495,7 @@ class AgentService:
         async with self.sessions() as session:
             run = await session.get(AgentRun, state["agent_run_id"])
             run.documents_indexed += index_job.documents_indexed
+            run.chunks_indexed += index_job.chunks_created
             action = (
                 await session.execute(
                     select(AgentAction).where(
@@ -1405,6 +1514,7 @@ class AgentService:
                 {
                     "index_job_id": index_id,
                     "documents_indexed": index_job.documents_indexed,
+                    "chunks_created": index_job.chunks_created,
                     "consistency": consistency,
                 }
             )
@@ -1414,6 +1524,7 @@ class AgentService:
             "index",
             index_job_id=index_id,
             documents_indexed=index_job.documents_indexed,
+            chunks_created=index_job.chunks_created,
             consistency=consistency,
         )
         return {

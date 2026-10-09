@@ -75,10 +75,13 @@ class GapQueryGenerator(Protocol):
 
 
 class OllamaAgentLLM:
-    def __init__(self, model: str, base_url: str, timeout: float = 180) -> None:
+    def __init__(
+        self, model: str, base_url: str, timeout: float = 180, temperature: float = 0
+    ) -> None:
         self.model = model
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
+        self.temperature = temperature
 
     async def _structured(self, schema: type[BaseModel], system: str, prompt: str) -> BaseModel:
         messages = [{"role": "system", "content": system}, {"role": "user", "content": prompt}]
@@ -95,7 +98,7 @@ class OllamaAgentLLM:
                                 "format": schema.model_json_schema(),
                                 "stream": False,
                                 "think": False,
-                                "options": {"temperature": 0},
+                                "options": {"temperature": self.temperature},
                             },
                         )
                         if response.status_code >= 500 and transient_attempt == 0:

@@ -37,6 +37,25 @@ class Settings(BaseSettings):
     qdrant_path: str = "data/qdrant"
     qdrant_collection: str = "spidermind_chunks"
     agent_checkpoint_path: str = "data/langgraph-checkpoints.sqlite"
+    agent_max_iterations: int = Field(default=5, ge=0, le=20)
+    agent_max_queries: int = Field(default=12, ge=0, le=100)
+    agent_max_seeds: int = Field(default=10, ge=0, le=100)
+    agent_max_pages: int = Field(default=40, ge=0, le=300)
+    agent_max_runtime_seconds: int = Field(default=900, ge=1, le=7200)
+    agent_min_evidence_chunks: int = Field(default=3, ge=1, le=20)
+    agent_min_unique_sources: int = Field(default=2, ge=1, le=20)
+    agent_max_assessment_chunks: int = Field(default=6, ge=1, le=12)
+    agent_max_assessment_chars_per_chunk: int = Field(default=1200, ge=100, le=4000)
+    agent_max_total_assessment_chars: int = Field(default=7000, ge=500, le=20000)
+    agent_max_queries_per_gap: int = Field(default=2, ge=1, le=5)
+    agent_max_stagnant_iterations: int = Field(default=2, ge=1, le=10)
+    agent_rerank_enabled: bool = True
+    agent_retrieval_top_k: int = Field(default=8, ge=1, le=50)
+    agent_model: str | None = None
+    agent_temperature: float = Field(default=0, ge=0, le=1)
+    agent_search_results_per_query: int = Field(default=8, ge=1, le=20)
+    agent_max_pages_per_seed: int = Field(default=4, ge=1, le=100)
+    agent_crawl_max_depth: int = Field(default=2, ge=0, le=5)
     dense_top_k: int = Field(default=50, ge=1, le=200)
     lexical_top_k: int = Field(default=50, ge=1, le=200)
     fusion_top_k: int = Field(default=30, ge=1, le=100)

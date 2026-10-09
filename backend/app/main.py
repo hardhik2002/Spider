@@ -84,7 +84,10 @@ def create_app(
             os.environ.setdefault("LANGGRAPH_STRICT_MSGPACK", "true")
             async with AsyncSqliteSaver.from_conn_string(config.agent_checkpoint_path) as saver:
                 llm = OllamaAgentLLM(
-                    config.ollama_model, config.ollama_url, config.planner_timeout_seconds
+                    config.agent_model or config.ollama_model,
+                    config.ollama_url,
+                    config.planner_timeout_seconds,
+                    config.agent_temperature,
                 )
                 agent_service = AgentService(
                     session_factory,

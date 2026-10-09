@@ -1,6 +1,6 @@
 {
   "evaluation": "controlled Phase 5 fixture; actual graph, crawler, index and retrieval",
-  "generated_at_utc": "2026-10-09T14:14:07.690452+00:00",
+  "generated_at_utc": "2026-10-09T14:21:10.344463+00:00",
   "fixture": {
     "question": "What are the benchmark metrics?",
     "subquestions": 1,
@@ -65,7 +65,11 @@
         "pages": 0,
         "page_attempts": 0,
         "iterations": 0,
-        "runtime_ms": 210,
+        "runtime_ms": 290,
+        "chunks_indexed": 0,
+        "llm_calls": 1,
+        "llm_failures": 0,
+        "duplicate_action_rate": 0.0,
         "budget_adherence": true,
         "stop_reason": "SUFFICIENT_EVIDENCE"
       },
@@ -74,37 +78,123 @@
           "iteration": 0,
           "nodes": [
             "initialize",
+            "node_timing",
             "retrieve",
+            "node_timing",
             "assess",
+            "node_timing",
             "update_gaps",
+            "node_timing",
             "check_stop",
-            "finalize"
+            "node_timing",
+            "finalize",
+            "node_timing"
           ],
           "events": [
             {
               "node": "initialize",
-              "at": "2026-10-09T14:13:45.830368+00:00",
+              "at": "2026-10-09T14:20:33.641991+00:00",
               "subquestions": 1
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:33.659233+00:00",
+              "operation": "initialize",
+              "duration_ms": 49,
+              "budget_before": {
+                "iterations": 4,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 4,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              }
+            },
+            {
               "node": "retrieve",
-              "at": "2026-10-09T14:13:45.861773+00:00",
+              "at": "2026-10-09T14:20:33.690826+00:00",
               "evidence_counts": {
                 "1": 3
               }
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:33.704287+00:00",
+              "operation": "retrieve",
+              "duration_ms": 32,
+              "budget_before": {
+                "iterations": 4,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 4,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              }
+            },
+            {
               "node": "assess",
-              "at": "2026-10-09T14:13:45.904991+00:00"
+              "at": "2026-10-09T14:20:33.763529+00:00"
+            },
+            {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:33.778599+00:00",
+              "operation": "assess",
+              "duration_ms": 58,
+              "budget_before": {
+                "iterations": 4,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 4,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              }
             },
             {
               "node": "update_gaps",
-              "at": "2026-10-09T14:13:45.925563+00:00",
+              "at": "2026-10-09T14:20:33.808052+00:00",
               "open_gap_count": 0
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:33.825737+00:00",
+              "operation": "update_gaps",
+              "duration_ms": 28,
+              "budget_before": {
+                "iterations": 4,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 4,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              }
+            },
+            {
               "node": "check_stop",
-              "at": "2026-10-09T14:13:45.974758+00:00",
+              "at": "2026-10-09T14:20:33.886082+00:00",
               "reason": "SUFFICIENT_EVIDENCE",
               "subquestions_total": 1,
               "subquestions_sufficient": 1,
@@ -113,9 +203,49 @@
               "stagnant_iterations": 0
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:33.898852+00:00",
+              "operation": "check_stop",
+              "duration_ms": 56,
+              "budget_before": {
+                "iterations": 4,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 4,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              }
+            },
+            {
               "node": "finalize",
-              "at": "2026-10-09T14:13:46.047201+00:00",
+              "at": "2026-10-09T14:20:33.932401+00:00",
               "reason": "SUFFICIENT_EVIDENCE"
+            },
+            {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:33.946080+00:00",
+              "operation": "finalize",
+              "duration_ms": 33,
+              "budget_before": {
+                "iterations": 4,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 4,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              }
             }
           ]
         }
@@ -134,7 +264,11 @@
         "pages": 0,
         "page_attempts": 0,
         "iterations": 0,
-        "runtime_ms": 396,
+        "runtime_ms": 450,
+        "chunks_indexed": 0,
+        "llm_calls": 1,
+        "llm_failures": 0,
+        "duplicate_action_rate": 0.0,
         "budget_adherence": true,
         "stop_reason": "MAX_ITERATIONS"
       },
@@ -143,37 +277,123 @@
           "iteration": 0,
           "nodes": [
             "initialize",
+            "node_timing",
             "retrieve",
+            "node_timing",
             "assess",
+            "node_timing",
             "update_gaps",
+            "node_timing",
             "check_stop",
-            "finalize"
+            "node_timing",
+            "finalize",
+            "node_timing"
           ],
           "events": [
             {
               "node": "initialize",
-              "at": "2026-10-09T14:13:47.505352+00:00",
+              "at": "2026-10-09T14:20:35.293361+00:00",
               "subquestions": 1
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:35.317894+00:00",
+              "operation": "initialize",
+              "duration_ms": 43,
+              "budget_before": {
+                "iterations": 0,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 0,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              }
+            },
+            {
               "node": "retrieve",
-              "at": "2026-10-09T14:13:47.570464+00:00",
+              "at": "2026-10-09T14:20:35.365226+00:00",
               "evidence_counts": {
                 "1": 0
               }
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:35.382331+00:00",
+              "operation": "retrieve",
+              "duration_ms": 42,
+              "budget_before": {
+                "iterations": 0,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 0,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              }
+            },
+            {
               "node": "assess",
-              "at": "2026-10-09T14:13:47.707570+00:00"
+              "at": "2026-10-09T14:20:35.536765+00:00"
+            },
+            {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:35.566321+00:00",
+              "operation": "assess",
+              "duration_ms": 162,
+              "budget_before": {
+                "iterations": 0,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 0,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              }
             },
             {
               "node": "update_gaps",
-              "at": "2026-10-09T14:13:47.791697+00:00",
+              "at": "2026-10-09T14:20:35.616404+00:00",
               "open_gap_count": 1
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:35.634959+00:00",
+              "operation": "update_gaps",
+              "duration_ms": 39,
+              "budget_before": {
+                "iterations": 0,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 0,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              }
+            },
+            {
               "node": "check_stop",
-              "at": "2026-10-09T14:13:47.846893+00:00",
+              "at": "2026-10-09T14:20:35.677047+00:00",
               "reason": "MAX_ITERATIONS",
               "subquestions_total": 1,
               "subquestions_sufficient": 0,
@@ -182,9 +402,49 @@
               "stagnant_iterations": 0
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:35.694990+00:00",
+              "operation": "check_stop",
+              "duration_ms": 35,
+              "budget_before": {
+                "iterations": 0,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 0,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              }
+            },
+            {
               "node": "finalize",
-              "at": "2026-10-09T14:13:47.890033+00:00",
+              "at": "2026-10-09T14:20:35.744210+00:00",
               "reason": "MAX_ITERATIONS"
+            },
+            {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:35.767058+00:00",
+              "operation": "finalize",
+              "duration_ms": 45,
+              "budget_before": {
+                "iterations": 0,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 0,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              }
             }
           ]
         }
@@ -203,7 +463,11 @@
         "pages": 0,
         "page_attempts": 0,
         "iterations": 2,
-        "runtime_ms": 1320,
+        "runtime_ms": 2724,
+        "chunks_indexed": 0,
+        "llm_calls": 5,
+        "llm_failures": 0,
+        "duplicate_action_rate": 0.0,
         "budget_adherence": true,
         "stop_reason": "STAGNATION"
       },
@@ -212,42 +476,147 @@
           "iteration": 0,
           "nodes": [
             "initialize",
+            "node_timing",
             "retrieve",
+            "node_timing",
             "assess",
+            "node_timing",
             "update_gaps",
-            "check_stop"
+            "node_timing",
+            "check_stop",
+            "node_timing"
           ],
           "events": [
             {
               "node": "initialize",
-              "at": "2026-10-09T14:13:49.425162+00:00",
+              "at": "2026-10-09T14:20:37.244853+00:00",
               "subquestions": 1
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:37.269031+00:00",
+              "operation": "initialize",
+              "duration_ms": 52,
+              "budget_before": {
+                "iterations": 4,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 4,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              }
+            },
+            {
               "node": "retrieve",
-              "at": "2026-10-09T14:13:49.482275+00:00",
+              "at": "2026-10-09T14:20:37.313862+00:00",
               "evidence_counts": {
                 "1": 0
               }
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:37.333034+00:00",
+              "operation": "retrieve",
+              "duration_ms": 44,
+              "budget_before": {
+                "iterations": 4,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 4,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              }
+            },
+            {
               "node": "assess",
-              "at": "2026-10-09T14:13:49.541925+00:00"
+              "at": "2026-10-09T14:20:37.422619+00:00"
+            },
+            {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:37.441263+00:00",
+              "operation": "assess",
+              "duration_ms": 81,
+              "budget_before": {
+                "iterations": 4,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 4,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              }
             },
             {
               "node": "update_gaps",
-              "at": "2026-10-09T14:13:49.582484+00:00",
+              "at": "2026-10-09T14:20:37.481870+00:00",
               "open_gap_count": 1
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:37.497304+00:00",
+              "operation": "update_gaps",
+              "duration_ms": 37,
+              "budget_before": {
+                "iterations": 4,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 4,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              }
+            },
+            {
               "node": "check_stop",
-              "at": "2026-10-09T14:13:49.617617+00:00",
+              "at": "2026-10-09T14:20:37.546580+00:00",
               "reason": null,
               "subquestions_total": 1,
               "subquestions_sufficient": 0,
               "subquestions_with_gaps": 1,
               "coverage_rate": 0.0,
               "stagnant_iterations": 0
+            },
+            {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:37.563335+00:00",
+              "operation": "check_stop",
+              "duration_ms": 46,
+              "budget_before": {
+                "iterations": 4,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 4,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              }
             }
           ]
         },
@@ -255,82 +624,313 @@
           "iteration": 1,
           "nodes": [
             "select_gap",
+            "node_timing",
             "generate_queries",
+            "node_timing",
             "search",
+            "node_timing",
             "select_seeds",
+            "node_timing",
             "crawl",
+            "node_timing",
             "index",
+            "node_timing",
             "advance",
+            "node_timing",
             "retrieve",
+            "node_timing",
             "assess",
+            "node_timing",
             "update_gaps",
-            "check_stop"
+            "node_timing",
+            "check_stop",
+            "node_timing"
           ],
           "events": [
             {
               "node": "select_gap",
-              "at": "2026-10-09T14:13:49.653561+00:00",
-              "gap_id": "8ae80776-9f64-4458-836a-e8688ccc8b1f",
+              "at": "2026-10-09T14:20:37.623746+00:00",
+              "gap_id": "c78c8c4e-15a8-4230-911e-9215748791e6",
               "priority": "HIGH",
               "description": "Need a primary source for the metric"
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:37.638969+00:00",
+              "operation": "select_gap",
+              "duration_ms": 59,
+              "budget_before": {
+                "iterations": 4,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 3,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              }
+            },
+            {
               "node": "generate_queries",
-              "at": "2026-10-09T14:13:49.738511+00:00",
+              "at": "2026-10-09T14:20:37.749182+00:00",
               "queries": [
                 "unique metric query 1"
               ]
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:37.776362+00:00",
+              "operation": "generate_queries",
+              "duration_ms": 92,
+              "budget_before": {
+                "iterations": 3,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 3,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              }
+            },
+            {
               "node": "search",
-              "at": "2026-10-09T14:13:49.805106+00:00",
+              "at": "2026-10-09T14:20:37.919771+00:00",
               "searches": 1
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:37.958249+00:00",
+              "operation": "search",
+              "duration_ms": 136,
+              "budget_before": {
+                "iterations": 3,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 3,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              }
+            },
+            {
               "node": "select_seeds",
-              "at": "2026-10-09T14:13:49.852765+00:00",
+              "at": "2026-10-09T14:20:38.063597+00:00",
               "candidates": 0,
               "selected": 0
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:38.090456+00:00",
+              "operation": "select_seeds",
+              "duration_ms": 93,
+              "budget_before": {
+                "iterations": 3,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 3,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              }
+            },
+            {
               "node": "crawl",
-              "at": "2026-10-09T14:13:49.916555+00:00",
+              "at": "2026-10-09T14:20:38.170000+00:00",
               "crawl_job_ids": []
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:38.215736+00:00",
+              "operation": "crawl",
+              "duration_ms": 87,
+              "budget_before": {
+                "iterations": 3,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 3,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              }
+            },
+            {
               "node": "index",
-              "at": "2026-10-09T14:13:49.942271+00:00",
+              "at": "2026-10-09T14:20:38.281529+00:00",
               "indexed": 0
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:38.320284+00:00",
+              "operation": "index",
+              "duration_ms": 68,
+              "budget_before": {
+                "iterations": 3,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              },
+              "budget_after": {
+                "iterations": 3,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              }
+            },
+            {
               "node": "advance",
-              "at": "2026-10-09T14:13:49.957641+00:00"
+              "at": "2026-10-09T14:20:38.354169+00:00"
+            },
+            {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:38.383798+00:00",
+              "operation": "advance",
+              "duration_ms": 25,
+              "budget_before": {
+                "iterations": 3,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              },
+              "budget_after": {
+                "iterations": 3,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              }
             },
             {
               "node": "retrieve",
-              "at": "2026-10-09T14:13:50.037015+00:00",
+              "at": "2026-10-09T14:20:38.454213+00:00",
               "evidence_counts": {
                 "1": 0
               }
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:38.540197+00:00",
+              "operation": "retrieve",
+              "duration_ms": 134,
+              "budget_before": {
+                "iterations": 3,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              },
+              "budget_after": {
+                "iterations": 3,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              }
+            },
+            {
               "node": "assess",
-              "at": "2026-10-09T14:13:50.098833+00:00"
+              "at": "2026-10-09T14:20:38.664041+00:00"
+            },
+            {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:38.685670+00:00",
+              "operation": "assess",
+              "duration_ms": 116,
+              "budget_before": {
+                "iterations": 3,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              },
+              "budget_after": {
+                "iterations": 3,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              }
             },
             {
               "node": "update_gaps",
-              "at": "2026-10-09T14:13:50.164162+00:00",
+              "at": "2026-10-09T14:20:38.752606+00:00",
               "open_gap_count": 1
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:38.768154+00:00",
+              "operation": "update_gaps",
+              "duration_ms": 57,
+              "budget_before": {
+                "iterations": 3,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              },
+              "budget_after": {
+                "iterations": 3,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              }
+            },
+            {
               "node": "check_stop",
-              "at": "2026-10-09T14:13:50.205843+00:00",
+              "at": "2026-10-09T14:20:38.816861+00:00",
               "reason": null,
               "subquestions_total": 1,
               "subquestions_sufficient": 0,
               "subquestions_with_gaps": 1,
               "coverage_rate": 0.0,
               "stagnant_iterations": 1
+            },
+            {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:38.831353+00:00",
+              "operation": "check_stop",
+              "duration_ms": 48,
+              "budget_before": {
+                "iterations": 3,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              },
+              "budget_after": {
+                "iterations": 3,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              }
             }
           ]
         },
@@ -338,77 +938,289 @@
           "iteration": 2,
           "nodes": [
             "select_gap",
+            "node_timing",
             "generate_queries",
+            "node_timing",
             "search",
+            "node_timing",
             "select_seeds",
+            "node_timing",
             "crawl",
+            "node_timing",
             "index",
+            "node_timing",
             "advance",
+            "node_timing",
             "retrieve",
+            "node_timing",
             "assess",
+            "node_timing",
             "update_gaps",
+            "node_timing",
             "check_stop",
-            "finalize"
+            "node_timing",
+            "finalize",
+            "node_timing"
           ],
           "events": [
             {
               "node": "select_gap",
-              "at": "2026-10-09T14:13:50.232098+00:00",
-              "gap_id": "8ae80776-9f64-4458-836a-e8688ccc8b1f",
+              "at": "2026-10-09T14:20:38.864697+00:00",
+              "gap_id": "c78c8c4e-15a8-4230-911e-9215748791e6",
               "priority": "HIGH",
               "description": "Need a primary source for the metric"
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:38.879535+00:00",
+              "operation": "select_gap",
+              "duration_ms": 31,
+              "budget_before": {
+                "iterations": 3,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              }
+            },
+            {
               "node": "generate_queries",
-              "at": "2026-10-09T14:13:50.355893+00:00",
+              "at": "2026-10-09T14:20:38.975776+00:00",
               "queries": [
                 "unique metric query 2"
               ]
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:39.000821+00:00",
+              "operation": "generate_queries",
+              "duration_ms": 99,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              }
+            },
+            {
               "node": "search",
-              "at": "2026-10-09T14:13:50.405546+00:00",
+              "at": "2026-10-09T14:20:39.073439+00:00",
               "searches": 1
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:39.095640+00:00",
+              "operation": "search",
+              "duration_ms": 65,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              }
+            },
+            {
               "node": "select_seeds",
-              "at": "2026-10-09T14:13:50.489972+00:00",
+              "at": "2026-10-09T14:20:39.190947+00:00",
               "candidates": 0,
               "selected": 0
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:39.213778+00:00",
+              "operation": "select_seeds",
+              "duration_ms": 94,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              }
+            },
+            {
               "node": "crawl",
-              "at": "2026-10-09T14:13:50.530475+00:00",
+              "at": "2026-10-09T14:20:39.269223+00:00",
               "crawl_job_ids": []
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:39.293106+00:00",
+              "operation": "crawl",
+              "duration_ms": 51,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 898
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 898
+              }
+            },
+            {
               "node": "index",
-              "at": "2026-10-09T14:13:50.554423+00:00",
+              "at": "2026-10-09T14:20:39.339110+00:00",
               "indexed": 0
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:39.363711+00:00",
+              "operation": "index",
+              "duration_ms": 42,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 898
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 898
+              }
+            },
+            {
               "node": "advance",
-              "at": "2026-10-09T14:13:50.568751+00:00"
+              "at": "2026-10-09T14:20:39.389164+00:00"
+            },
+            {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:39.412735+00:00",
+              "operation": "advance",
+              "duration_ms": 23,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 898
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 898
+              }
             },
             {
               "node": "retrieve",
-              "at": "2026-10-09T14:13:50.604280+00:00",
+              "at": "2026-10-09T14:20:39.477850+00:00",
               "evidence_counts": {
                 "1": 0
               }
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:39.505172+00:00",
+              "operation": "retrieve",
+              "duration_ms": 69,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 898
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 898
+              }
+            },
+            {
               "node": "assess",
-              "at": "2026-10-09T14:13:50.659092+00:00"
+              "at": "2026-10-09T14:20:39.643631+00:00"
+            },
+            {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:39.679985+00:00",
+              "operation": "assess",
+              "duration_ms": 133,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 898
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 898
+              }
             },
             {
               "node": "update_gaps",
-              "at": "2026-10-09T14:13:50.673075+00:00",
+              "at": "2026-10-09T14:20:39.745632+00:00",
               "open_gap_count": 1
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:39.789190+00:00",
+              "operation": "update_gaps",
+              "duration_ms": 57,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 898
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 898
+              }
+            },
+            {
               "node": "check_stop",
-              "at": "2026-10-09T14:13:50.711981+00:00",
+              "at": "2026-10-09T14:20:39.876736+00:00",
               "reason": "STAGNATION",
               "subquestions_total": 1,
               "subquestions_sufficient": 0,
@@ -417,9 +1229,49 @@
               "stagnant_iterations": 2
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:39.897127+00:00",
+              "operation": "check_stop",
+              "duration_ms": 78,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 898
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 898
+              }
+            },
+            {
               "node": "finalize",
-              "at": "2026-10-09T14:13:50.733112+00:00",
+              "at": "2026-10-09T14:20:39.966266+00:00",
               "reason": "STAGNATION"
+            },
+            {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:39.986870+00:00",
+              "operation": "finalize",
+              "duration_ms": 56,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 898
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 898
+              }
             }
           ]
         }
@@ -438,7 +1290,11 @@
         "pages": 0,
         "page_attempts": 0,
         "iterations": 2,
-        "runtime_ms": 1117,
+        "runtime_ms": 2535,
+        "chunks_indexed": 0,
+        "llm_calls": 5,
+        "llm_failures": 0,
+        "duplicate_action_rate": 0.0,
         "budget_adherence": true,
         "stop_reason": "STAGNATION"
       },
@@ -447,42 +1303,147 @@
           "iteration": 0,
           "nodes": [
             "initialize",
+            "node_timing",
             "retrieve",
+            "node_timing",
             "assess",
+            "node_timing",
             "update_gaps",
-            "check_stop"
+            "node_timing",
+            "check_stop",
+            "node_timing"
           ],
           "events": [
             {
               "node": "initialize",
-              "at": "2026-10-09T14:13:51.906028+00:00",
+              "at": "2026-10-09T14:20:41.316654+00:00",
               "subquestions": 1
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:41.335074+00:00",
+              "operation": "initialize",
+              "duration_ms": 42,
+              "budget_before": {
+                "iterations": 4,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 4,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              }
+            },
+            {
               "node": "retrieve",
-              "at": "2026-10-09T14:13:51.931519+00:00",
+              "at": "2026-10-09T14:20:41.394730+00:00",
               "evidence_counts": {
                 "1": 1
               }
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:41.406473+00:00",
+              "operation": "retrieve",
+              "duration_ms": 54,
+              "budget_before": {
+                "iterations": 4,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 4,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              }
+            },
+            {
               "node": "assess",
-              "at": "2026-10-09T14:13:51.967496+00:00"
+              "at": "2026-10-09T14:20:41.489096+00:00"
+            },
+            {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:41.512999+00:00",
+              "operation": "assess",
+              "duration_ms": 86,
+              "budget_before": {
+                "iterations": 4,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 4,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              }
             },
             {
               "node": "update_gaps",
-              "at": "2026-10-09T14:13:51.993204+00:00",
+              "at": "2026-10-09T14:20:41.568938+00:00",
               "open_gap_count": 1
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:41.594788+00:00",
+              "operation": "update_gaps",
+              "duration_ms": 53,
+              "budget_before": {
+                "iterations": 4,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 4,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              }
+            },
+            {
               "node": "check_stop",
-              "at": "2026-10-09T14:13:52.021024+00:00",
+              "at": "2026-10-09T14:20:41.651751+00:00",
               "reason": null,
               "subquestions_total": 1,
               "subquestions_sufficient": 0,
               "subquestions_with_gaps": 1,
               "coverage_rate": 0.0,
               "stagnant_iterations": 0
+            },
+            {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:41.668833+00:00",
+              "operation": "check_stop",
+              "duration_ms": 49,
+              "budget_before": {
+                "iterations": 4,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 4,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              }
             }
           ]
         },
@@ -490,82 +1451,313 @@
           "iteration": 1,
           "nodes": [
             "select_gap",
+            "node_timing",
             "generate_queries",
+            "node_timing",
             "search",
+            "node_timing",
             "select_seeds",
+            "node_timing",
             "crawl",
+            "node_timing",
             "index",
+            "node_timing",
             "advance",
+            "node_timing",
             "retrieve",
+            "node_timing",
             "assess",
+            "node_timing",
             "update_gaps",
-            "check_stop"
+            "node_timing",
+            "check_stop",
+            "node_timing"
           ],
           "events": [
             {
               "node": "select_gap",
-              "at": "2026-10-09T14:13:52.044638+00:00",
-              "gap_id": "6de85bcb-2f58-45f9-acec-3473850d89ea",
+              "at": "2026-10-09T14:20:41.778211+00:00",
+              "gap_id": "0811b5ad-3168-4d24-bedc-6581ba538f16",
               "priority": "HIGH",
               "description": "Need a primary source for the metric"
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:41.803320+00:00",
+              "operation": "select_gap",
+              "duration_ms": 105,
+              "budget_before": {
+                "iterations": 4,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 3,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              }
+            },
+            {
               "node": "generate_queries",
-              "at": "2026-10-09T14:13:52.085619+00:00",
+              "at": "2026-10-09T14:20:41.903575+00:00",
               "queries": [
                 "unique metric query 1"
               ]
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:41.921866+00:00",
+              "operation": "generate_queries",
+              "duration_ms": 89,
+              "budget_before": {
+                "iterations": 3,
+                "queries": 4,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 3,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              }
+            },
+            {
               "node": "search",
-              "at": "2026-10-09T14:13:52.124733+00:00",
+              "at": "2026-10-09T14:20:42.010588+00:00",
               "searches": 1
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:42.028089+00:00",
+              "operation": "search",
+              "duration_ms": 82,
+              "budget_before": {
+                "iterations": 3,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 3,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              }
+            },
+            {
               "node": "select_seeds",
-              "at": "2026-10-09T14:13:52.160341+00:00",
+              "at": "2026-10-09T14:20:42.090075+00:00",
               "candidates": 0,
               "selected": 0
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:42.108522+00:00",
+              "operation": "select_seeds",
+              "duration_ms": 58,
+              "budget_before": {
+                "iterations": 3,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 3,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              }
+            },
+            {
               "node": "crawl",
-              "at": "2026-10-09T14:13:52.185426+00:00",
+              "at": "2026-10-09T14:20:42.228549+00:00",
               "crawl_job_ids": []
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:42.258535+00:00",
+              "operation": "crawl",
+              "duration_ms": 117,
+              "budget_before": {
+                "iterations": 3,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 3,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              }
+            },
+            {
               "node": "index",
-              "at": "2026-10-09T14:13:52.211935+00:00",
+              "at": "2026-10-09T14:20:42.321632+00:00",
               "indexed": 0
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:42.338866+00:00",
+              "operation": "index",
+              "duration_ms": 56,
+              "budget_before": {
+                "iterations": 3,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 3,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              }
+            },
+            {
               "node": "advance",
-              "at": "2026-10-09T14:13:52.242164+00:00"
+              "at": "2026-10-09T14:20:42.355656+00:00"
+            },
+            {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:42.373222+00:00",
+              "operation": "advance",
+              "duration_ms": 18,
+              "budget_before": {
+                "iterations": 3,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              },
+              "budget_after": {
+                "iterations": 3,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              }
             },
             {
               "node": "retrieve",
-              "at": "2026-10-09T14:13:52.282595+00:00",
+              "at": "2026-10-09T14:20:42.415629+00:00",
               "evidence_counts": {
                 "1": 1
               }
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:42.433547+00:00",
+              "operation": "retrieve",
+              "duration_ms": 42,
+              "budget_before": {
+                "iterations": 3,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              },
+              "budget_after": {
+                "iterations": 3,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              }
+            },
+            {
               "node": "assess",
-              "at": "2026-10-09T14:13:52.326969+00:00"
+              "at": "2026-10-09T14:20:42.498192+00:00"
+            },
+            {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:42.532980+00:00",
+              "operation": "assess",
+              "duration_ms": 71,
+              "budget_before": {
+                "iterations": 3,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              },
+              "budget_after": {
+                "iterations": 3,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              }
             },
             {
               "node": "update_gaps",
-              "at": "2026-10-09T14:13:52.364177+00:00",
+              "at": "2026-10-09T14:20:42.586793+00:00",
               "open_gap_count": 1
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:42.608017+00:00",
+              "operation": "update_gaps",
+              "duration_ms": 43,
+              "budget_before": {
+                "iterations": 3,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              },
+              "budget_after": {
+                "iterations": 3,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              }
+            },
+            {
               "node": "check_stop",
-              "at": "2026-10-09T14:13:52.400060+00:00",
+              "at": "2026-10-09T14:20:42.662998+00:00",
               "reason": null,
               "subquestions_total": 1,
               "subquestions_sufficient": 0,
               "subquestions_with_gaps": 1,
               "coverage_rate": 0.0,
               "stagnant_iterations": 1
+            },
+            {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:42.680137+00:00",
+              "operation": "check_stop",
+              "duration_ms": 41,
+              "budget_before": {
+                "iterations": 3,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              },
+              "budget_after": {
+                "iterations": 3,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              }
             }
           ]
         },
@@ -573,77 +1765,289 @@
           "iteration": 2,
           "nodes": [
             "select_gap",
+            "node_timing",
             "generate_queries",
+            "node_timing",
             "search",
+            "node_timing",
             "select_seeds",
+            "node_timing",
             "crawl",
+            "node_timing",
             "index",
+            "node_timing",
             "advance",
+            "node_timing",
             "retrieve",
+            "node_timing",
             "assess",
+            "node_timing",
             "update_gaps",
+            "node_timing",
             "check_stop",
-            "finalize"
+            "node_timing",
+            "finalize",
+            "node_timing"
           ],
           "events": [
             {
               "node": "select_gap",
-              "at": "2026-10-09T14:13:52.427000+00:00",
-              "gap_id": "6de85bcb-2f58-45f9-acec-3473850d89ea",
+              "at": "2026-10-09T14:20:42.780833+00:00",
+              "gap_id": "0811b5ad-3168-4d24-bedc-6581ba538f16",
               "priority": "HIGH",
               "description": "Need a primary source for the metric"
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:42.807396+00:00",
+              "operation": "select_gap",
+              "duration_ms": 100,
+              "budget_before": {
+                "iterations": 3,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              }
+            },
+            {
               "node": "generate_queries",
-              "at": "2026-10-09T14:13:52.479264+00:00",
+              "at": "2026-10-09T14:20:42.985155+00:00",
               "queries": [
                 "unique metric query 2"
               ]
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:43.020776+00:00",
+              "operation": "generate_queries",
+              "duration_ms": 173,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 3,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              }
+            },
+            {
               "node": "search",
-              "at": "2026-10-09T14:13:52.518809+00:00",
+              "at": "2026-10-09T14:20:43.109619+00:00",
               "searches": 1
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:43.130053+00:00",
+              "operation": "search",
+              "duration_ms": 75,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              }
+            },
+            {
               "node": "select_seeds",
-              "at": "2026-10-09T14:13:52.552763+00:00",
+              "at": "2026-10-09T14:20:43.217277+00:00",
               "candidates": 0,
               "selected": 0
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:43.237374+00:00",
+              "operation": "select_seeds",
+              "duration_ms": 74,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              }
+            },
+            {
               "node": "crawl",
-              "at": "2026-10-09T14:13:52.610124+00:00",
+              "at": "2026-10-09T14:20:43.287630+00:00",
               "crawl_job_ids": []
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:43.309658+00:00",
+              "operation": "crawl",
+              "duration_ms": 45,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 898
+              }
+            },
+            {
               "node": "index",
-              "at": "2026-10-09T14:13:52.664366+00:00",
+              "at": "2026-10-09T14:20:43.362821+00:00",
               "indexed": 0
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:43.386042+00:00",
+              "operation": "index",
+              "duration_ms": 48,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 898
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 898
+              }
+            },
+            {
               "node": "advance",
-              "at": "2026-10-09T14:13:52.714950+00:00"
+              "at": "2026-10-09T14:20:43.408598+00:00"
+            },
+            {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:43.432833+00:00",
+              "operation": "advance",
+              "duration_ms": 21,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 898
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 898
+              }
             },
             {
               "node": "retrieve",
-              "at": "2026-10-09T14:13:52.769985+00:00",
+              "at": "2026-10-09T14:20:43.506067+00:00",
               "evidence_counts": {
                 "1": 1
               }
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:43.544317+00:00",
+              "operation": "retrieve",
+              "duration_ms": 86,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 898
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 898
+              }
+            },
+            {
               "node": "assess",
-              "at": "2026-10-09T14:13:52.847056+00:00"
+              "at": "2026-10-09T14:20:43.667985+00:00"
+            },
+            {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:43.696074+00:00",
+              "operation": "assess",
+              "duration_ms": 125,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 898
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 898
+              }
             },
             {
               "node": "update_gaps",
-              "at": "2026-10-09T14:13:52.893206+00:00",
+              "at": "2026-10-09T14:20:43.726941+00:00",
               "open_gap_count": 1
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:43.748148+00:00",
+              "operation": "update_gaps",
+              "duration_ms": 21,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 898
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 898
+              }
+            },
+            {
               "node": "check_stop",
-              "at": "2026-10-09T14:13:52.991124+00:00",
+              "at": "2026-10-09T14:20:43.799568+00:00",
               "reason": "STAGNATION",
               "subquestions_total": 1,
               "subquestions_sufficient": 0,
@@ -652,9 +2056,49 @@
               "stagnant_iterations": 2
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:43.812632+00:00",
+              "operation": "check_stop",
+              "duration_ms": 40,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 898
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 898
+              }
+            },
+            {
               "node": "finalize",
-              "at": "2026-10-09T14:13:53.025748+00:00",
+              "at": "2026-10-09T14:20:43.842029+00:00",
               "reason": "STAGNATION"
+            },
+            {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:43.859908+00:00",
+              "operation": "finalize",
+              "duration_ms": 31,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 898
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 898
+              }
             }
           ]
         }
@@ -673,7 +2117,11 @@
         "pages": 1,
         "page_attempts": 1,
         "iterations": 1,
-        "runtime_ms": 1868,
+        "runtime_ms": 3740,
+        "chunks_indexed": 3,
+        "llm_calls": 3,
+        "llm_failures": 0,
+        "duplicate_action_rate": 0.0,
         "budget_adherence": true,
         "stop_reason": "SUFFICIENT_EVIDENCE"
       },
@@ -682,42 +2130,147 @@
           "iteration": 0,
           "nodes": [
             "initialize",
+            "node_timing",
             "retrieve",
+            "node_timing",
             "assess",
+            "node_timing",
             "update_gaps",
-            "check_stop"
+            "node_timing",
+            "check_stop",
+            "node_timing"
           ],
           "events": [
             {
               "node": "initialize",
-              "at": "2026-10-09T14:14:01.264923+00:00",
+              "at": "2026-10-09T14:20:56.054443+00:00",
               "subquestions": 1
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:56.091087+00:00",
+              "operation": "initialize",
+              "duration_ms": 81,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              }
+            },
+            {
               "node": "retrieve",
-              "at": "2026-10-09T14:14:01.340270+00:00",
+              "at": "2026-10-09T14:20:56.246838+00:00",
               "evidence_counts": {
                 "1": 3
               }
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:56.278410+00:00",
+              "operation": "retrieve",
+              "duration_ms": 141,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              }
+            },
+            {
               "node": "assess",
-              "at": "2026-10-09T14:14:01.429834+00:00"
+              "at": "2026-10-09T14:20:56.431360+00:00"
+            },
+            {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:56.455185+00:00",
+              "operation": "assess",
+              "duration_ms": 142,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              }
             },
             {
               "node": "update_gaps",
-              "at": "2026-10-09T14:14:01.456985+00:00",
+              "at": "2026-10-09T14:20:56.540889+00:00",
               "open_gap_count": 1
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:56.561330+00:00",
+              "operation": "update_gaps",
+              "duration_ms": 67,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              }
+            },
+            {
               "node": "check_stop",
-              "at": "2026-10-09T14:14:01.487298+00:00",
+              "at": "2026-10-09T14:20:56.613545+00:00",
               "reason": null,
               "subquestions_total": 1,
               "subquestions_sufficient": 0,
               "subquestions_with_gaps": 1,
               "coverage_rate": 0.0,
               "stagnant_iterations": 0
+            },
+            {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:56.639349+00:00",
+              "operation": "check_stop",
+              "duration_ms": 56,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              }
             }
           ]
         },
@@ -725,58 +2278,171 @@
           "iteration": 1,
           "nodes": [
             "select_gap",
+            "node_timing",
             "generate_queries",
+            "node_timing",
             "search",
+            "node_timing",
             "select_seeds",
+            "node_timing",
             "crawl",
+            "node_timing",
             "index",
+            "node_timing",
             "advance",
+            "node_timing",
             "retrieve",
+            "node_timing",
             "assess",
+            "node_timing",
             "update_gaps",
+            "node_timing",
             "check_stop",
-            "finalize"
+            "node_timing",
+            "finalize",
+            "node_timing"
           ],
           "events": [
             {
               "node": "select_gap",
-              "at": "2026-10-09T14:14:01.536954+00:00",
-              "gap_id": "4a9fa496-4bd0-4915-a3ff-30ea07904e25",
+              "at": "2026-10-09T14:20:56.721291+00:00",
+              "gap_id": "8bb92dae-2f72-4988-8bdb-a3f05e59cae9",
               "priority": "HIGH",
               "description": "Need a primary source for the metric"
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:56.748008+00:00",
+              "operation": "select_gap",
+              "duration_ms": 84,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 1,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              }
+            },
+            {
               "node": "generate_queries",
-              "at": "2026-10-09T14:14:01.579807+00:00",
+              "at": "2026-10-09T14:20:56.884609+00:00",
               "queries": [
                 "unique metric query 1"
               ]
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:56.900170+00:00",
+              "operation": "generate_queries",
+              "duration_ms": 126,
+              "budget_before": {
+                "iterations": 1,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 1,
+                "queries": 1,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              }
+            },
+            {
               "node": "search",
-              "at": "2026-10-09T14:14:01.634839+00:00",
+              "at": "2026-10-09T14:20:56.981261+00:00",
               "searches": 1
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:56.994881+00:00",
+              "operation": "search",
+              "duration_ms": 76,
+              "budget_before": {
+                "iterations": 1,
+                "queries": 1,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 1,
+                "queries": 1,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 900
+              }
+            },
+            {
               "node": "select_seeds",
-              "at": "2026-10-09T14:14:01.715194+00:00",
+              "at": "2026-10-09T14:20:57.154495+00:00",
               "candidates": 1,
               "selected": 1
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:57.223452+00:00",
+              "operation": "select_seeds",
+              "duration_ms": 165,
+              "budget_before": {
+                "iterations": 1,
+                "queries": 1,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              },
+              "budget_after": {
+                "iterations": 1,
+                "queries": 1,
+                "seeds": 1,
+                "pages": 2,
+                "runtime_seconds": 899
+              }
+            },
+            {
               "node": "crawl",
-              "at": "2026-10-09T14:14:02.081697+00:00",
+              "at": "2026-10-09T14:20:57.683154+00:00",
               "crawl_job_ids": [
-                "4864f575-61b2-448c-b1e1-8f8d1b56f2d3"
+                "506492df-750b-42a8-97f9-b4b76564edc1"
               ]
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:57.730766+00:00",
+              "operation": "crawl",
+              "duration_ms": 462,
+              "budget_before": {
+                "iterations": 1,
+                "queries": 1,
+                "seeds": 1,
+                "pages": 2,
+                "runtime_seconds": 899
+              },
+              "budget_after": {
+                "iterations": 1,
+                "queries": 1,
+                "seeds": 1,
+                "pages": 1,
+                "runtime_seconds": 899
+              }
+            },
+            {
               "node": "index",
-              "at": "2026-10-09T14:14:02.783074+00:00",
-              "index_job_id": "809701cc-1b96-483c-bf7b-d0fca5d55954",
+              "at": "2026-10-09T14:20:58.563903+00:00",
+              "index_job_id": "02680df2-a222-456a-820f-50880bbe48c4",
               "documents_indexed": 1,
+              "chunks_created": 3,
               "consistency": {
-                "research_job_id": "d5180a24-4ff5-4a08-9e75-6b55c835f97a",
+                "research_job_id": "c280dd2e-09a5-4f4d-bd03-74cb8b08b8be",
                 "sql_chunks": 6,
                 "active_chunks": 6,
                 "fts_records": 6,
@@ -790,28 +2456,128 @@
               }
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:58.597060+00:00",
+              "operation": "index",
+              "duration_ms": 817,
+              "budget_before": {
+                "iterations": 1,
+                "queries": 1,
+                "seeds": 1,
+                "pages": 1,
+                "runtime_seconds": 899
+              },
+              "budget_after": {
+                "iterations": 1,
+                "queries": 1,
+                "seeds": 1,
+                "pages": 1,
+                "runtime_seconds": 898
+              }
+            },
+            {
               "node": "advance",
-              "at": "2026-10-09T14:14:02.808569+00:00"
+              "at": "2026-10-09T14:20:58.799735+00:00"
+            },
+            {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:59.034496+00:00",
+              "operation": "advance",
+              "duration_ms": 211,
+              "budget_before": {
+                "iterations": 1,
+                "queries": 1,
+                "seeds": 1,
+                "pages": 1,
+                "runtime_seconds": 898
+              },
+              "budget_after": {
+                "iterations": 1,
+                "queries": 1,
+                "seeds": 1,
+                "pages": 1,
+                "runtime_seconds": 897
+              }
             },
             {
               "node": "retrieve",
-              "at": "2026-10-09T14:14:02.876861+00:00",
+              "at": "2026-10-09T14:20:59.265957+00:00",
               "evidence_counts": {
                 "1": 6
               }
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:59.298722+00:00",
+              "operation": "retrieve",
+              "duration_ms": 218,
+              "budget_before": {
+                "iterations": 1,
+                "queries": 1,
+                "seeds": 1,
+                "pages": 1,
+                "runtime_seconds": 897
+              },
+              "budget_after": {
+                "iterations": 1,
+                "queries": 1,
+                "seeds": 1,
+                "pages": 1,
+                "runtime_seconds": 897
+              }
+            },
+            {
               "node": "assess",
-              "at": "2026-10-09T14:14:02.955196+00:00"
+              "at": "2026-10-09T14:20:59.484313+00:00"
+            },
+            {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:59.521765+00:00",
+              "operation": "assess",
+              "duration_ms": 180,
+              "budget_before": {
+                "iterations": 1,
+                "queries": 1,
+                "seeds": 1,
+                "pages": 1,
+                "runtime_seconds": 897
+              },
+              "budget_after": {
+                "iterations": 1,
+                "queries": 1,
+                "seeds": 1,
+                "pages": 1,
+                "runtime_seconds": 897
+              }
             },
             {
               "node": "update_gaps",
-              "at": "2026-10-09T14:14:03.000718+00:00",
+              "at": "2026-10-09T14:20:59.595686+00:00",
               "open_gap_count": 0
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:59.618865+00:00",
+              "operation": "update_gaps",
+              "duration_ms": 65,
+              "budget_before": {
+                "iterations": 1,
+                "queries": 1,
+                "seeds": 1,
+                "pages": 1,
+                "runtime_seconds": 897
+              },
+              "budget_after": {
+                "iterations": 1,
+                "queries": 1,
+                "seeds": 1,
+                "pages": 1,
+                "runtime_seconds": 897
+              }
+            },
+            {
               "node": "check_stop",
-              "at": "2026-10-09T14:14:03.085422+00:00",
+              "at": "2026-10-09T14:20:59.698429+00:00",
               "reason": "SUFFICIENT_EVIDENCE",
               "subquestions_total": 1,
               "subquestions_sufficient": 1,
@@ -820,9 +2586,49 @@
               "stagnant_iterations": 0
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:59.722434+00:00",
+              "operation": "check_stop",
+              "duration_ms": 63,
+              "budget_before": {
+                "iterations": 1,
+                "queries": 1,
+                "seeds": 1,
+                "pages": 1,
+                "runtime_seconds": 897
+              },
+              "budget_after": {
+                "iterations": 1,
+                "queries": 1,
+                "seeds": 1,
+                "pages": 1,
+                "runtime_seconds": 897
+              }
+            },
+            {
               "node": "finalize",
-              "at": "2026-10-09T14:14:03.133268+00:00",
+              "at": "2026-10-09T14:20:59.769152+00:00",
               "reason": "SUFFICIENT_EVIDENCE"
+            },
+            {
+              "node": "node_timing",
+              "at": "2026-10-09T14:20:59.789668+00:00",
+              "operation": "finalize",
+              "duration_ms": 37,
+              "budget_before": {
+                "iterations": 1,
+                "queries": 1,
+                "seeds": 1,
+                "pages": 1,
+                "runtime_seconds": 897
+              },
+              "budget_after": {
+                "iterations": 1,
+                "queries": 1,
+                "seeds": 1,
+                "pages": 1,
+                "runtime_seconds": 897
+              }
             }
           ]
         }
@@ -841,7 +2647,11 @@
         "pages": 0,
         "page_attempts": 1,
         "iterations": 1,
-        "runtime_ms": 1314,
+        "runtime_ms": 2043,
+        "chunks_indexed": 0,
+        "llm_calls": 3,
+        "llm_failures": 0,
+        "duplicate_action_rate": 0.0,
         "budget_adherence": true,
         "stop_reason": "PAGE_BUDGET"
       },
@@ -850,42 +2660,147 @@
           "iteration": 0,
           "nodes": [
             "initialize",
+            "node_timing",
             "retrieve",
+            "node_timing",
             "assess",
+            "node_timing",
             "update_gaps",
-            "check_stop"
+            "node_timing",
+            "check_stop",
+            "node_timing"
           ],
           "events": [
             {
               "node": "initialize",
-              "at": "2026-10-09T14:14:04.503292+00:00",
+              "at": "2026-10-09T14:21:01.253033+00:00",
               "subquestions": 1
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:21:01.288059+00:00",
+              "operation": "initialize",
+              "duration_ms": 102,
+              "budget_before": {
+                "iterations": 3,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 1,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 3,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 1,
+                "runtime_seconds": 900
+              }
+            },
+            {
               "node": "retrieve",
-              "at": "2026-10-09T14:14:04.560567+00:00",
+              "at": "2026-10-09T14:21:01.387549+00:00",
               "evidence_counts": {
                 "1": 0
               }
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:21:01.416434+00:00",
+              "operation": "retrieve",
+              "duration_ms": 95,
+              "budget_before": {
+                "iterations": 3,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 1,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 3,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 1,
+                "runtime_seconds": 900
+              }
+            },
+            {
               "node": "assess",
-              "at": "2026-10-09T14:14:04.634235+00:00"
+              "at": "2026-10-09T14:21:01.517587+00:00"
+            },
+            {
+              "node": "node_timing",
+              "at": "2026-10-09T14:21:01.534998+00:00",
+              "operation": "assess",
+              "duration_ms": 96,
+              "budget_before": {
+                "iterations": 3,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 1,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 3,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 1,
+                "runtime_seconds": 900
+              }
             },
             {
               "node": "update_gaps",
-              "at": "2026-10-09T14:14:04.674110+00:00",
+              "at": "2026-10-09T14:21:01.587337+00:00",
               "open_gap_count": 1
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:21:01.604966+00:00",
+              "operation": "update_gaps",
+              "duration_ms": 50,
+              "budget_before": {
+                "iterations": 3,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 1,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 3,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 1,
+                "runtime_seconds": 900
+              }
+            },
+            {
               "node": "check_stop",
-              "at": "2026-10-09T14:14:04.722967+00:00",
+              "at": "2026-10-09T14:21:01.674433+00:00",
               "reason": null,
               "subquestions_total": 1,
               "subquestions_sufficient": 0,
               "subquestions_with_gaps": 1,
               "coverage_rate": 0.0,
               "stagnant_iterations": 0
+            },
+            {
+              "node": "node_timing",
+              "at": "2026-10-09T14:21:01.695282+00:00",
+              "operation": "check_stop",
+              "duration_ms": 72,
+              "budget_before": {
+                "iterations": 3,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 1,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 3,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 1,
+                "runtime_seconds": 900
+              }
             }
           ]
         },
@@ -893,77 +2808,289 @@
           "iteration": 1,
           "nodes": [
             "select_gap",
+            "node_timing",
             "generate_queries",
+            "node_timing",
             "search",
+            "node_timing",
             "select_seeds",
+            "node_timing",
             "crawl",
+            "node_timing",
             "index",
+            "node_timing",
             "advance",
+            "node_timing",
             "retrieve",
+            "node_timing",
             "assess",
+            "node_timing",
             "update_gaps",
+            "node_timing",
             "check_stop",
-            "finalize"
+            "node_timing",
+            "finalize",
+            "node_timing"
           ],
           "events": [
             {
               "node": "select_gap",
-              "at": "2026-10-09T14:14:04.781784+00:00",
-              "gap_id": "bcf35456-6a0a-467b-b22a-840f42a456a9",
+              "at": "2026-10-09T14:21:01.740060+00:00",
+              "gap_id": "0c574146-89c9-44c9-ba4f-004290c1e058",
               "priority": "HIGH",
               "description": "Need a primary source for the metric"
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:21:01.760717+00:00",
+              "operation": "select_gap",
+              "duration_ms": 45,
+              "budget_before": {
+                "iterations": 3,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 1,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 1,
+                "runtime_seconds": 900
+              }
+            },
+            {
               "node": "generate_queries",
-              "at": "2026-10-09T14:14:04.918202+00:00",
+              "at": "2026-10-09T14:21:01.862074+00:00",
               "queries": [
                 "unique metric query 1"
               ]
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:21:01.884601+00:00",
+              "operation": "generate_queries",
+              "duration_ms": 98,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 1,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 1,
+                "seeds": 2,
+                "pages": 1,
+                "runtime_seconds": 900
+              }
+            },
+            {
               "node": "search",
-              "at": "2026-10-09T14:14:04.989421+00:00",
+              "at": "2026-10-09T14:21:01.988062+00:00",
               "searches": 1
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:21:02.010491+00:00",
+              "operation": "search",
+              "duration_ms": 99,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 1,
+                "seeds": 2,
+                "pages": 1,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 1,
+                "seeds": 2,
+                "pages": 1,
+                "runtime_seconds": 900
+              }
+            },
+            {
               "node": "select_seeds",
-              "at": "2026-10-09T14:14:05.043243+00:00",
+              "at": "2026-10-09T14:21:02.129436+00:00",
               "candidates": 1,
               "selected": 1
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:21:02.148943+00:00",
+              "operation": "select_seeds",
+              "duration_ms": 103,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 1,
+                "seeds": 2,
+                "pages": 1,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 1,
+                "seeds": 1,
+                "pages": 1,
+                "runtime_seconds": 900
+              }
+            },
+            {
               "node": "crawl",
-              "at": "2026-10-09T14:14:05.396562+00:00",
+              "at": "2026-10-09T14:21:02.565679+00:00",
               "crawl_job_ids": []
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:21:02.581920+00:00",
+              "operation": "crawl",
+              "duration_ms": 409,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 1,
+                "seeds": 1,
+                "pages": 1,
+                "runtime_seconds": 900
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 1,
+                "seeds": 1,
+                "pages": 0,
+                "runtime_seconds": 899
+              }
+            },
+            {
               "node": "index",
-              "at": "2026-10-09T14:14:05.480831+00:00",
+              "at": "2026-10-09T14:21:02.637060+00:00",
               "indexed": 0
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:21:02.658275+00:00",
+              "operation": "index",
+              "duration_ms": 41,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 1,
+                "seeds": 1,
+                "pages": 0,
+                "runtime_seconds": 899
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 1,
+                "seeds": 1,
+                "pages": 0,
+                "runtime_seconds": 899
+              }
+            },
+            {
               "node": "advance",
-              "at": "2026-10-09T14:14:05.519353+00:00"
+              "at": "2026-10-09T14:21:02.711157+00:00"
+            },
+            {
+              "node": "node_timing",
+              "at": "2026-10-09T14:21:02.734570+00:00",
+              "operation": "advance",
+              "duration_ms": 49,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 1,
+                "seeds": 1,
+                "pages": 0,
+                "runtime_seconds": 899
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 1,
+                "seeds": 1,
+                "pages": 0,
+                "runtime_seconds": 899
+              }
             },
             {
               "node": "retrieve",
-              "at": "2026-10-09T14:14:05.605672+00:00",
+              "at": "2026-10-09T14:21:02.820651+00:00",
               "evidence_counts": {
                 "1": 0
               }
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:21:02.851925+00:00",
+              "operation": "retrieve",
+              "duration_ms": 77,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 1,
+                "seeds": 1,
+                "pages": 0,
+                "runtime_seconds": 899
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 1,
+                "seeds": 1,
+                "pages": 0,
+                "runtime_seconds": 899
+              }
+            },
+            {
               "node": "assess",
-              "at": "2026-10-09T14:14:05.689474+00:00"
+              "at": "2026-10-09T14:21:03.028354+00:00"
+            },
+            {
+              "node": "node_timing",
+              "at": "2026-10-09T14:21:03.056100+00:00",
+              "operation": "assess",
+              "duration_ms": 165,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 1,
+                "seeds": 1,
+                "pages": 0,
+                "runtime_seconds": 899
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 1,
+                "seeds": 1,
+                "pages": 0,
+                "runtime_seconds": 899
+              }
             },
             {
               "node": "update_gaps",
-              "at": "2026-10-09T14:14:05.722716+00:00",
+              "at": "2026-10-09T14:21:03.105437+00:00",
               "open_gap_count": 1
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:21:03.129210+00:00",
+              "operation": "update_gaps",
+              "duration_ms": 43,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 1,
+                "seeds": 1,
+                "pages": 0,
+                "runtime_seconds": 899
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 1,
+                "seeds": 1,
+                "pages": 0,
+                "runtime_seconds": 899
+              }
+            },
+            {
               "node": "check_stop",
-              "at": "2026-10-09T14:14:05.770733+00:00",
+              "at": "2026-10-09T14:21:03.206242+00:00",
               "reason": "PAGE_BUDGET",
               "subquestions_total": 1,
               "subquestions_sufficient": 0,
@@ -972,9 +3099,49 @@
               "stagnant_iterations": 1
             },
             {
+              "node": "node_timing",
+              "at": "2026-10-09T14:21:03.225798+00:00",
+              "operation": "check_stop",
+              "duration_ms": 67,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 1,
+                "seeds": 1,
+                "pages": 0,
+                "runtime_seconds": 899
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 1,
+                "seeds": 1,
+                "pages": 0,
+                "runtime_seconds": 898
+              }
+            },
+            {
               "node": "finalize",
-              "at": "2026-10-09T14:14:05.822960+00:00",
+              "at": "2026-10-09T14:21:03.270949+00:00",
               "reason": "PAGE_BUDGET"
+            },
+            {
+              "node": "node_timing",
+              "at": "2026-10-09T14:21:03.328846+00:00",
+              "operation": "finalize",
+              "duration_ms": 74,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 1,
+                "seeds": 1,
+                "pages": 0,
+                "runtime_seconds": 898
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 1,
+                "seeds": 1,
+                "pages": 0,
+                "runtime_seconds": 898
+              }
             }
           ]
         }
@@ -998,6 +3165,19 @@
     "scenario": "cancel",
     "status": "CANCELLED",
     "stop_reason": "CANCELLED",
+    "search_calls": 0
+  },
+  "url_security": {
+    "scenario": "url_security",
+    "stop_reason": "MAX_ITERATIONS",
+    "search_calls": 1,
+    "seeds_selected": 0,
+    "page_attempts": 0
+  },
+  "query_dedup": {
+    "scenario": "query_dedup",
+    "stop_reason": "STAGNATION",
+    "new_queries": 0,
     "search_calls": 0
   },
   "resume": {

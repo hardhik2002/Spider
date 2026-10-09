@@ -18,6 +18,7 @@ from app.db.models import (
     CrawledPage,
     CrawlJob,
     ResearchJob,
+    ResearchSearchQuery,
     ResearchSearchResult,
     ResearchSeed,
     ResearchSubquestion,
@@ -145,6 +146,25 @@ class FailingSearch(FakeSearch):
     async def search(self, query, limit):
         self.calls += 1
         raise RuntimeError("fixture search outage")
+
+
+class PrivateSearch(FakeSearch):
+    async def search(self, query, limit):
+        self.calls += 1
+        return [
+            SearchResult("Private", "http://127.0.0.1/secret", "Never crawl", 1, query, "fixture")
+        ]
+
+
+class DuplicateQueries(FakeQueries):
+    async def generate(self, original_question, subquestion, gap, previous_queries):
+        self.calls += 1
+        return GapQueryPlan(
+            gap_id=gap["id"],
+            queries=["unique metric query 1"],
+            search_intent="previous query",
+            desired_evidence=["paper"],
+        )
 
 
 def evidence_rows():
@@ -539,6 +559,78 @@ async def test_empty_plan_fails_without_search(tmp_path: Path):
 
 
 @pytest.mark.asyncio
+async def test_unindexed_existing_pages_require_initial_index(tmp_path: Path):
+    settings = Settings(
+        database_url=f"sqlite+aiosqlite:///{tmp_path / 'unindexed.db'}",
+        qdrant_path=str(tmp_path / "qdrant"),
+        agent_checkpoint_path=str(tmp_path / "checkpoints.sqlite"),
+    )
+    app = create_app(
+        settings,
+        embedding_provider=FakeEmbedding(),
+        search_provider=FakeSearch(),
+        agent_assessor=FakeAssessor(False),
+        gap_query_generator=FakeQueries(),
+    )
+    async with app.router.lifespan_context(app):
+        sessions = app.state.agent_service.sessions
+        job_id = await one_subquestion(sessions)
+        async with sessions() as session:
+            sub = (
+                await session.execute(
+                    select(ResearchSubquestion).where(ResearchSubquestion.research_job_id == job_id)
+                )
+            ).scalar_one()
+            crawl = CrawlJob(
+                start_url="https://research.example/old",
+                max_depth=0,
+                max_pages=1,
+                timeout=10,
+                max_content_size=100000,
+            )
+            result = ResearchSearchResult(
+                research_job_id=job_id,
+                normalized_url="https://research.example/old",
+                url="https://research.example/old",
+                title="Old study",
+                snippet="Metrics",
+                domain="research.example",
+                provider="fixture",
+                best_rank=1,
+            )
+            session.add_all([crawl, result])
+            await session.flush()
+            session.add(
+                CrawledPage(
+                    crawl_job_id=crawl.id,
+                    url="https://research.example/old",
+                    normalized_url="https://research.example/old",
+                    depth=0,
+                    crawl_status="COMPLETED",
+                    text_content="Evidence " * 40,
+                )
+            )
+            session.add(
+                ResearchSeed(
+                    research_job_id=job_id,
+                    subquestion_id=sub.id,
+                    result_id=result.id,
+                    semantic_relevance=1,
+                    seed_score=1,
+                    selected=True,
+                    crawl_job_id=crawl.id,
+                )
+            )
+            await session.commit()
+        async with httpx.AsyncClient(
+            transport=httpx.ASGITransport(app=app), base_url="http://test"
+        ) as api:
+            response = await api.post(f"/api/v1/research/{job_id}/agent", json={})
+            assert response.status_code == 409
+            assert "Index existing research pages" in response.text
+
+
+@pytest.mark.asyncio
 async def test_runtime_budget_cancels_slow_assessment(tmp_path: Path):
     settings = Settings(
         database_url=f"sqlite+aiosqlite:///{tmp_path / 'time.db'}",
@@ -569,6 +661,8 @@ async def test_runtime_budget_cancels_slow_assessment(tmp_path: Path):
                 "status": finished.status,
                 "stop_reason": finished.stop_reason,
                 "search_calls": search.calls,
+                "duration_ms": finished.duration_ms,
+                "limit_ms": 1000,
             },
         )
 
@@ -914,3 +1008,94 @@ async def test_failed_page_attempt_consumes_budget(tmp_path: Path):
                     "iterations": iterations,
                 },
             )
+
+
+@pytest.mark.asyncio
+async def test_query_dedup_uses_phase3_history(tmp_path: Path):
+    settings = Settings(
+        database_url=f"sqlite+aiosqlite:///{tmp_path / 'dedup.db'}",
+        qdrant_path=str(tmp_path / "qdrant"),
+        agent_checkpoint_path=str(tmp_path / "checkpoints.sqlite"),
+    )
+    search = FakeSearch()
+    app = create_app(
+        settings,
+        embedding_provider=FakeEmbedding(),
+        search_provider=search,
+        agent_assessor=FakeAssessor(False),
+        gap_query_generator=DuplicateQueries(),
+    )
+    async with app.router.lifespan_context(app):
+        service = app.state.agent_service
+        service.retrieval = FakeRetrieval([])
+        job_id = await one_subquestion(service.sessions)
+        async with service.sessions() as session:
+            session.add(
+                ResearchSearchQuery(
+                    research_job_id=job_id, query="Unique Metric Query 1", status="completed"
+                )
+            )
+            await session.commit()
+        run = await service.start(job_id, AgentRequest(max_iterations=3, rerank=False))
+        finished = await wait_terminal(service, run.id)
+        assert finished.stop_reason == "STAGNATION"
+        assert finished.queries_used == 0
+        assert search.calls == 0
+        record_scenario(
+            "query_dedup",
+            {
+                "scenario": "query_dedup",
+                "stop_reason": finished.stop_reason,
+                "new_queries": finished.queries_used,
+                "search_calls": search.calls,
+            },
+        )
+
+
+@pytest.mark.asyncio
+async def test_agent_rejects_private_search_result(tmp_path: Path):
+    settings = Settings(
+        database_url=f"sqlite+aiosqlite:///{tmp_path / 'private.db'}",
+        qdrant_path=str(tmp_path / "qdrant"),
+        agent_checkpoint_path=str(tmp_path / "checkpoints.sqlite"),
+    )
+    search = PrivateSearch()
+    app = create_app(
+        settings,
+        embedding_provider=FakeEmbedding(),
+        search_provider=search,
+        agent_assessor=FakeAssessor(False),
+        gap_query_generator=FakeQueries(),
+    )
+    async with app.router.lifespan_context(app):
+        service = app.state.agent_service
+        service.retrieval = FakeRetrieval([])
+        job_id = await one_subquestion(service.sessions)
+        run = await service.start(job_id, AgentRequest(max_iterations=1, rerank=False))
+        finished = await wait_terminal(service, run.id)
+        assert finished.seeds_used == 0
+        assert finished.pages_used == 0
+        assert search.calls == 1
+        async with service.sessions() as session:
+            results = (
+                (
+                    await session.execute(
+                        select(ResearchSearchResult).where(
+                            ResearchSearchResult.research_job_id == job_id
+                        )
+                    )
+                )
+                .scalars()
+                .all()
+            )
+            assert not results
+        record_scenario(
+            "url_security",
+            {
+                "scenario": "url_security",
+                "stop_reason": finished.stop_reason,
+                "search_calls": search.calls,
+                "seeds_selected": finished.seeds_used,
+                "page_attempts": finished.pages_used,
+            },
+        )

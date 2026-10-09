@@ -40,6 +40,14 @@ def run_metrics(status: dict, gaps: list[dict], request: dict) -> dict:
         "seeds": (status["new_seeds_selected"], request["max_new_seeds"]),
         "pages": (status["new_page_attempts"], request["max_new_pages"]),
     }
+    action_keys = [
+        (action["kind"], action["data"].get("query") or action["data"].get("url"))
+        for gap in gaps
+        for action in gap.get("actions", [])
+        if action["kind"] in {"SEARCH", "CRAWL"}
+    ]
+    duplicate_actions = len(action_keys) - len(set(action_keys))
+    runtime_adherence = status["duration_ms"] <= request["max_runtime_seconds"] * 1000
     return {
         "subquestion_sufficiency_rate": status["subquestions_sufficient"]
         / status["subquestions_total"]
@@ -56,6 +64,13 @@ def run_metrics(status: dict, gaps: list[dict], request: dict) -> dict:
         "page_attempts": status["new_page_attempts"],
         "iterations": status["iterations_used"],
         "runtime_ms": status["duration_ms"],
-        "budget_adherence": all(used <= maximum for used, maximum in limits.values()),
+        "chunks_indexed": status["new_chunks_indexed"],
+        "llm_calls": status["llm_calls"],
+        "llm_failures": status["llm_failures"],
+        "duplicate_action_rate": duplicate_actions / len(action_keys) if action_keys else 0.0,
+        "runtime_budget_adherence": runtime_adherence,
+        "budget_adherence": (
+            all(used <= maximum for used, maximum in limits.values()) and runtime_adherence
+        ),
         "stop_reason": status["stop_reason"],
     }

@@ -98,6 +98,9 @@ async def agent_status(job_id: UUID, run_id: UUID, request: Request) -> dict:
         "new_pages_crawled": row.pages_crawled,
         "new_page_attempts": row.pages_used,
         "new_documents_indexed": row.documents_indexed,
+        "new_chunks_indexed": row.chunks_indexed,
+        "llm_calls": row.llm_calls,
+        "llm_failures": row.llm_failures,
         "iterations_used": row.current_iteration,
         "remaining_budgets": budget,
         "started_at": row.started_at,
@@ -132,6 +135,9 @@ async def agent_iterations(job_id: UUID, run_id: UUID, request: Request) -> dict
                 "action": row.action,
                 "started_at": row.started_at,
                 "completed_at": row.completed_at,
+                "duration_ms": int((row.completed_at - row.started_at).total_seconds() * 1000)
+                if row.completed_at
+                else None,
                 "trace": json.loads(row.trace_json),
             }
             for row in rows

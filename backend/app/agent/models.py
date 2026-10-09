@@ -3,10 +3,20 @@
 from datetime import datetime
 from uuid import uuid4
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import (
+    Boolean,
+    DateTime,
+    Enum as SqlEnum,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.models import Base, utc_now
+from app.agent.enums import ActionStatus, AgentStatus, GapPriority, GapStatus, StopReason
 
 
 class AgentRun(Base):
@@ -14,10 +24,14 @@ class AgentRun(Base):
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
     research_job_id: Mapped[str] = mapped_column(ForeignKey("research_jobs.id"), index=True)
-    status: Mapped[str] = mapped_column(String(30), default="PENDING")
+    status: Mapped[AgentStatus] = mapped_column(
+        SqlEnum(AgentStatus, native_enum=False, validate_strings=True), default=AgentStatus.PENDING
+    )
     current_node: Mapped[str] = mapped_column(String(40), default="PENDING")
     current_iteration: Mapped[int] = mapped_column(Integer, default=0)
-    stop_reason: Mapped[str | None] = mapped_column(String(40))
+    stop_reason: Mapped[StopReason | None] = mapped_column(
+        SqlEnum(StopReason, native_enum=False, validate_strings=True)
+    )
     request_json: Mapped[str] = mapped_column(Text)
     queries_used: Mapped[int] = mapped_column(Integer, default=0)
     searches_used: Mapped[int] = mapped_column(Integer, default=0)
@@ -25,6 +39,9 @@ class AgentRun(Base):
     pages_used: Mapped[int] = mapped_column(Integer, default=0)
     pages_crawled: Mapped[int] = mapped_column(Integer, default=0)
     documents_indexed: Mapped[int] = mapped_column(Integer, default=0)
+    chunks_indexed: Mapped[int] = mapped_column(Integer, default=0)
+    llm_calls: Mapped[int] = mapped_column(Integer, default=0)
+    llm_failures: Mapped[int] = mapped_column(Integer, default=0)
     error_message: Mapped[str | None] = mapped_column(Text)
     cancel_requested: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
@@ -40,7 +57,10 @@ class AgentIteration(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     agent_run_id: Mapped[str] = mapped_column(ForeignKey("agent_runs.id"), index=True)
     number: Mapped[int] = mapped_column(Integer)
-    status: Mapped[str] = mapped_column(String(20), default="RUNNING")
+    status: Mapped[ActionStatus] = mapped_column(
+        SqlEnum(ActionStatus, native_enum=False, validate_strings=True),
+        default=ActionStatus.RUNNING,
+    )
     selected_gap_id: Mapped[str | None] = mapped_column(String(36))
     action: Mapped[str | None] = mapped_column(String(40))
     trace_json: Mapped[str] = mapped_column(Text, default="[]")
@@ -61,8 +81,12 @@ class ResearchGap(Base):
     iteration_created: Mapped[int] = mapped_column(Integer)
     gap_type: Mapped[str] = mapped_column(String(40))
     description: Mapped[str] = mapped_column(Text)
-    priority: Mapped[str] = mapped_column(String(10))
-    status: Mapped[str] = mapped_column(String(20), default="OPEN")
+    priority: Mapped[GapPriority] = mapped_column(
+        SqlEnum(GapPriority, native_enum=False, validate_strings=True)
+    )
+    status: Mapped[GapStatus] = mapped_column(
+        SqlEnum(GapStatus, native_enum=False, validate_strings=True), default=GapStatus.OPEN
+    )
     evidence_count: Mapped[int] = mapped_column(Integer, default=0)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
     resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
@@ -99,7 +123,10 @@ class AgentAction(Base):
     gap_id: Mapped[str | None] = mapped_column(ForeignKey("research_gaps.id"))
     kind: Mapped[str] = mapped_column(String(25))
     action_key: Mapped[str] = mapped_column(Text)
-    status: Mapped[str] = mapped_column(String(20), default="PENDING")
+    status: Mapped[ActionStatus] = mapped_column(
+        SqlEnum(ActionStatus, native_enum=False, validate_strings=True),
+        default=ActionStatus.PENDING,
+    )
     data_json: Mapped[str] = mapped_column(Text, default="{}")
     error_message: Mapped[str | None] = mapped_column(Text)
     duration_ms: Mapped[int | None] = mapped_column(Integer)

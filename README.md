@@ -282,6 +282,8 @@ Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/api/v1/research/$rese
 
 The [controlled Phase 5 results](docs/phase5-agent-results.json) come from a repeatable local fixture with labeled sources. Run `cd backend; ..\.venv\Scripts\python.exe scripts/evaluate_phase5.py` to regenerate them. The [live Phase 5 smoke](docs/phase5-live-smoke-results.json) uses a copy of the prior Phase 3 job, real local models, and public search; it is a connectivity check and is not a labeled benchmark. Run `cd backend; ..\.venv\Scripts\python.exe scripts/live_phase5_smoke.py` to repeat with a new copied database. The smoke caps the agent at one iteration, query, seed, and page. Its initial index step can take several minutes on CPU.
 
+For a local Mermaid graph export, run `cd backend; ..\.venv\Scripts\python.exe scripts/show_agent_graph.py`.
+
 ## Tests and checks
 
 ```powershell
