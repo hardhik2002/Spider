@@ -1,7 +1,6 @@
 """Pure Phase 6 safety and decision rules; no models or network."""
 
 import pytest
-
 from app.evidence.logic import (
     decide_claim,
     normalize_claim,
@@ -62,8 +61,14 @@ def test_status_and_confidence_require_valid_independent_citations():
     assert decide_claim([first, mirror])["status"] == ClaimStatus.SUPPORTED
     assert decide_claim([first, second])["confidence"] == ConfidenceTier.HIGH
     contested = decide_claim(
-        [first, {"relation": DecisionLabel.CONTRADICTION, "valid_citation": True,
-                 "source_group_id": "c"}]
+        [
+            first,
+            {
+                "relation": DecisionLabel.CONTRADICTION,
+                "valid_citation": True,
+                "source_group_id": "c",
+            },
+        ]
     )
     assert contested["status"] == ClaimStatus.CONTESTED
     assert contested["confidence"] == ConfidenceTier.UNRESOLVED
@@ -71,18 +76,27 @@ def test_status_and_confidence_require_valid_independent_citations():
     assert decide_claim([{**first, "valid_citation": False}])["status"] == (
         ClaimStatus.INSUFFICIENT_EVIDENCE
     )
-    assert decide_claim([
-        {"relation": DecisionLabel.NEUTRAL, "valid_citation": True, "source_group_id": "x"}
-    ])["status"] == ClaimStatus.INSUFFICIENT_EVIDENCE
+    assert (
+        decide_claim(
+            [{"relation": DecisionLabel.NEUTRAL, "valid_citation": True, "source_group_id": "x"}]
+        )["status"]
+        == ClaimStatus.INSUFFICIENT_EVIDENCE
+    )
 
 
 def test_source_group_mirrors_share_identity():
     from types import SimpleNamespace
 
     docs = [
-        SimpleNamespace(id=1, canonical_url=None, source_url="https://a.test/p", content_hash="same"),
-        SimpleNamespace(id=2, canonical_url=None, source_url="https://b.test/p", content_hash="same"),
-        SimpleNamespace(id=3, canonical_url=None, source_url="https://c.test/p", content_hash="other"),
+        SimpleNamespace(
+            id=1, canonical_url=None, source_url="https://a.test/p", content_hash="same"
+        ),
+        SimpleNamespace(
+            id=2, canonical_url=None, source_url="https://b.test/p", content_hash="same"
+        ),
+        SimpleNamespace(
+            id=3, canonical_url=None, source_url="https://c.test/p", content_hash="other"
+        ),
     ]
     groups = source_groups(docs)
     assert groups[1] == groups[2]

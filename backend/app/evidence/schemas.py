@@ -58,6 +58,7 @@ class EvidenceRequest(BaseModel):
     use_llm_adjudication: bool = True
     adjudicate_all: bool = False
     use_counterqueries: bool = True
+    rerank: bool = True
     max_claim_extraction_chunks: int = Field(default=8, ge=1, le=20)
     max_chars_per_chunk: int = Field(default=2500, ge=100, le=5000)
     max_claim_extraction_chars: int = Field(default=16000, ge=500, le=30000)

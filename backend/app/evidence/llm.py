@@ -59,7 +59,12 @@ class EvidenceAdjudicator(Protocol):
 
 class OllamaEvidenceLLM(OllamaAgentLLM):
     async def extract(self, subquestion: dict, evidence_pack: list[dict]) -> list[ClaimCandidate]:
-        bounded = evidence_envelope(evidence_pack, 8, 2500, 16000)
+        bounded = evidence_envelope(
+            evidence_pack,
+            subquestion.get("max_claim_extraction_chunks", 8),
+            subquestion.get("max_chars_per_chunk", 2500),
+            subquestion.get("max_claim_extraction_chars", 16000),
+        )
         prompt = (
             f"Subquestion: {subquestion['question'][:800]}\n"
             f"Permitted chunk IDs: {[row['chunk_id'] for row in evidence_pack]}\n"

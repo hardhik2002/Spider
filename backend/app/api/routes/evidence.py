@@ -52,16 +52,17 @@ async def evidence_status(research_job_id: UUID, job_id: UUID, request: Request)
         "stage": row.stage,
         **{name: counters.get(name, 0) for name in (
             "subquestions_processed", "claims_extracted", "claims_normalized",
-            "claims_deduplicated", "direct_support_relations", "contradiction_relations",
+            "claims_deduplicated", "support_relations", "direct_support_relations", "contradiction_relations",
             "neutral_relations", "claims_corroborated", "claims_supported",
             "claims_contested", "claims_contradicted", "claims_partially_supported",
             "claims_insufficient_evidence", "citations_created", "citations_validated",
-            "citation_failures", "nli_pairs", "llm_extraction_calls",
+            "citation_failures", "nli_pairs", "nli_batches", "llm_extraction_calls",
             "llm_adjudication_calls",
         )},
         "timings": json.loads(row.timings_json),
         "duration_ms": row.duration_ms,
         "error": row.error_message,
+        "errors": [row.error_message] if row.error_message else [],
     }
 
 
@@ -178,6 +179,7 @@ async def _detail(service, job_id: str, claim_id: str) -> dict:
     ]
     relation_items = [
         {
+            "id": row.id,
             "chunk_id": row.chunk_id, "document_id": row.document_id,
             "source_group_id": row.source_group_id,
             "source_url": row.source_url, "source_domain": row.source_domain,

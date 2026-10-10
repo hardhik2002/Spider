@@ -1,0 +1,206 @@
+{
+  "evaluation": "Controlled deterministic local fixture; model accuracy is not estimated by fake components",
+  "generated_at_utc": "2026-10-10T09:37:33.660794+00:00",
+  "fixture": {
+    "question": "Does GraphRAG improve recall on Dataset X?",
+    "gold_claims": [
+      "GraphRAG improves recall on Dataset X."
+    ],
+    "gold_relations_by_chunk_id": {
+      "1": "SUPPORT",
+      "2": "SUPPORT",
+      "3": "CONTRADICTION",
+      "4": "NEUTRAL"
+    },
+    "gold_status": "CONTESTED",
+    "gold_confidence": "UNRESOLVED",
+    "features": [
+      "support",
+      "independent corroboration",
+      "direct contradiction",
+      "contested",
+      "neutral distractor",
+      "mirrored source",
+      "semantic paraphrase",
+      "prompt injection"
+    ]
+  },
+  "models": {
+    "fixture_extractor": "FakeExtractor",
+    "fixture_relation_classifier": "FakeClassifier",
+    "fixture_adjudicator": "FakeAdjudicator",
+    "configured_nli_default": "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli"
+  },
+  "configuration": {
+    "adjudication_modes": [
+      "NLI only",
+      "ambiguous-case adjudication"
+    ],
+    "retrieval_modes": [
+      "claim query",
+      "claim plus counterquery"
+    ],
+    "no_internet": true
+  },
+  "claim_metrics": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0
+  },
+  "relation_metrics": {
+    "per_label": {
+      "SUPPORT": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "CONTRADICTION": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "NEUTRAL": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      }
+    },
+    "macro_f1": 1.0,
+    "accuracy": 1.0,
+    "confusion": {
+      "SUPPORT->SUPPORT": 2,
+      "CONTRADICTION->CONTRADICTION": 1,
+      "NEUTRAL->NEUTRAL": 1
+    }
+  },
+  "contradiction_metrics": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0
+  },
+  "citation_metrics": {
+    "precision": 1.0,
+    "coverage": 1.0,
+    "span_validity": 1.0,
+    "supporting_citations": 3,
+    "all_citations": 4
+  },
+  "status_metrics": {
+    "pipeline_accuracy": 1.0,
+    "cases": [
+      {
+        "case": "corroborated",
+        "expected_status": "CORROBORATED",
+        "actual_status": "CORROBORATED",
+        "expected_confidence": "HIGH",
+        "actual_confidence": "HIGH"
+      },
+      {
+        "case": "supported",
+        "expected_status": "SUPPORTED",
+        "actual_status": "SUPPORTED",
+        "expected_confidence": "MEDIUM",
+        "actual_confidence": "MEDIUM"
+      },
+      {
+        "case": "partial",
+        "expected_status": "PARTIALLY_SUPPORTED",
+        "actual_status": "PARTIALLY_SUPPORTED",
+        "expected_confidence": "LOW",
+        "actual_confidence": "LOW"
+      },
+      {
+        "case": "contested",
+        "expected_status": "CONTESTED",
+        "actual_status": "CONTESTED",
+        "expected_confidence": "UNRESOLVED",
+        "actual_confidence": "UNRESOLVED"
+      },
+      {
+        "case": "contradicted",
+        "expected_status": "CONTRADICTED",
+        "actual_status": "CONTRADICTED",
+        "expected_confidence": "UNRESOLVED",
+        "actual_confidence": "UNRESOLVED"
+      },
+      {
+        "case": "insufficient",
+        "expected_status": "INSUFFICIENT_EVIDENCE",
+        "actual_status": "INSUFFICIENT_EVIDENCE",
+        "expected_confidence": "UNRESOLVED",
+        "actual_confidence": "UNRESOLVED"
+      }
+    ],
+    "status_accuracy": 1.0,
+    "confidence_tier_accuracy": 1.0,
+    "high_confidence_errors": 0
+  },
+  "confidence_metrics": {
+    "pipeline_accuracy": 1.0,
+    "rule_accuracy": 1.0
+  },
+  "adjudication_comparison": {
+    "nli_only": {
+      "relation_macro_f1": 1.0,
+      "contradiction_recall": 1.0,
+      "duration_ms": 200,
+      "llm_adjudication_calls": 0
+    },
+    "nli_plus_ambiguous_adjudication": {
+      "relation_macro_f1": 1.0,
+      "contradiction_recall": 1.0,
+      "duration_ms": 221,
+      "llm_adjudication_calls": 4
+    },
+    "note": "Fixture adjudicator uses deterministic labels; it added calls but no accuracy gain."
+  },
+  "counterquery_comparison": {
+    "claim_only": {
+      "contradiction_recall": 0.0,
+      "candidate_count": 3
+    },
+    "with_counterquery": {
+      "contradiction_recall": 1.0,
+      "candidate_count": 4
+    },
+    "retrieval_ms": 0,
+    "counter_retrieval_ms": 0
+  },
+  "high_severity_failures": {
+    "false_claim_merges": 0,
+    "fabricated_citations": 0,
+    "neutral_as_support": 0,
+    "duplicate_source_inflation": 0,
+    "contested_high_confidence": 0,
+    "prompt_injection_failures": 0
+  },
+  "latencies_ms": {
+    "claim_extraction_ms": 1,
+    "claim_deduplication_ms": 0,
+    "counter_retrieval_ms": 0,
+    "retrieval_ms": 0,
+    "nli_ms": 0,
+    "citation_validation_ms": 0
+  },
+  "counters": {
+    "claims_extracted": 2,
+    "claims_deduplicated": 1,
+    "nli_pairs": 10,
+    "nli_batches": 4,
+    "citations_validated": 4
+  },
+  "nli_comparison": {
+    "base": {
+      "status": "not measured in deterministic fixture"
+    },
+    "large": {
+      "status": "skipped",
+      "reason": "16 GB laptop had under 1 GB available memory during evaluation"
+    }
+  },
+  "limitations": [
+    "One claim in the integrated pipeline fixture; six deterministic status-rule cases are measured separately.",
+    "Fake classifier and adjudicator metrics establish wiring and accounting, not real NLI quality.",
+    "Counterquery improvement is measured on a constructed retrieval fixture."
+  ]
+}

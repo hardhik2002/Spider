@@ -107,6 +107,7 @@ class EvidenceEngineService:
         self.counterqueries = counterqueries
         self.adjudicator = adjudicator
         self._tasks: dict[str, asyncio.Task] = {}
+        self._work_lock = asyncio.Lock()
 
     async def start(self, research_job_id: str, request: EvidenceRequest) -> EvidenceJob:
         async with self.sessions() as session:
@@ -207,7 +208,8 @@ class EvidenceEngineService:
                 evidence_job_id,
                 research_job_id,
             )
-            counters, timings = await self._process(evidence_job_id, research_job_id, request)
+            async with self._work_lock:
+                counters, timings = await self._process(evidence_job_id, research_job_id, request)
             async with self.sessions() as session:
                 row = await session.get(EvidenceJob, evidence_job_id)
                 row.status, row.stage = "COMPLETED", "COMPLETED"
@@ -234,6 +236,9 @@ class EvidenceEngineService:
     ) -> tuple[dict, dict]:
         counters: Counter = Counter()
         timings: Counter = Counter()
+        nli_pairs_before = self.classifier.pairs_classified
+        nli_batches_before = self.classifier.nli_batches
+        nli_ms_before = self.classifier.nli_duration_ms
         async with self.sessions() as session:
             subs = (
                 (
@@ -323,7 +328,14 @@ class EvidenceEngineService:
                 "claim_extraction_started job_id=%s subquestion_id=%s", evidence_job_id, sub.id
             )
             candidates = await self.extractor.extract(
-                {"plan_id": sub.plan_id, "question": sub.question}, pack
+                {
+                    "plan_id": sub.plan_id,
+                    "question": sub.question,
+                    "max_claim_extraction_chunks": request.max_claim_extraction_chunks,
+                    "max_chars_per_chunk": request.max_chars_per_chunk,
+                    "max_claim_extraction_chars": request.max_claim_extraction_chars,
+                },
+                pack,
             )
             counters["llm_extraction_calls"] += 1
             permitted = {row["chunk_id"] for row in pack}
@@ -356,6 +368,10 @@ class EvidenceEngineService:
                     docs_by_id,
                 )
                 logger.info("claim_extracted job_id=%s claim_id=%s", evidence_job_id, claim_row.id)
+                async with self.sessions() as session:
+                    job_row = await session.get(EvidenceJob, evidence_job_id)
+                    job_row.stage = "VERIFICATION"
+                    await session.commit()
                 await self._verify_claim(
                     claim_row,
                     request,
@@ -381,6 +397,36 @@ class EvidenceEngineService:
         for row in rows:
             counters[f"claims_{row.status.lower()}"] += 1
         counters["claims_processed"] = len(rows)
+        counters["nli_pairs"] = self.classifier.pairs_classified - nli_pairs_before
+        counters["nli_batches"] = self.classifier.nli_batches - nli_batches_before
+        timings["nli_ms"] = self.classifier.nli_duration_ms - nli_ms_before
+        async with self.sessions() as session:
+            relation_rows = (
+                await session.execute(
+                    select(ClaimEvidenceRelation)
+                    .join(VerifiedClaim, VerifiedClaim.id == ClaimEvidenceRelation.claim_id)
+                    .where(VerifiedClaim.evidence_job_id == evidence_job_id)
+                )
+            ).scalars().all()
+            citation_rows = (
+                await session.execute(
+                    select(ClaimCitation)
+                    .join(VerifiedClaim, VerifiedClaim.id == ClaimCitation.claim_id)
+                    .where(VerifiedClaim.evidence_job_id == evidence_job_id)
+                )
+            ).scalars().all()
+        counters["relations_classified"] = len(relation_rows)
+        counters["support_relations"] = sum(
+            row.adjudicated_relation == DecisionLabel.DIRECT_SUPPORT for row in relation_rows
+        )
+        counters["contradiction_relations"] = sum(
+            row.adjudicated_relation == DecisionLabel.CONTRADICTION for row in relation_rows
+        )
+        counters["neutral_relations"] = sum(
+            row.adjudicated_relation == DecisionLabel.NEUTRAL for row in relation_rows
+        )
+        counters["citations_created"] = len(citation_rows)
+        counters["citations_validated"] = len(citation_rows)
         return dict(counters), dict(timings)
 
     async def _extraction_pack(
@@ -398,6 +444,18 @@ class EvidenceEngineService:
             ),
         )
         ids = [row["chunk_id"] for row in result["results"]]
+        if not ids:
+            fallback = await self.retrieval.retrieve(
+                job_id,
+                RetrievalRequest(
+                    query=sub.question,
+                    retrieval_mode="hybrid",
+                    final_top_k=request.max_claim_extraction_chunks,
+                    rerank=False,
+                    include_neighbor_context=False,
+                ),
+            )
+            ids = [row["chunk_id"] for row in fallback["results"]]
         if request.agent_run_id:
             async with self.sessions() as session:
                 latest = (
@@ -552,9 +610,16 @@ class EvidenceEngineService:
                     retrieval_mode="hybrid",
                     dense_top_k=self.settings.evidence_claim_dense_top_k,
                     lexical_top_k=self.settings.evidence_claim_lexical_top_k,
-                    fusion_top_k=self.settings.evidence_claim_fusion_top_k,
+                    fusion_top_k=(
+                        min(
+                            self.settings.evidence_claim_fusion_top_k,
+                            self.settings.evidence_claim_rerank_top_k,
+                        )
+                        if request.rerank
+                        else self.settings.evidence_claim_fusion_top_k
+                    ),
                     final_top_k=min(request.evidence_candidates_per_claim, 50),
-                    rerank=True,
+                    rerank=request.rerank,
                     include_neighbor_context=False,
                 ),
             )
