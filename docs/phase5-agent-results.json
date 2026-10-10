@@ -1,6 +1,6 @@
 {
   "evaluation": "controlled Phase 5 fixture; actual graph, crawler, index and retrieval",
-  "generated_at_utc": "2026-10-09T14:21:10.344463+00:00",
+  "generated_at_utc": "2026-10-10T09:04:24.899727+00:00",
   "fixture": {
     "question": "What are the benchmark metrics?",
     "subquestions": 1,
@@ -65,11 +65,12 @@
         "pages": 0,
         "page_attempts": 0,
         "iterations": 0,
-        "runtime_ms": 290,
+        "runtime_ms": 363,
         "chunks_indexed": 0,
         "llm_calls": 1,
         "llm_failures": 0,
         "duplicate_action_rate": 0.0,
+        "runtime_budget_adherence": true,
         "budget_adherence": true,
         "stop_reason": "SUFFICIENT_EVIDENCE"
       },
@@ -93,14 +94,14 @@
           "events": [
             {
               "node": "initialize",
-              "at": "2026-10-09T14:20:33.641991+00:00",
+              "at": "2026-10-10T09:03:47.251472+00:00",
               "subquestions": 1
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:33.659233+00:00",
+              "at": "2026-10-10T09:03:47.268297+00:00",
               "operation": "initialize",
-              "duration_ms": 49,
+              "duration_ms": 59,
               "budget_before": {
                 "iterations": 4,
                 "queries": 4,
@@ -118,16 +119,16 @@
             },
             {
               "node": "retrieve",
-              "at": "2026-10-09T14:20:33.690826+00:00",
+              "at": "2026-10-10T09:03:47.308725+00:00",
               "evidence_counts": {
                 "1": 3
               }
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:33.704287+00:00",
+              "at": "2026-10-10T09:03:47.325200+00:00",
               "operation": "retrieve",
-              "duration_ms": 32,
+              "duration_ms": 41,
               "budget_before": {
                 "iterations": 4,
                 "queries": 4,
@@ -145,13 +146,13 @@
             },
             {
               "node": "assess",
-              "at": "2026-10-09T14:20:33.763529+00:00"
+              "at": "2026-10-10T09:03:47.395496+00:00"
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:33.778599+00:00",
+              "at": "2026-10-10T09:03:47.409719+00:00",
               "operation": "assess",
-              "duration_ms": 58,
+              "duration_ms": 66,
               "budget_before": {
                 "iterations": 4,
                 "queries": 4,
@@ -169,14 +170,14 @@
             },
             {
               "node": "update_gaps",
-              "at": "2026-10-09T14:20:33.808052+00:00",
+              "at": "2026-10-10T09:03:47.445479+00:00",
               "open_gap_count": 0
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:33.825737+00:00",
+              "at": "2026-10-10T09:03:47.461022+00:00",
               "operation": "update_gaps",
-              "duration_ms": 28,
+              "duration_ms": 30,
               "budget_before": {
                 "iterations": 4,
                 "queries": 4,
@@ -194,7 +195,7 @@
             },
             {
               "node": "check_stop",
-              "at": "2026-10-09T14:20:33.886082+00:00",
+              "at": "2026-10-10T09:03:47.533393+00:00",
               "reason": "SUFFICIENT_EVIDENCE",
               "subquestions_total": 1,
               "subquestions_sufficient": 1,
@@ -204,9 +205,9 @@
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:33.898852+00:00",
+              "at": "2026-10-10T09:03:47.553243+00:00",
               "operation": "check_stop",
-              "duration_ms": 56,
+              "duration_ms": 73,
               "budget_before": {
                 "iterations": 4,
                 "queries": 4,
@@ -224,14 +225,14 @@
             },
             {
               "node": "finalize",
-              "at": "2026-10-09T14:20:33.932401+00:00",
+              "at": "2026-10-10T09:03:47.613359+00:00",
               "reason": "SUFFICIENT_EVIDENCE"
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:33.946080+00:00",
+              "at": "2026-10-10T09:03:47.628773+00:00",
               "operation": "finalize",
-              "duration_ms": 33,
+              "duration_ms": 54,
               "budget_before": {
                 "iterations": 4,
                 "queries": 4,
@@ -264,11 +265,12 @@
         "pages": 0,
         "page_attempts": 0,
         "iterations": 0,
-        "runtime_ms": 450,
+        "runtime_ms": 401,
         "chunks_indexed": 0,
         "llm_calls": 1,
         "llm_failures": 0,
         "duplicate_action_rate": 0.0,
+        "runtime_budget_adherence": true,
         "budget_adherence": true,
         "stop_reason": "MAX_ITERATIONS"
       },
@@ -292,14 +294,14 @@
           "events": [
             {
               "node": "initialize",
-              "at": "2026-10-09T14:20:35.293361+00:00",
+              "at": "2026-10-10T09:03:49.044576+00:00",
               "subquestions": 1
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:35.317894+00:00",
+              "at": "2026-10-10T09:03:49.061723+00:00",
               "operation": "initialize",
-              "duration_ms": 43,
+              "duration_ms": 54,
               "budget_before": {
                 "iterations": 0,
                 "queries": 4,
@@ -317,16 +319,16 @@
             },
             {
               "node": "retrieve",
-              "at": "2026-10-09T14:20:35.365226+00:00",
+              "at": "2026-10-10T09:03:49.125642+00:00",
               "evidence_counts": {
                 "1": 0
               }
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:35.382331+00:00",
+              "at": "2026-10-10T09:03:49.140331+00:00",
               "operation": "retrieve",
-              "duration_ms": 42,
+              "duration_ms": 63,
               "budget_before": {
                 "iterations": 0,
                 "queries": 4,
@@ -344,13 +346,13 @@
             },
             {
               "node": "assess",
-              "at": "2026-10-09T14:20:35.536765+00:00"
+              "at": "2026-10-10T09:03:49.216306+00:00"
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:35.566321+00:00",
+              "at": "2026-10-10T09:03:49.231524+00:00",
               "operation": "assess",
-              "duration_ms": 162,
+              "duration_ms": 73,
               "budget_before": {
                 "iterations": 0,
                 "queries": 4,
@@ -368,14 +370,14 @@
             },
             {
               "node": "update_gaps",
-              "at": "2026-10-09T14:20:35.616404+00:00",
+              "at": "2026-10-10T09:03:49.276685+00:00",
               "open_gap_count": 1
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:35.634959+00:00",
+              "at": "2026-10-10T09:03:49.302874+00:00",
               "operation": "update_gaps",
-              "duration_ms": 39,
+              "duration_ms": 47,
               "budget_before": {
                 "iterations": 0,
                 "queries": 4,
@@ -393,7 +395,7 @@
             },
             {
               "node": "check_stop",
-              "at": "2026-10-09T14:20:35.677047+00:00",
+              "at": "2026-10-10T09:03:49.367557+00:00",
               "reason": "MAX_ITERATIONS",
               "subquestions_total": 1,
               "subquestions_sufficient": 0,
@@ -403,9 +405,9 @@
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:35.694990+00:00",
+              "at": "2026-10-10T09:03:49.386527+00:00",
               "operation": "check_stop",
-              "duration_ms": 35,
+              "duration_ms": 57,
               "budget_before": {
                 "iterations": 0,
                 "queries": 4,
@@ -423,14 +425,14 @@
             },
             {
               "node": "finalize",
-              "at": "2026-10-09T14:20:35.744210+00:00",
+              "at": "2026-10-10T09:03:49.425140+00:00",
               "reason": "MAX_ITERATIONS"
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:35.767058+00:00",
+              "at": "2026-10-10T09:03:49.440499+00:00",
               "operation": "finalize",
-              "duration_ms": 45,
+              "duration_ms": 32,
               "budget_before": {
                 "iterations": 0,
                 "queries": 4,
@@ -463,11 +465,12 @@
         "pages": 0,
         "page_attempts": 0,
         "iterations": 2,
-        "runtime_ms": 2724,
+        "runtime_ms": 2390,
         "chunks_indexed": 0,
         "llm_calls": 5,
         "llm_failures": 0,
         "duplicate_action_rate": 0.0,
+        "runtime_budget_adherence": true,
         "budget_adherence": true,
         "stop_reason": "STAGNATION"
       },
@@ -489,14 +492,14 @@
           "events": [
             {
               "node": "initialize",
-              "at": "2026-10-09T14:20:37.244853+00:00",
+              "at": "2026-10-10T09:03:51.366847+00:00",
               "subquestions": 1
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:37.269031+00:00",
+              "at": "2026-10-10T09:03:51.396690+00:00",
               "operation": "initialize",
-              "duration_ms": 52,
+              "duration_ms": 74,
               "budget_before": {
                 "iterations": 4,
                 "queries": 4,
@@ -514,16 +517,16 @@
             },
             {
               "node": "retrieve",
-              "at": "2026-10-09T14:20:37.313862+00:00",
+              "at": "2026-10-10T09:03:51.445879+00:00",
               "evidence_counts": {
                 "1": 0
               }
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:37.333034+00:00",
+              "at": "2026-10-10T09:03:51.461722+00:00",
               "operation": "retrieve",
-              "duration_ms": 44,
+              "duration_ms": 42,
               "budget_before": {
                 "iterations": 4,
                 "queries": 4,
@@ -541,13 +544,13 @@
             },
             {
               "node": "assess",
-              "at": "2026-10-09T14:20:37.422619+00:00"
+              "at": "2026-10-10T09:03:51.554725+00:00"
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:37.441263+00:00",
+              "at": "2026-10-10T09:03:51.571998+00:00",
               "operation": "assess",
-              "duration_ms": 81,
+              "duration_ms": 84,
               "budget_before": {
                 "iterations": 4,
                 "queries": 4,
@@ -565,14 +568,14 @@
             },
             {
               "node": "update_gaps",
-              "at": "2026-10-09T14:20:37.481870+00:00",
+              "at": "2026-10-10T09:03:51.611945+00:00",
               "open_gap_count": 1
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:37.497304+00:00",
+              "at": "2026-10-10T09:03:51.628374+00:00",
               "operation": "update_gaps",
-              "duration_ms": 37,
+              "duration_ms": 36,
               "budget_before": {
                 "iterations": 4,
                 "queries": 4,
@@ -590,7 +593,7 @@
             },
             {
               "node": "check_stop",
-              "at": "2026-10-09T14:20:37.546580+00:00",
+              "at": "2026-10-10T09:03:51.702055+00:00",
               "reason": null,
               "subquestions_total": 1,
               "subquestions_sufficient": 0,
@@ -600,9 +603,9 @@
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:37.563335+00:00",
+              "at": "2026-10-10T09:03:51.728308+00:00",
               "operation": "check_stop",
-              "duration_ms": 46,
+              "duration_ms": 76,
               "budget_before": {
                 "iterations": 4,
                 "queries": 4,
@@ -649,16 +652,16 @@
           "events": [
             {
               "node": "select_gap",
-              "at": "2026-10-09T14:20:37.623746+00:00",
-              "gap_id": "c78c8c4e-15a8-4230-911e-9215748791e6",
+              "at": "2026-10-10T09:03:51.812619+00:00",
+              "gap_id": "390b04f0-9c86-40f9-bd61-3298bc82cb8d",
               "priority": "HIGH",
               "description": "Need a primary source for the metric"
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:37.638969+00:00",
+              "at": "2026-10-10T09:03:51.844631+00:00",
               "operation": "select_gap",
-              "duration_ms": 59,
+              "duration_ms": 94,
               "budget_before": {
                 "iterations": 4,
                 "queries": 4,
@@ -676,16 +679,16 @@
             },
             {
               "node": "generate_queries",
-              "at": "2026-10-09T14:20:37.749182+00:00",
+              "at": "2026-10-10T09:03:51.956131+00:00",
               "queries": [
                 "unique metric query 1"
               ]
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:37.776362+00:00",
+              "at": "2026-10-10T09:03:51.973832+00:00",
               "operation": "generate_queries",
-              "duration_ms": 92,
+              "duration_ms": 99,
               "budget_before": {
                 "iterations": 3,
                 "queries": 4,
@@ -703,14 +706,14 @@
             },
             {
               "node": "search",
-              "at": "2026-10-09T14:20:37.919771+00:00",
+              "at": "2026-10-10T09:03:52.099237+00:00",
               "searches": 1
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:37.958249+00:00",
+              "at": "2026-10-10T09:03:52.120986+00:00",
               "operation": "search",
-              "duration_ms": 136,
+              "duration_ms": 120,
               "budget_before": {
                 "iterations": 3,
                 "queries": 3,
@@ -728,15 +731,15 @@
             },
             {
               "node": "select_seeds",
-              "at": "2026-10-09T14:20:38.063597+00:00",
+              "at": "2026-10-10T09:03:52.295718+00:00",
               "candidates": 0,
               "selected": 0
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:38.090456+00:00",
+              "at": "2026-10-10T09:03:52.351109+00:00",
               "operation": "select_seeds",
-              "duration_ms": 93,
+              "duration_ms": 170,
               "budget_before": {
                 "iterations": 3,
                 "queries": 3,
@@ -754,39 +757,39 @@
             },
             {
               "node": "crawl",
-              "at": "2026-10-09T14:20:38.170000+00:00",
+              "at": "2026-10-10T09:03:52.434467+00:00",
               "crawl_job_ids": []
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:38.215736+00:00",
+              "at": "2026-10-10T09:03:52.475279+00:00",
               "operation": "crawl",
-              "duration_ms": 87,
+              "duration_ms": 77,
               "budget_before": {
                 "iterations": 3,
                 "queries": 3,
                 "seeds": 2,
                 "pages": 2,
-                "runtime_seconds": 900
+                "runtime_seconds": 899
               },
               "budget_after": {
                 "iterations": 3,
                 "queries": 3,
                 "seeds": 2,
                 "pages": 2,
-                "runtime_seconds": 900
+                "runtime_seconds": 899
               }
             },
             {
               "node": "index",
-              "at": "2026-10-09T14:20:38.281529+00:00",
+              "at": "2026-10-10T09:03:52.555412+00:00",
               "indexed": 0
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:38.320284+00:00",
+              "at": "2026-10-10T09:03:52.580017+00:00",
               "operation": "index",
-              "duration_ms": 68,
+              "duration_ms": 59,
               "budget_before": {
                 "iterations": 3,
                 "queries": 3,
@@ -804,13 +807,13 @@
             },
             {
               "node": "advance",
-              "at": "2026-10-09T14:20:38.354169+00:00"
+              "at": "2026-10-10T09:03:52.597233+00:00"
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:38.383798+00:00",
+              "at": "2026-10-10T09:03:52.620944+00:00",
               "operation": "advance",
-              "duration_ms": 25,
+              "duration_ms": 19,
               "budget_before": {
                 "iterations": 3,
                 "queries": 3,
@@ -828,16 +831,16 @@
             },
             {
               "node": "retrieve",
-              "at": "2026-10-09T14:20:38.454213+00:00",
+              "at": "2026-10-10T09:03:52.692194+00:00",
               "evidence_counts": {
                 "1": 0
               }
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:38.540197+00:00",
+              "at": "2026-10-10T09:03:52.708249+00:00",
               "operation": "retrieve",
-              "duration_ms": 134,
+              "duration_ms": 62,
               "budget_before": {
                 "iterations": 3,
                 "queries": 3,
@@ -855,13 +858,13 @@
             },
             {
               "node": "assess",
-              "at": "2026-10-09T14:20:38.664041+00:00"
+              "at": "2026-10-10T09:03:52.804647+00:00"
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:38.685670+00:00",
+              "at": "2026-10-10T09:03:52.821640+00:00",
               "operation": "assess",
-              "duration_ms": 116,
+              "duration_ms": 92,
               "budget_before": {
                 "iterations": 3,
                 "queries": 3,
@@ -879,14 +882,14 @@
             },
             {
               "node": "update_gaps",
-              "at": "2026-10-09T14:20:38.752606+00:00",
+              "at": "2026-10-10T09:03:52.846516+00:00",
               "open_gap_count": 1
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:38.768154+00:00",
+              "at": "2026-10-10T09:03:52.864216+00:00",
               "operation": "update_gaps",
-              "duration_ms": 57,
+              "duration_ms": 23,
               "budget_before": {
                 "iterations": 3,
                 "queries": 3,
@@ -904,7 +907,7 @@
             },
             {
               "node": "check_stop",
-              "at": "2026-10-09T14:20:38.816861+00:00",
+              "at": "2026-10-10T09:03:52.909032+00:00",
               "reason": null,
               "subquestions_total": 1,
               "subquestions_sufficient": 0,
@@ -914,9 +917,9 @@
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:38.831353+00:00",
+              "at": "2026-10-10T09:03:52.933837+00:00",
               "operation": "check_stop",
-              "duration_ms": 48,
+              "duration_ms": 46,
               "budget_before": {
                 "iterations": 3,
                 "queries": 3,
@@ -965,16 +968,16 @@
           "events": [
             {
               "node": "select_gap",
-              "at": "2026-10-09T14:20:38.864697+00:00",
-              "gap_id": "c78c8c4e-15a8-4230-911e-9215748791e6",
+              "at": "2026-10-10T09:03:52.987191+00:00",
+              "gap_id": "390b04f0-9c86-40f9-bd61-3298bc82cb8d",
               "priority": "HIGH",
               "description": "Need a primary source for the metric"
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:38.879535+00:00",
+              "at": "2026-10-10T09:03:53.003685+00:00",
               "operation": "select_gap",
-              "duration_ms": 31,
+              "duration_ms": 38,
               "budget_before": {
                 "iterations": 3,
                 "queries": 3,
@@ -992,16 +995,16 @@
             },
             {
               "node": "generate_queries",
-              "at": "2026-10-09T14:20:38.975776+00:00",
+              "at": "2026-10-10T09:03:53.075655+00:00",
               "queries": [
                 "unique metric query 2"
               ]
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:39.000821+00:00",
+              "at": "2026-10-10T09:03:53.087115+00:00",
               "operation": "generate_queries",
-              "duration_ms": 99,
+              "duration_ms": 62,
               "budget_before": {
                 "iterations": 2,
                 "queries": 3,
@@ -1019,14 +1022,14 @@
             },
             {
               "node": "search",
-              "at": "2026-10-09T14:20:39.073439+00:00",
+              "at": "2026-10-10T09:03:53.134213+00:00",
               "searches": 1
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:39.095640+00:00",
+              "at": "2026-10-10T09:03:53.146881+00:00",
               "operation": "search",
-              "duration_ms": 65,
+              "duration_ms": 44,
               "budget_before": {
                 "iterations": 2,
                 "queries": 2,
@@ -1044,15 +1047,15 @@
             },
             {
               "node": "select_seeds",
-              "at": "2026-10-09T14:20:39.190947+00:00",
+              "at": "2026-10-10T09:03:53.184444+00:00",
               "candidates": 0,
               "selected": 0
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:39.213778+00:00",
+              "at": "2026-10-10T09:03:53.199426+00:00",
               "operation": "select_seeds",
-              "duration_ms": 94,
+              "duration_ms": 36,
               "budget_before": {
                 "iterations": 2,
                 "queries": 2,
@@ -1070,45 +1073,45 @@
             },
             {
               "node": "crawl",
-              "at": "2026-10-09T14:20:39.269223+00:00",
+              "at": "2026-10-10T09:03:53.254506+00:00",
               "crawl_job_ids": []
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:39.293106+00:00",
+              "at": "2026-10-10T09:03:53.299646+00:00",
               "operation": "crawl",
-              "duration_ms": 51,
+              "duration_ms": 61,
               "budget_before": {
                 "iterations": 2,
                 "queries": 2,
                 "seeds": 2,
                 "pages": 2,
-                "runtime_seconds": 898
+                "runtime_seconds": 899
               },
               "budget_after": {
                 "iterations": 2,
                 "queries": 2,
                 "seeds": 2,
                 "pages": 2,
-                "runtime_seconds": 898
+                "runtime_seconds": 899
               }
             },
             {
               "node": "index",
-              "at": "2026-10-09T14:20:39.339110+00:00",
+              "at": "2026-10-10T09:03:53.371516+00:00",
               "indexed": 0
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:39.363711+00:00",
+              "at": "2026-10-10T09:03:53.397109+00:00",
               "operation": "index",
-              "duration_ms": 42,
+              "duration_ms": 63,
               "budget_before": {
                 "iterations": 2,
                 "queries": 2,
                 "seeds": 2,
                 "pages": 2,
-                "runtime_seconds": 898
+                "runtime_seconds": 899
               },
               "budget_after": {
                 "iterations": 2,
@@ -1120,13 +1123,13 @@
             },
             {
               "node": "advance",
-              "at": "2026-10-09T14:20:39.389164+00:00"
+              "at": "2026-10-10T09:03:53.429829+00:00"
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:39.412735+00:00",
+              "at": "2026-10-10T09:03:53.453826+00:00",
               "operation": "advance",
-              "duration_ms": 23,
+              "duration_ms": 24,
               "budget_before": {
                 "iterations": 2,
                 "queries": 2,
@@ -1144,16 +1147,16 @@
             },
             {
               "node": "retrieve",
-              "at": "2026-10-09T14:20:39.477850+00:00",
+              "at": "2026-10-10T09:03:53.498332+00:00",
               "evidence_counts": {
                 "1": 0
               }
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:39.505172+00:00",
+              "at": "2026-10-10T09:03:53.514015+00:00",
               "operation": "retrieve",
-              "duration_ms": 69,
+              "duration_ms": 38,
               "budget_before": {
                 "iterations": 2,
                 "queries": 2,
@@ -1171,13 +1174,13 @@
             },
             {
               "node": "assess",
-              "at": "2026-10-09T14:20:39.643631+00:00"
+              "at": "2026-10-10T09:03:53.582065+00:00"
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:39.679985+00:00",
+              "at": "2026-10-10T09:03:53.598272+00:00",
               "operation": "assess",
-              "duration_ms": 133,
+              "duration_ms": 66,
               "budget_before": {
                 "iterations": 2,
                 "queries": 2,
@@ -1195,14 +1198,14 @@
             },
             {
               "node": "update_gaps",
-              "at": "2026-10-09T14:20:39.745632+00:00",
+              "at": "2026-10-10T09:03:53.622576+00:00",
               "open_gap_count": 1
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:39.789190+00:00",
+              "at": "2026-10-10T09:03:53.637312+00:00",
               "operation": "update_gaps",
-              "duration_ms": 57,
+              "duration_ms": 18,
               "budget_before": {
                 "iterations": 2,
                 "queries": 2,
@@ -1220,7 +1223,7 @@
             },
             {
               "node": "check_stop",
-              "at": "2026-10-09T14:20:39.876736+00:00",
+              "at": "2026-10-10T09:03:53.675410+00:00",
               "reason": "STAGNATION",
               "subquestions_total": 1,
               "subquestions_sufficient": 0,
@@ -1230,9 +1233,9 @@
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:39.897127+00:00",
+              "at": "2026-10-10T09:03:53.695027+00:00",
               "operation": "check_stop",
-              "duration_ms": 78,
+              "duration_ms": 35,
               "budget_before": {
                 "iterations": 2,
                 "queries": 2,
@@ -1250,14 +1253,14 @@
             },
             {
               "node": "finalize",
-              "at": "2026-10-09T14:20:39.966266+00:00",
+              "at": "2026-10-10T09:03:53.766652+00:00",
               "reason": "STAGNATION"
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:39.986870+00:00",
+              "at": "2026-10-10T09:03:53.788507+00:00",
               "operation": "finalize",
-              "duration_ms": 56,
+              "duration_ms": 60,
               "budget_before": {
                 "iterations": 2,
                 "queries": 2,
@@ -1290,11 +1293,12 @@
         "pages": 0,
         "page_attempts": 0,
         "iterations": 2,
-        "runtime_ms": 2535,
+        "runtime_ms": 2306,
         "chunks_indexed": 0,
         "llm_calls": 5,
         "llm_failures": 0,
         "duplicate_action_rate": 0.0,
+        "runtime_budget_adherence": true,
         "budget_adherence": true,
         "stop_reason": "STAGNATION"
       },
@@ -1316,14 +1320,14 @@
           "events": [
             {
               "node": "initialize",
-              "at": "2026-10-09T14:20:41.316654+00:00",
+              "at": "2026-10-10T09:03:55.222979+00:00",
               "subquestions": 1
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:41.335074+00:00",
+              "at": "2026-10-10T09:03:55.246327+00:00",
               "operation": "initialize",
-              "duration_ms": 42,
+              "duration_ms": 59,
               "budget_before": {
                 "iterations": 4,
                 "queries": 4,
@@ -1341,16 +1345,16 @@
             },
             {
               "node": "retrieve",
-              "at": "2026-10-09T14:20:41.394730+00:00",
+              "at": "2026-10-10T09:03:55.308148+00:00",
               "evidence_counts": {
                 "1": 1
               }
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:41.406473+00:00",
+              "at": "2026-10-10T09:03:55.329075+00:00",
               "operation": "retrieve",
-              "duration_ms": 54,
+              "duration_ms": 59,
               "budget_before": {
                 "iterations": 4,
                 "queries": 4,
@@ -1368,13 +1372,13 @@
             },
             {
               "node": "assess",
-              "at": "2026-10-09T14:20:41.489096+00:00"
+              "at": "2026-10-10T09:03:55.412017+00:00"
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:41.512999+00:00",
+              "at": "2026-10-10T09:03:55.450961+00:00",
               "operation": "assess",
-              "duration_ms": 86,
+              "duration_ms": 89,
               "budget_before": {
                 "iterations": 4,
                 "queries": 4,
@@ -1392,14 +1396,14 @@
             },
             {
               "node": "update_gaps",
-              "at": "2026-10-09T14:20:41.568938+00:00",
+              "at": "2026-10-10T09:03:55.486655+00:00",
               "open_gap_count": 1
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:41.594788+00:00",
+              "at": "2026-10-10T09:03:55.504800+00:00",
               "operation": "update_gaps",
-              "duration_ms": 53,
+              "duration_ms": 33,
               "budget_before": {
                 "iterations": 4,
                 "queries": 4,
@@ -1417,7 +1421,7 @@
             },
             {
               "node": "check_stop",
-              "at": "2026-10-09T14:20:41.651751+00:00",
+              "at": "2026-10-10T09:03:55.612929+00:00",
               "reason": null,
               "subquestions_total": 1,
               "subquestions_sufficient": 0,
@@ -1427,9 +1431,9 @@
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:41.668833+00:00",
+              "at": "2026-10-10T09:03:55.630499+00:00",
               "operation": "check_stop",
-              "duration_ms": 49,
+              "duration_ms": 96,
               "budget_before": {
                 "iterations": 4,
                 "queries": 4,
@@ -1476,16 +1480,16 @@
           "events": [
             {
               "node": "select_gap",
-              "at": "2026-10-09T14:20:41.778211+00:00",
-              "gap_id": "0811b5ad-3168-4d24-bedc-6581ba538f16",
+              "at": "2026-10-10T09:03:55.670524+00:00",
+              "gap_id": "9fd49ed2-9b2b-4414-9af4-dc0e1dfa5b69",
               "priority": "HIGH",
               "description": "Need a primary source for the metric"
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:41.803320+00:00",
+              "at": "2026-10-10T09:03:55.684620+00:00",
               "operation": "select_gap",
-              "duration_ms": 105,
+              "duration_ms": 34,
               "budget_before": {
                 "iterations": 4,
                 "queries": 4,
@@ -1503,16 +1507,16 @@
             },
             {
               "node": "generate_queries",
-              "at": "2026-10-09T14:20:41.903575+00:00",
+              "at": "2026-10-10T09:03:55.763479+00:00",
               "queries": [
                 "unique metric query 1"
               ]
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:41.921866+00:00",
+              "at": "2026-10-10T09:03:55.775569+00:00",
               "operation": "generate_queries",
-              "duration_ms": 89,
+              "duration_ms": 76,
               "budget_before": {
                 "iterations": 3,
                 "queries": 4,
@@ -1530,14 +1534,14 @@
             },
             {
               "node": "search",
-              "at": "2026-10-09T14:20:42.010588+00:00",
+              "at": "2026-10-10T09:03:55.830502+00:00",
               "searches": 1
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:42.028089+00:00",
+              "at": "2026-10-10T09:03:55.847321+00:00",
               "operation": "search",
-              "duration_ms": 82,
+              "duration_ms": 55,
               "budget_before": {
                 "iterations": 3,
                 "queries": 3,
@@ -1555,15 +1559,15 @@
             },
             {
               "node": "select_seeds",
-              "at": "2026-10-09T14:20:42.090075+00:00",
+              "at": "2026-10-10T09:03:55.898966+00:00",
               "candidates": 0,
               "selected": 0
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:42.108522+00:00",
+              "at": "2026-10-10T09:03:55.913088+00:00",
               "operation": "select_seeds",
-              "duration_ms": 58,
+              "duration_ms": 41,
               "budget_before": {
                 "iterations": 3,
                 "queries": 3,
@@ -1581,14 +1585,14 @@
             },
             {
               "node": "crawl",
-              "at": "2026-10-09T14:20:42.228549+00:00",
+              "at": "2026-10-10T09:03:55.976998+00:00",
               "crawl_job_ids": []
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:42.258535+00:00",
+              "at": "2026-10-10T09:03:55.995910+00:00",
               "operation": "crawl",
-              "duration_ms": 117,
+              "duration_ms": 59,
               "budget_before": {
                 "iterations": 3,
                 "queries": 3,
@@ -1606,14 +1610,14 @@
             },
             {
               "node": "index",
-              "at": "2026-10-09T14:20:42.321632+00:00",
+              "at": "2026-10-10T09:03:56.060971+00:00",
               "indexed": 0
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:42.338866+00:00",
+              "at": "2026-10-10T09:03:56.230531+00:00",
               "operation": "index",
-              "duration_ms": 56,
+              "duration_ms": 188,
               "budget_before": {
                 "iterations": 3,
                 "queries": 3,
@@ -1631,13 +1635,13 @@
             },
             {
               "node": "advance",
-              "at": "2026-10-09T14:20:42.355656+00:00"
+              "at": "2026-10-10T09:03:56.271856+00:00"
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:42.373222+00:00",
+              "at": "2026-10-10T09:03:56.290908+00:00",
               "operation": "advance",
-              "duration_ms": 18,
+              "duration_ms": 24,
               "budget_before": {
                 "iterations": 3,
                 "queries": 3,
@@ -1655,16 +1659,16 @@
             },
             {
               "node": "retrieve",
-              "at": "2026-10-09T14:20:42.415629+00:00",
+              "at": "2026-10-10T09:03:56.360287+00:00",
               "evidence_counts": {
                 "1": 1
               }
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:42.433547+00:00",
+              "at": "2026-10-10T09:03:56.384171+00:00",
               "operation": "retrieve",
-              "duration_ms": 42,
+              "duration_ms": 69,
               "budget_before": {
                 "iterations": 3,
                 "queries": 3,
@@ -1682,13 +1686,13 @@
             },
             {
               "node": "assess",
-              "at": "2026-10-09T14:20:42.498192+00:00"
+              "at": "2026-10-10T09:03:56.495583+00:00"
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:42.532980+00:00",
+              "at": "2026-10-10T09:03:56.515219+00:00",
               "operation": "assess",
-              "duration_ms": 71,
+              "duration_ms": 108,
               "budget_before": {
                 "iterations": 3,
                 "queries": 3,
@@ -1706,14 +1710,14 @@
             },
             {
               "node": "update_gaps",
-              "at": "2026-10-09T14:20:42.586793+00:00",
+              "at": "2026-10-10T09:03:56.553285+00:00",
               "open_gap_count": 1
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:42.608017+00:00",
+              "at": "2026-10-10T09:03:56.570022+00:00",
               "operation": "update_gaps",
-              "duration_ms": 43,
+              "duration_ms": 31,
               "budget_before": {
                 "iterations": 3,
                 "queries": 3,
@@ -1731,7 +1735,7 @@
             },
             {
               "node": "check_stop",
-              "at": "2026-10-09T14:20:42.662998+00:00",
+              "at": "2026-10-10T09:03:56.611396+00:00",
               "reason": null,
               "subquestions_total": 1,
               "subquestions_sufficient": 0,
@@ -1741,9 +1745,9 @@
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:42.680137+00:00",
+              "at": "2026-10-10T09:03:56.627285+00:00",
               "operation": "check_stop",
-              "duration_ms": 41,
+              "duration_ms": 40,
               "budget_before": {
                 "iterations": 3,
                 "queries": 3,
@@ -1792,16 +1796,16 @@
           "events": [
             {
               "node": "select_gap",
-              "at": "2026-10-09T14:20:42.780833+00:00",
-              "gap_id": "0811b5ad-3168-4d24-bedc-6581ba538f16",
+              "at": "2026-10-10T09:03:56.666906+00:00",
+              "gap_id": "9fd49ed2-9b2b-4414-9af4-dc0e1dfa5b69",
               "priority": "HIGH",
               "description": "Need a primary source for the metric"
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:42.807396+00:00",
+              "at": "2026-10-10T09:03:56.686027+00:00",
               "operation": "select_gap",
-              "duration_ms": 100,
+              "duration_ms": 36,
               "budget_before": {
                 "iterations": 3,
                 "queries": 3,
@@ -1819,16 +1823,16 @@
             },
             {
               "node": "generate_queries",
-              "at": "2026-10-09T14:20:42.985155+00:00",
+              "at": "2026-10-10T09:03:56.804584+00:00",
               "queries": [
                 "unique metric query 2"
               ]
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:43.020776+00:00",
+              "at": "2026-10-10T09:03:56.817882+00:00",
               "operation": "generate_queries",
-              "duration_ms": 173,
+              "duration_ms": 112,
               "budget_before": {
                 "iterations": 2,
                 "queries": 3,
@@ -1846,14 +1850,14 @@
             },
             {
               "node": "search",
-              "at": "2026-10-09T14:20:43.109619+00:00",
+              "at": "2026-10-10T09:03:56.877168+00:00",
               "searches": 1
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:43.130053+00:00",
+              "at": "2026-10-10T09:03:56.894260+00:00",
               "operation": "search",
-              "duration_ms": 75,
+              "duration_ms": 57,
               "budget_before": {
                 "iterations": 2,
                 "queries": 2,
@@ -1871,15 +1875,15 @@
             },
             {
               "node": "select_seeds",
-              "at": "2026-10-09T14:20:43.217277+00:00",
+              "at": "2026-10-10T09:03:56.929674+00:00",
               "candidates": 0,
               "selected": 0
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:43.237374+00:00",
+              "at": "2026-10-10T09:03:56.942319+00:00",
               "operation": "select_seeds",
-              "duration_ms": 74,
+              "duration_ms": 32,
               "budget_before": {
                 "iterations": 2,
                 "queries": 2,
@@ -1897,14 +1901,114 @@
             },
             {
               "node": "crawl",
-              "at": "2026-10-09T14:20:43.287630+00:00",
+              "at": "2026-10-10T09:03:56.972550+00:00",
               "crawl_job_ids": []
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:43.309658+00:00",
+              "at": "2026-10-10T09:03:56.985356+00:00",
               "operation": "crawl",
-              "duration_ms": 45,
+              "duration_ms": 27,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              }
+            },
+            {
+              "node": "index",
+              "at": "2026-10-10T09:03:57.023990+00:00",
+              "indexed": 0
+            },
+            {
+              "node": "node_timing",
+              "at": "2026-10-10T09:03:57.041844+00:00",
+              "operation": "index",
+              "duration_ms": 34,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              }
+            },
+            {
+              "node": "advance",
+              "at": "2026-10-10T09:03:57.063150+00:00"
+            },
+            {
+              "node": "node_timing",
+              "at": "2026-10-10T09:03:57.078354+00:00",
+              "operation": "advance",
+              "duration_ms": 16,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              }
+            },
+            {
+              "node": "retrieve",
+              "at": "2026-10-10T09:03:57.119330+00:00",
+              "evidence_counts": {
+                "1": 1
+              }
+            },
+            {
+              "node": "node_timing",
+              "at": "2026-10-10T09:03:57.139814+00:00",
+              "operation": "retrieve",
+              "duration_ms": 43,
+              "budget_before": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              },
+              "budget_after": {
+                "iterations": 2,
+                "queries": 2,
+                "seeds": 2,
+                "pages": 2,
+                "runtime_seconds": 899
+              }
+            },
+            {
+              "node": "assess",
+              "at": "2026-10-10T09:03:57.286704+00:00"
+            },
+            {
+              "node": "node_timing",
+              "at": "2026-10-10T09:03:57.306469+00:00",
+              "operation": "assess",
+              "duration_ms": 146,
               "budget_before": {
                 "iterations": 2,
                 "queries": 2,
@@ -1921,115 +2025,15 @@
               }
             },
             {
-              "node": "index",
-              "at": "2026-10-09T14:20:43.362821+00:00",
-              "indexed": 0
-            },
-            {
-              "node": "node_timing",
-              "at": "2026-10-09T14:20:43.386042+00:00",
-              "operation": "index",
-              "duration_ms": 48,
-              "budget_before": {
-                "iterations": 2,
-                "queries": 2,
-                "seeds": 2,
-                "pages": 2,
-                "runtime_seconds": 898
-              },
-              "budget_after": {
-                "iterations": 2,
-                "queries": 2,
-                "seeds": 2,
-                "pages": 2,
-                "runtime_seconds": 898
-              }
-            },
-            {
-              "node": "advance",
-              "at": "2026-10-09T14:20:43.408598+00:00"
-            },
-            {
-              "node": "node_timing",
-              "at": "2026-10-09T14:20:43.432833+00:00",
-              "operation": "advance",
-              "duration_ms": 21,
-              "budget_before": {
-                "iterations": 2,
-                "queries": 2,
-                "seeds": 2,
-                "pages": 2,
-                "runtime_seconds": 898
-              },
-              "budget_after": {
-                "iterations": 2,
-                "queries": 2,
-                "seeds": 2,
-                "pages": 2,
-                "runtime_seconds": 898
-              }
-            },
-            {
-              "node": "retrieve",
-              "at": "2026-10-09T14:20:43.506067+00:00",
-              "evidence_counts": {
-                "1": 1
-              }
-            },
-            {
-              "node": "node_timing",
-              "at": "2026-10-09T14:20:43.544317+00:00",
-              "operation": "retrieve",
-              "duration_ms": 86,
-              "budget_before": {
-                "iterations": 2,
-                "queries": 2,
-                "seeds": 2,
-                "pages": 2,
-                "runtime_seconds": 898
-              },
-              "budget_after": {
-                "iterations": 2,
-                "queries": 2,
-                "seeds": 2,
-                "pages": 2,
-                "runtime_seconds": 898
-              }
-            },
-            {
-              "node": "assess",
-              "at": "2026-10-09T14:20:43.667985+00:00"
-            },
-            {
-              "node": "node_timing",
-              "at": "2026-10-09T14:20:43.696074+00:00",
-              "operation": "assess",
-              "duration_ms": 125,
-              "budget_before": {
-                "iterations": 2,
-                "queries": 2,
-                "seeds": 2,
-                "pages": 2,
-                "runtime_seconds": 898
-              },
-              "budget_after": {
-                "iterations": 2,
-                "queries": 2,
-                "seeds": 2,
-                "pages": 2,
-                "runtime_seconds": 898
-              }
-            },
-            {
               "node": "update_gaps",
-              "at": "2026-10-09T14:20:43.726941+00:00",
+              "at": "2026-10-10T09:03:57.345487+00:00",
               "open_gap_count": 1
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:43.748148+00:00",
+              "at": "2026-10-10T09:03:57.391987+00:00",
               "operation": "update_gaps",
-              "duration_ms": 21,
+              "duration_ms": 31,
               "budget_before": {
                 "iterations": 2,
                 "queries": 2,
@@ -2047,7 +2051,7 @@
             },
             {
               "node": "check_stop",
-              "at": "2026-10-09T14:20:43.799568+00:00",
+              "at": "2026-10-10T09:03:57.441934+00:00",
               "reason": "STAGNATION",
               "subquestions_total": 1,
               "subquestions_sufficient": 0,
@@ -2057,9 +2061,9 @@
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:43.812632+00:00",
+              "at": "2026-10-10T09:03:57.460478+00:00",
               "operation": "check_stop",
-              "duration_ms": 40,
+              "duration_ms": 46,
               "budget_before": {
                 "iterations": 2,
                 "queries": 2,
@@ -2077,14 +2081,14 @@
             },
             {
               "node": "finalize",
-              "at": "2026-10-09T14:20:43.842029+00:00",
+              "at": "2026-10-10T09:03:57.515063+00:00",
               "reason": "STAGNATION"
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:43.859908+00:00",
+              "at": "2026-10-10T09:03:57.547446+00:00",
               "operation": "finalize",
-              "duration_ms": 31,
+              "duration_ms": 57,
               "budget_before": {
                 "iterations": 2,
                 "queries": 2,
@@ -2117,11 +2121,12 @@
         "pages": 1,
         "page_attempts": 1,
         "iterations": 1,
-        "runtime_ms": 3740,
+        "runtime_ms": 2962,
         "chunks_indexed": 3,
         "llm_calls": 3,
         "llm_failures": 0,
         "duplicate_action_rate": 0.0,
+        "runtime_budget_adherence": true,
         "budget_adherence": true,
         "stop_reason": "SUFFICIENT_EVIDENCE"
       },
@@ -2143,14 +2148,14 @@
           "events": [
             {
               "node": "initialize",
-              "at": "2026-10-09T14:20:56.054443+00:00",
+              "at": "2026-10-10T09:04:09.179581+00:00",
               "subquestions": 1
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:56.091087+00:00",
+              "at": "2026-10-10T09:04:09.201466+00:00",
               "operation": "initialize",
-              "duration_ms": 81,
+              "duration_ms": 50,
               "budget_before": {
                 "iterations": 2,
                 "queries": 2,
@@ -2168,16 +2173,16 @@
             },
             {
               "node": "retrieve",
-              "at": "2026-10-09T14:20:56.246838+00:00",
+              "at": "2026-10-10T09:04:09.287514+00:00",
               "evidence_counts": {
                 "1": 3
               }
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:56.278410+00:00",
+              "at": "2026-10-10T09:04:09.311833+00:00",
               "operation": "retrieve",
-              "duration_ms": 141,
+              "duration_ms": 90,
               "budget_before": {
                 "iterations": 2,
                 "queries": 2,
@@ -2195,13 +2200,13 @@
             },
             {
               "node": "assess",
-              "at": "2026-10-09T14:20:56.431360+00:00"
+              "at": "2026-10-10T09:04:09.538692+00:00"
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:56.455185+00:00",
+              "at": "2026-10-10T09:04:09.567588+00:00",
               "operation": "assess",
-              "duration_ms": 142,
+              "duration_ms": 227,
               "budget_before": {
                 "iterations": 2,
                 "queries": 2,
@@ -2219,14 +2224,14 @@
             },
             {
               "node": "update_gaps",
-              "at": "2026-10-09T14:20:56.540889+00:00",
+              "at": "2026-10-10T09:04:09.620267+00:00",
               "open_gap_count": 1
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:56.561330+00:00",
+              "at": "2026-10-10T09:04:09.643626+00:00",
               "operation": "update_gaps",
-              "duration_ms": 67,
+              "duration_ms": 43,
               "budget_before": {
                 "iterations": 2,
                 "queries": 2,
@@ -2244,7 +2249,7 @@
             },
             {
               "node": "check_stop",
-              "at": "2026-10-09T14:20:56.613545+00:00",
+              "at": "2026-10-10T09:04:09.726960+00:00",
               "reason": null,
               "subquestions_total": 1,
               "subquestions_sufficient": 0,
@@ -2254,9 +2259,9 @@
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:56.639349+00:00",
+              "at": "2026-10-10T09:04:09.748459+00:00",
               "operation": "check_stop",
-              "duration_ms": 56,
+              "duration_ms": 79,
               "budget_before": {
                 "iterations": 2,
                 "queries": 2,
@@ -2305,16 +2310,16 @@
           "events": [
             {
               "node": "select_gap",
-              "at": "2026-10-09T14:20:56.721291+00:00",
-              "gap_id": "8bb92dae-2f72-4988-8bdb-a3f05e59cae9",
+              "at": "2026-10-10T09:04:09.819912+00:00",
+              "gap_id": "d9c4b4f9-57b0-4b7c-a594-30411e10fb36",
               "priority": "HIGH",
               "description": "Need a primary source for the metric"
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:56.748008+00:00",
+              "at": "2026-10-10T09:04:09.849837+00:00",
               "operation": "select_gap",
-              "duration_ms": 84,
+              "duration_ms": 56,
               "budget_before": {
                 "iterations": 2,
                 "queries": 2,
@@ -2332,16 +2337,16 @@
             },
             {
               "node": "generate_queries",
-              "at": "2026-10-09T14:20:56.884609+00:00",
+              "at": "2026-10-10T09:04:10.011473+00:00",
               "queries": [
                 "unique metric query 1"
               ]
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:56.900170+00:00",
+              "at": "2026-10-10T09:04:10.034694+00:00",
               "operation": "generate_queries",
-              "duration_ms": 126,
+              "duration_ms": 144,
               "budget_before": {
                 "iterations": 1,
                 "queries": 2,
@@ -2359,14 +2364,14 @@
             },
             {
               "node": "search",
-              "at": "2026-10-09T14:20:56.981261+00:00",
+              "at": "2026-10-10T09:04:10.134566+00:00",
               "searches": 1
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:56.994881+00:00",
+              "at": "2026-10-10T09:04:10.167341+00:00",
               "operation": "search",
-              "duration_ms": 76,
+              "duration_ms": 91,
               "budget_before": {
                 "iterations": 1,
                 "queries": 1,
@@ -2379,20 +2384,20 @@
                 "queries": 1,
                 "seeds": 2,
                 "pages": 2,
-                "runtime_seconds": 900
+                "runtime_seconds": 899
               }
             },
             {
               "node": "select_seeds",
-              "at": "2026-10-09T14:20:57.154495+00:00",
+              "at": "2026-10-10T09:04:10.239199+00:00",
               "candidates": 1,
               "selected": 1
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:57.223452+00:00",
+              "at": "2026-10-10T09:04:10.256354+00:00",
               "operation": "select_seeds",
-              "duration_ms": 165,
+              "duration_ms": 68,
               "budget_before": {
                 "iterations": 1,
                 "queries": 1,
@@ -2410,16 +2415,16 @@
             },
             {
               "node": "crawl",
-              "at": "2026-10-09T14:20:57.683154+00:00",
+              "at": "2026-10-10T09:04:10.700644+00:00",
               "crawl_job_ids": [
-                "506492df-750b-42a8-97f9-b4b76564edc1"
+                "476e2c42-1218-40fd-85e4-7df82bfe5541"
               ]
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:57.730766+00:00",
+              "at": "2026-10-10T09:04:10.730195+00:00",
               "operation": "crawl",
-              "duration_ms": 462,
+              "duration_ms": 452,
               "budget_before": {
                 "iterations": 1,
                 "queries": 1,
@@ -2437,12 +2442,12 @@
             },
             {
               "node": "index",
-              "at": "2026-10-09T14:20:58.563903+00:00",
-              "index_job_id": "02680df2-a222-456a-820f-50880bbe48c4",
+              "at": "2026-10-10T09:04:11.437235+00:00",
+              "index_job_id": "3e5c5972-f4bd-4d02-aa52-6867644180ef",
               "documents_indexed": 1,
               "chunks_created": 3,
               "consistency": {
-                "research_job_id": "c280dd2e-09a5-4f4d-bd03-74cb8b08b8be",
+                "research_job_id": "0544d22f-f909-47c1-9033-3949bf833caa",
                 "sql_chunks": 6,
                 "active_chunks": 6,
                 "fts_records": 6,
@@ -2457,9 +2462,9 @@
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:58.597060+00:00",
+              "at": "2026-10-10T09:04:11.457911+00:00",
               "operation": "index",
-              "duration_ms": 817,
+              "duration_ms": 669,
               "budget_before": {
                 "iterations": 1,
                 "queries": 1,
@@ -2477,13 +2482,13 @@
             },
             {
               "node": "advance",
-              "at": "2026-10-09T14:20:58.799735+00:00"
+              "at": "2026-10-10T09:04:11.482344+00:00"
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:59.034496+00:00",
+              "at": "2026-10-10T09:04:11.503382+00:00",
               "operation": "advance",
-              "duration_ms": 211,
+              "duration_ms": 21,
               "budget_before": {
                 "iterations": 1,
                 "queries": 1,
@@ -2496,88 +2501,88 @@
                 "queries": 1,
                 "seeds": 1,
                 "pages": 1,
-                "runtime_seconds": 897
+                "runtime_seconds": 898
               }
             },
             {
               "node": "retrieve",
-              "at": "2026-10-09T14:20:59.265957+00:00",
+              "at": "2026-10-10T09:04:11.550252+00:00",
               "evidence_counts": {
                 "1": 6
               }
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:59.298722+00:00",
+              "at": "2026-10-10T09:04:11.568088+00:00",
               "operation": "retrieve",
-              "duration_ms": 218,
+              "duration_ms": 46,
               "budget_before": {
                 "iterations": 1,
                 "queries": 1,
                 "seeds": 1,
                 "pages": 1,
-                "runtime_seconds": 897
+                "runtime_seconds": 898
               },
               "budget_after": {
                 "iterations": 1,
                 "queries": 1,
                 "seeds": 1,
                 "pages": 1,
-                "runtime_seconds": 897
+                "runtime_seconds": 898
               }
             },
             {
               "node": "assess",
-              "at": "2026-10-09T14:20:59.484313+00:00"
+              "at": "2026-10-10T09:04:11.686075+00:00"
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:59.521765+00:00",
+              "at": "2026-10-10T09:04:11.909338+00:00",
               "operation": "assess",
-              "duration_ms": 180,
+              "duration_ms": 321,
               "budget_before": {
                 "iterations": 1,
                 "queries": 1,
                 "seeds": 1,
                 "pages": 1,
-                "runtime_seconds": 897
+                "runtime_seconds": 898
               },
               "budget_after": {
                 "iterations": 1,
                 "queries": 1,
                 "seeds": 1,
                 "pages": 1,
-                "runtime_seconds": 897
+                "runtime_seconds": 898
               }
             },
             {
               "node": "update_gaps",
-              "at": "2026-10-09T14:20:59.595686+00:00",
+              "at": "2026-10-10T09:04:11.966761+00:00",
               "open_gap_count": 0
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:59.618865+00:00",
+              "at": "2026-10-10T09:04:11.998521+00:00",
               "operation": "update_gaps",
-              "duration_ms": 65,
+              "duration_ms": 66,
               "budget_before": {
                 "iterations": 1,
                 "queries": 1,
                 "seeds": 1,
                 "pages": 1,
-                "runtime_seconds": 897
+                "runtime_seconds": 898
               },
               "budget_after": {
                 "iterations": 1,
                 "queries": 1,
                 "seeds": 1,
                 "pages": 1,
-                "runtime_seconds": 897
+                "runtime_seconds": 898
               }
             },
             {
               "node": "check_stop",
-              "at": "2026-10-09T14:20:59.698429+00:00",
+              "at": "2026-10-10T09:04:12.073850+00:00",
               "reason": "SUFFICIENT_EVIDENCE",
               "subquestions_total": 1,
               "subquestions_sufficient": 1,
@@ -2587,40 +2592,40 @@
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:59.722434+00:00",
+              "at": "2026-10-10T09:04:12.096792+00:00",
               "operation": "check_stop",
-              "duration_ms": 63,
+              "duration_ms": 74,
               "budget_before": {
                 "iterations": 1,
                 "queries": 1,
                 "seeds": 1,
                 "pages": 1,
-                "runtime_seconds": 897
+                "runtime_seconds": 898
               },
               "budget_after": {
                 "iterations": 1,
                 "queries": 1,
                 "seeds": 1,
                 "pages": 1,
-                "runtime_seconds": 897
+                "runtime_seconds": 898
               }
             },
             {
               "node": "finalize",
-              "at": "2026-10-09T14:20:59.769152+00:00",
+              "at": "2026-10-10T09:04:12.153853+00:00",
               "reason": "SUFFICIENT_EVIDENCE"
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:20:59.789668+00:00",
+              "at": "2026-10-10T09:04:12.199834+00:00",
               "operation": "finalize",
-              "duration_ms": 37,
+              "duration_ms": 69,
               "budget_before": {
                 "iterations": 1,
                 "queries": 1,
                 "seeds": 1,
                 "pages": 1,
-                "runtime_seconds": 897
+                "runtime_seconds": 898
               },
               "budget_after": {
                 "iterations": 1,
@@ -2647,11 +2652,12 @@
         "pages": 0,
         "page_attempts": 1,
         "iterations": 1,
-        "runtime_ms": 2043,
+        "runtime_ms": 1732,
         "chunks_indexed": 0,
         "llm_calls": 3,
         "llm_failures": 0,
         "duplicate_action_rate": 0.0,
+        "runtime_budget_adherence": true,
         "budget_adherence": true,
         "stop_reason": "PAGE_BUDGET"
       },
@@ -2673,14 +2679,14 @@
           "events": [
             {
               "node": "initialize",
-              "at": "2026-10-09T14:21:01.253033+00:00",
+              "at": "2026-10-10T09:04:13.639192+00:00",
               "subquestions": 1
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:21:01.288059+00:00",
+              "at": "2026-10-10T09:04:13.673053+00:00",
               "operation": "initialize",
-              "duration_ms": 102,
+              "duration_ms": 57,
               "budget_before": {
                 "iterations": 3,
                 "queries": 2,
@@ -2698,16 +2704,16 @@
             },
             {
               "node": "retrieve",
-              "at": "2026-10-09T14:21:01.387549+00:00",
+              "at": "2026-10-10T09:04:13.764188+00:00",
               "evidence_counts": {
                 "1": 0
               }
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:21:01.416434+00:00",
+              "at": "2026-10-10T09:04:13.787806+00:00",
               "operation": "retrieve",
-              "duration_ms": 95,
+              "duration_ms": 84,
               "budget_before": {
                 "iterations": 3,
                 "queries": 2,
@@ -2725,13 +2731,13 @@
             },
             {
               "node": "assess",
-              "at": "2026-10-09T14:21:01.517587+00:00"
+              "at": "2026-10-10T09:04:13.885907+00:00"
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:21:01.534998+00:00",
+              "at": "2026-10-10T09:04:13.901058+00:00",
               "operation": "assess",
-              "duration_ms": 96,
+              "duration_ms": 93,
               "budget_before": {
                 "iterations": 3,
                 "queries": 2,
@@ -2749,14 +2755,14 @@
             },
             {
               "node": "update_gaps",
-              "at": "2026-10-09T14:21:01.587337+00:00",
+              "at": "2026-10-10T09:04:13.937926+00:00",
               "open_gap_count": 1
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:21:01.604966+00:00",
+              "at": "2026-10-10T09:04:13.953164+00:00",
               "operation": "update_gaps",
-              "duration_ms": 50,
+              "duration_ms": 34,
               "budget_before": {
                 "iterations": 3,
                 "queries": 2,
@@ -2774,7 +2780,7 @@
             },
             {
               "node": "check_stop",
-              "at": "2026-10-09T14:21:01.674433+00:00",
+              "at": "2026-10-10T09:04:13.994023+00:00",
               "reason": null,
               "subquestions_total": 1,
               "subquestions_sufficient": 0,
@@ -2784,9 +2790,9 @@
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:21:01.695282+00:00",
+              "at": "2026-10-10T09:04:14.010614+00:00",
               "operation": "check_stop",
-              "duration_ms": 72,
+              "duration_ms": 34,
               "budget_before": {
                 "iterations": 3,
                 "queries": 2,
@@ -2835,16 +2841,16 @@
           "events": [
             {
               "node": "select_gap",
-              "at": "2026-10-09T14:21:01.740060+00:00",
-              "gap_id": "0c574146-89c9-44c9-ba4f-004290c1e058",
+              "at": "2026-10-10T09:04:14.057413+00:00",
+              "gap_id": "e93a5ae0-dd5b-469b-bd04-680ae4b96d6b",
               "priority": "HIGH",
               "description": "Need a primary source for the metric"
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:21:01.760717+00:00",
+              "at": "2026-10-10T09:04:14.088836+00:00",
               "operation": "select_gap",
-              "duration_ms": 45,
+              "duration_ms": 50,
               "budget_before": {
                 "iterations": 3,
                 "queries": 2,
@@ -2862,16 +2868,16 @@
             },
             {
               "node": "generate_queries",
-              "at": "2026-10-09T14:21:01.862074+00:00",
+              "at": "2026-10-10T09:04:14.248476+00:00",
               "queries": [
                 "unique metric query 1"
               ]
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:21:01.884601+00:00",
+              "at": "2026-10-10T09:04:14.279555+00:00",
               "operation": "generate_queries",
-              "duration_ms": 98,
+              "duration_ms": 146,
               "budget_before": {
                 "iterations": 2,
                 "queries": 2,
@@ -2889,14 +2895,14 @@
             },
             {
               "node": "search",
-              "at": "2026-10-09T14:21:01.988062+00:00",
+              "at": "2026-10-10T09:04:14.439361+00:00",
               "searches": 1
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:21:02.010491+00:00",
+              "at": "2026-10-10T09:04:14.459456+00:00",
               "operation": "search",
-              "duration_ms": 99,
+              "duration_ms": 151,
               "budget_before": {
                 "iterations": 2,
                 "queries": 1,
@@ -2914,15 +2920,15 @@
             },
             {
               "node": "select_seeds",
-              "at": "2026-10-09T14:21:02.129436+00:00",
+              "at": "2026-10-10T09:04:14.568397+00:00",
               "candidates": 1,
               "selected": 1
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:21:02.148943+00:00",
+              "at": "2026-10-10T09:04:14.591081+00:00",
               "operation": "select_seeds",
-              "duration_ms": 103,
+              "duration_ms": 106,
               "budget_before": {
                 "iterations": 2,
                 "queries": 1,
@@ -2940,20 +2946,20 @@
             },
             {
               "node": "crawl",
-              "at": "2026-10-09T14:21:02.565679+00:00",
+              "at": "2026-10-10T09:04:14.960168+00:00",
               "crawl_job_ids": []
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:21:02.581920+00:00",
+              "at": "2026-10-10T09:04:14.977277+00:00",
               "operation": "crawl",
-              "duration_ms": 409,
+              "duration_ms": 359,
               "budget_before": {
                 "iterations": 2,
                 "queries": 1,
                 "seeds": 1,
                 "pages": 1,
-                "runtime_seconds": 900
+                "runtime_seconds": 899
               },
               "budget_after": {
                 "iterations": 2,
@@ -2965,14 +2971,14 @@
             },
             {
               "node": "index",
-              "at": "2026-10-09T14:21:02.637060+00:00",
+              "at": "2026-10-10T09:04:15.015859+00:00",
               "indexed": 0
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:21:02.658275+00:00",
+              "at": "2026-10-10T09:04:15.030470+00:00",
               "operation": "index",
-              "duration_ms": 41,
+              "duration_ms": 35,
               "budget_before": {
                 "iterations": 2,
                 "queries": 1,
@@ -2990,13 +2996,13 @@
             },
             {
               "node": "advance",
-              "at": "2026-10-09T14:21:02.711157+00:00"
+              "at": "2026-10-10T09:04:15.049448+00:00"
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:21:02.734570+00:00",
+              "at": "2026-10-10T09:04:15.066822+00:00",
               "operation": "advance",
-              "duration_ms": 49,
+              "duration_ms": 17,
               "budget_before": {
                 "iterations": 2,
                 "queries": 1,
@@ -3014,16 +3020,16 @@
             },
             {
               "node": "retrieve",
-              "at": "2026-10-09T14:21:02.820651+00:00",
+              "at": "2026-10-10T09:04:15.124552+00:00",
               "evidence_counts": {
                 "1": 0
               }
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:21:02.851925+00:00",
+              "at": "2026-10-10T09:04:15.144795+00:00",
               "operation": "retrieve",
-              "duration_ms": 77,
+              "duration_ms": 59,
               "budget_before": {
                 "iterations": 2,
                 "queries": 1,
@@ -3041,13 +3047,13 @@
             },
             {
               "node": "assess",
-              "at": "2026-10-09T14:21:03.028354+00:00"
+              "at": "2026-10-10T09:04:15.222843+00:00"
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:21:03.056100+00:00",
+              "at": "2026-10-10T09:04:15.240922+00:00",
               "operation": "assess",
-              "duration_ms": 165,
+              "duration_ms": 78,
               "budget_before": {
                 "iterations": 2,
                 "queries": 1,
@@ -3065,14 +3071,14 @@
             },
             {
               "node": "update_gaps",
-              "at": "2026-10-09T14:21:03.105437+00:00",
+              "at": "2026-10-10T09:04:15.260255+00:00",
               "open_gap_count": 1
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:21:03.129210+00:00",
+              "at": "2026-10-10T09:04:15.276737+00:00",
               "operation": "update_gaps",
-              "duration_ms": 43,
+              "duration_ms": 19,
               "budget_before": {
                 "iterations": 2,
                 "queries": 1,
@@ -3090,7 +3096,7 @@
             },
             {
               "node": "check_stop",
-              "at": "2026-10-09T14:21:03.206242+00:00",
+              "at": "2026-10-10T09:04:15.311596+00:00",
               "reason": "PAGE_BUDGET",
               "subquestions_total": 1,
               "subquestions_sufficient": 0,
@@ -3100,9 +3106,9 @@
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:21:03.225798+00:00",
+              "at": "2026-10-10T09:04:15.326621+00:00",
               "operation": "check_stop",
-              "duration_ms": 67,
+              "duration_ms": 34,
               "budget_before": {
                 "iterations": 2,
                 "queries": 1,
@@ -3115,32 +3121,32 @@
                 "queries": 1,
                 "seeds": 1,
                 "pages": 0,
-                "runtime_seconds": 898
+                "runtime_seconds": 899
               }
             },
             {
               "node": "finalize",
-              "at": "2026-10-09T14:21:03.270949+00:00",
+              "at": "2026-10-10T09:04:15.363964+00:00",
               "reason": "PAGE_BUDGET"
             },
             {
               "node": "node_timing",
-              "at": "2026-10-09T14:21:03.328846+00:00",
+              "at": "2026-10-10T09:04:15.382342+00:00",
               "operation": "finalize",
-              "duration_ms": 74,
+              "duration_ms": 39,
               "budget_before": {
                 "iterations": 2,
                 "queries": 1,
                 "seeds": 1,
                 "pages": 0,
-                "runtime_seconds": 898
+                "runtime_seconds": 899
               },
               "budget_after": {
                 "iterations": 2,
                 "queries": 1,
                 "seeds": 1,
                 "pages": 0,
-                "runtime_seconds": 898
+                "runtime_seconds": 899
               }
             }
           ]
@@ -3159,7 +3165,9 @@
     "scenario": "time_budget",
     "status": "BUDGET_EXHAUSTED",
     "stop_reason": "TIME_BUDGET",
-    "search_calls": 0
+    "search_calls": 0,
+    "duration_ms": 1007,
+    "limit_ms": 1000
   },
   "cancel": {
     "scenario": "cancel",

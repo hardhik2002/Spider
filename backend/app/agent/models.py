@@ -6,17 +6,19 @@ from uuid import uuid4
 from sqlalchemy import (
     Boolean,
     DateTime,
-    Enum as SqlEnum,
     ForeignKey,
     Integer,
     String,
     Text,
     UniqueConstraint,
 )
+from sqlalchemy import (
+    Enum as SqlEnum,
+)
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.db.models import Base, utc_now
 from app.agent.enums import ActionStatus, AgentStatus, GapPriority, GapStatus, StopReason
+from app.db.models import Base, utc_now
 
 
 class AgentRun(Base):

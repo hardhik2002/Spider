@@ -1,0 +1,4 @@
+-r requirements-agent.txt
+transformers>=4.48,<6
+torch>=2.2,<3
+sentencepiece>=0.2,<1

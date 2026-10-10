@@ -56,6 +56,20 @@ class Settings(BaseSettings):
     agent_search_results_per_query: int = Field(default=8, ge=1, le=20)
     agent_max_pages_per_seed: int = Field(default=4, ge=1, le=100)
     agent_crawl_max_depth: int = Field(default=2, ge=0, le=5)
+    evidence_nli_model: str = "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli"
+    evidence_nli_fallback_model: str | None = None
+    evidence_nli_batch_size: int = Field(default=2, ge=1, le=32)
+    evidence_nli_device: str = "cpu"
+    evidence_claim_extraction_batch_size: int = Field(default=1, ge=1, le=8)
+    evidence_max_candidates_per_claim: int = Field(default=20, ge=1, le=50)
+    evidence_adjudication_enabled: bool = True
+    evidence_adjudication_margin_threshold: float = Field(default=0.18, ge=0, le=1)
+    evidence_adjudicate_all: bool = False
+    evidence_semantic_duplicate_threshold: float = Field(default=0.88, ge=0, le=1)
+    evidence_claim_dense_top_k: int = Field(default=40, ge=1, le=200)
+    evidence_claim_lexical_top_k: int = Field(default=40, ge=1, le=200)
+    evidence_claim_fusion_top_k: int = Field(default=30, ge=1, le=100)
+    evidence_claim_rerank_top_k: int = Field(default=20, ge=1, le=50)
     dense_top_k: int = Field(default=50, ge=1, le=200)
     lexical_top_k: int = Field(default=50, ge=1, le=200)
     fusion_top_k: int = Field(default=30, ge=1, le=100)

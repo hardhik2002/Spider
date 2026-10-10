@@ -925,6 +925,7 @@ async def test_agent_acquires_and_indexes_new_source(tmp_path: Path):
                             "max_new_search_queries": 2,
                             "max_new_seeds": 2,
                             "max_new_pages": 2,
+                            "max_runtime_seconds": 900,
                         },
                         "status": status_payload,
                         "gaps": gaps,
