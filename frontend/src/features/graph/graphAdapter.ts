@@ -1,7 +1,7 @@
 import type { Edge, Node } from '@xyflow/react'
 import type { ClaimStatus, ConfidenceTier, GraphEdgeDto, GraphEdgeType, GraphNodeDto, GraphNodeType, SubgraphDto } from '../../types/graph'
 import { edgeVisuals } from './visuals'
-import { graphLayout } from './graphLayout'
+import { graphLayout, type LayoutViewport } from './graphLayout'
 
 export type UiNodeData = { dto: GraphNodeDto; dimmed: boolean; compact: boolean; highlighted: boolean; [key: string]: unknown }
 export type UiEdgeData = { dto: GraphEdgeDto; highlighted: boolean; [key: string]: unknown }
@@ -52,8 +52,9 @@ export function toFlowGraph(
   pathNodeIds: ReadonlySet<string>,
   pathEdgeIds: ReadonlySet<string>,
   compact: boolean,
+  viewport?: LayoutViewport,
 ): { nodes: UiNode[]; edges: UiEdge[] } {
-  const positions = graphLayout(graph.nodes)
+  const positions = graphLayout(graph.nodes, viewport)
   const related = new Set<string>(selectedId ? [selectedId] : [])
   if (selectedId) {
     for (const edge of graph.edges) {

@@ -1,5 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
+import process from 'node:process'
+import console from 'node:console'
 import { chromium } from 'playwright'
 
 const researchId = process.env.VITE_LIVE_RESEARCH_ID ?? '38f3b146-6170-49c2-8b5c-64677210dd3f'
@@ -31,28 +33,35 @@ try {
     page.on('requestfailed', (request) => failedRequests.push(`${request.failure()?.errorText} ${request.url()}`))
 
     await page.goto(`${baseUrl}/research/${researchId}/graph/${snapshotId}`, { waitUntil: 'networkidle' })
-    await page.locator('.graph-node.type-claim').first().waitFor({ timeout: 30000 })
+    await page.locator('.graph-node.type-claim').first().waitFor({ state: 'attached', timeout: 30000 })
+    if (!await page.locator('.graph-node.type-claim').first().isVisible()) {
+      await page.screenshot({ path: path.join(screenshotDir, `phase8a-${width}x${height}-debug.png`), fullPage: true })
+      throw new Error(`Claim node is outside the visible graph at ${width}x${height}`)
+    }
+    if (width === 1920) await page.screenshot({ path: path.join(screenshotDir, 'phase8a-1920x1080-initial.png'), fullPage: true })
     await page.locator('.graph-node.type-claim').first().click()
     await page.locator('.selected-node-heading').waitFor({ timeout: 15000 })
+    await page.locator('.graph-node.type-claim').first().dblclick()
+    await page.waitForFunction(() => globalThis.document.querySelectorAll('.graph-node').length > 5, undefined, { timeout: 15000 })
     await page.waitForTimeout(650)
     const screenshot = path.join(screenshotDir, `phase8a-${width}x${height}.png`)
     await page.screenshot({ path: screenshot, fullPage: true })
     const measurements = await page.evaluate(() => {
       const box = (selector) => {
-        const element = document.querySelector(selector)
+        const element = globalThis.document.querySelector(selector)
         if (!element) return null
         const rect = element.getBoundingClientRect()
         return { x: Math.round(rect.x), y: Math.round(rect.y), width: Math.round(rect.width), height: Math.round(rect.height) }
       }
-      const spider = document.querySelector('.spider-hub img')
+      const spider = globalThis.document.querySelector('.spider-hub img')
       return {
-        viewport: { width: innerWidth, height: innerHeight },
-        page: { scrollWidth: document.documentElement.scrollWidth, scrollHeight: document.documentElement.scrollHeight },
+        viewport: { width: globalThis.innerWidth, height: globalThis.innerHeight },
+        page: { scrollWidth: globalThis.document.documentElement.scrollWidth, scrollHeight: globalThis.document.documentElement.scrollHeight },
         header: box('.top-header'), sidebar: box('.sidebar'), graph: box('.graph-workspace'),
         spider: box('.spider-hub img'), inspector: box('.inspector'), toolbar: box('.graph-toolbar'),
         spiderImageLoaded: Boolean(spider?.complete && spider.naturalWidth),
-        visibleGraphNodes: document.querySelectorAll('.graph-node').length,
-        selectedClaim: document.querySelector('.selected-node-heading h2')?.textContent ?? null,
+        visibleGraphNodes: globalThis.document.querySelectorAll('.graph-node').length,
+        selectedClaim: globalThis.document.querySelector('.selected-node-heading h2')?.textContent ?? null,
       }
     })
     report.viewports.push({ width, height, screenshot, measurements, consoleErrors, consoleWarnings, pageErrors, failedRequests })

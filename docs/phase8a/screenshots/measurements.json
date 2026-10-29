@@ -54,15 +54,11 @@
           "height": 44
         },
         "spiderImageLoaded": true,
-        "visibleGraphNodes": 5,
+        "visibleGraphNodes": 11,
         "selectedClaim": "GraphRAG methods include Knowledge Graph-based GraphRAG Liu (2022) which extracts a Knowledge Graph (KG) from text and performs retrieval solely based on the KG."
       },
-      "consoleErrors": [
-        "Failed to load resource: the server responded with a status of 404 (Not Found)"
-      ],
-      "consoleWarnings": [
-        "React Flow: It seems like you are hiding the attribution. Please only do this when you are subscribed to React Flow Pro: https://reactflow.dev/remove-attr\n%cYou can ignore this warning if you are subscribed. font-style: italic;"
-      ],
+      "consoleErrors": [],
+      "consoleWarnings": [],
       "pageErrors": [],
       "failedRequests": []
     },
@@ -98,10 +94,10 @@
           "height": 824
         },
         "spider": {
-          "x": 413,
-          "y": 248,
-          "width": 480,
-          "height": 480
+          "x": 453,
+          "y": 288,
+          "width": 400,
+          "height": 400
         },
         "inspector": {
           "x": 1060,
@@ -116,13 +112,11 @@
           "height": 44
         },
         "spiderImageLoaded": true,
-        "visibleGraphNodes": 5,
+        "visibleGraphNodes": 11,
         "selectedClaim": "GraphRAG methods include Knowledge Graph-based GraphRAG Liu (2022) which extracts a Knowledge Graph (KG) from text and performs retrieval solely based on the KG."
       },
       "consoleErrors": [],
-      "consoleWarnings": [
-        "React Flow: It seems like you are hiding the attribution. Please only do this when you are subscribed to React Flow Pro: https://reactflow.dev/remove-attr\n%cYou can ignore this warning if you are subscribed. font-style: italic;"
-      ],
+      "consoleWarnings": [],
       "pageErrors": [],
       "failedRequests": []
     },
@@ -158,10 +152,10 @@
           "height": 692
         },
         "spider": {
-          "x": 376,
-          "y": 182,
-          "width": 480,
-          "height": 480
+          "x": 436,
+          "y": 242,
+          "width": 360,
+          "height": 360
         },
         "inspector": {
           "x": 986,
@@ -176,13 +170,11 @@
           "height": 44
         },
         "spiderImageLoaded": true,
-        "visibleGraphNodes": 5,
+        "visibleGraphNodes": 11,
         "selectedClaim": "GraphRAG methods include Knowledge Graph-based GraphRAG Liu (2022) which extracts a Knowledge Graph (KG) from text and performs retrieval solely based on the KG."
       },
       "consoleErrors": [],
-      "consoleWarnings": [
-        "React Flow: It seems like you are hiding the attribution. Please only do this when you are subscribed to React Flow Pro: https://reactflow.dev/remove-attr\n%cYou can ignore this warning if you are subscribed. font-style: italic;"
-      ],
+      "consoleWarnings": [],
       "pageErrors": [],
       "failedRequests": []
     },
@@ -206,22 +198,22 @@
           "height": 76
         },
         "sidebar": {
-          "x": 0,
+          "x": -246,
           "y": 76,
-          "width": 210,
+          "width": 246,
           "height": 692
         },
         "graph": {
-          "x": 210,
+          "x": 0,
           "y": 76,
-          "width": 474,
+          "width": 684,
           "height": 692
         },
         "spider": {
-          "x": 207,
-          "y": 182,
-          "width": 480,
-          "height": 480
+          "x": 172,
+          "y": 252,
+          "width": 340,
+          "height": 340
         },
         "inspector": {
           "x": 684,
@@ -230,19 +222,17 @@
           "height": 692
         },
         "toolbar": {
-          "x": 296,
+          "x": 191,
           "y": 701,
           "width": 302,
           "height": 44
         },
         "spiderImageLoaded": true,
-        "visibleGraphNodes": 5,
+        "visibleGraphNodes": 11,
         "selectedClaim": "GraphRAG methods include Knowledge Graph-based GraphRAG Liu (2022) which extracts a Knowledge Graph (KG) from text and performs retrieval solely based on the KG."
       },
       "consoleErrors": [],
-      "consoleWarnings": [
-        "React Flow: It seems like you are hiding the attribution. Please only do this when you are subscribed to React Flow Pro: https://reactflow.dev/remove-attr\n%cYou can ignore this warning if you are subscribed. font-style: italic;"
-      ],
+      "consoleWarnings": [],
       "pageErrors": [],
       "failedRequests": []
     }

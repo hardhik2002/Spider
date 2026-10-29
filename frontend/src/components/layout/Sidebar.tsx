@@ -38,7 +38,7 @@ export function Sidebar({ filters, onFilters, status, summary, onContradictions,
         </nav>
         <div className="sidebar-divider" />
         <p className="sidebar-caption">INVESTIGATE</p>
-        <button className="nav-item" onClick={onContradictions}><ShieldAlert size={17} /><span>Contradictions</span>{summary && <em>{summary.claims_contested + summary.claims_contradicted}</em>}</button>
+        <button className="nav-item" onClick={onContradictions}><ShieldAlert size={17} /><span>Contradictions</span>{summary && <em>{summary.contradiction_edges}</em>}</button>
         <button className="nav-item" onClick={onLoadAnother}><Database size={17} /><span>Jobs</span></button>
         <button className="nav-item" onClick={() => setAdvanced(!advanced)} aria-expanded={advanced}><Settings2 size={17} /><span>Settings & filters</span><ChevronDown size={15} className={advanced ? 'rotate' : ''} /></button>
         {advanced && <div className="sidebar-filters">

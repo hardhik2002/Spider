@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { GRAPH_EDGE_TYPES, GRAPH_NODE_TYPES, type GraphNodeDto } from '../types/graph'
 import { allFilters, filterGraph, mergeSubgraphs, toFlowGraph } from '../features/graph/graphAdapter'
-import { graphLayout } from '../features/graph/graphLayout'
+import { graphLayout, spiderSizeForWidth } from '../features/graph/graphLayout'
 import { edgeVisuals, nodeNames, statusVisuals } from '../features/graph/visuals'
 import { claim, graph, initialGraph } from './fixture'
 
@@ -52,6 +52,29 @@ describe('Phase 7 graph adapter', () => {
       expect([...first]).toEqual([...second])
       expect(new Set([...first.values()].map((point) => `${point.x}:${point.y}`)).size).toBe(count)
       expect(elapsed).toBeLessThan(2000)
+    }
+  })
+
+  it('keeps side cards outside the spider at the verified canvas widths', () => {
+    for (const viewport of [
+      { width: 1294, height: 1004, zoom: 0.9 },
+      { width: 814, height: 824, zoom: 0.82 },
+      { width: 740, height: 692, zoom: 0.75 },
+      { width: 684, height: 692, zoom: 0.68 },
+    ]) {
+      const positions = graphLayout(graph.nodes, viewport)
+      const spiderLeft = (viewport.width - spiderSizeForWidth(viewport.width)) / 2
+      const spiderRight = (viewport.width + spiderSizeForWidth(viewport.width)) / 2
+      for (const node of graph.nodes) {
+        const point = positions.get(node.id)!
+        const cardLeft = viewport.width / 2 + point.x * viewport.zoom
+        if (['SUBQUESTION', 'SOURCE_GROUP', 'DOCUMENT'].includes(node.type)) {
+          expect(cardLeft + 224 * viewport.zoom).toBeLessThan(spiderLeft)
+        }
+        if (['CLAIM', 'CITATION', 'EVIDENCE_CHUNK'].includes(node.type)) {
+          expect(cardLeft).toBeGreaterThan(spiderRight)
+        }
+      }
     }
   })
 })

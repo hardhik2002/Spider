@@ -25,12 +25,13 @@ export function App() {
   }, [spider.ids.researchId, spider.ids.snapshotId, spider.load])
   useEffect(() => { if (spider.phase === 'ready') setLoaderOpen(false) }, [spider.phase])
 
-  const select = useCallback((node: GraphNodeDto) => {
+  const select = useCallback((node: GraphNodeDto, focus = true) => {
     if (!filterGraph(spider.graph, filters).nodes.some((item) => item.id === node.id)) setFilters(allFilters())
     setInspectorOpen(true)
-    setFocusId(node.id)
+    setFocusId(focus ? node.id : null)
     void spider.select(node)
   }, [spider.graph, spider.select, filters])
+  const selectFromCanvas = useCallback((node: GraphNodeDto) => select(node, false), [select])
   const showContradictions = () => {
     setContradictionsOpen(true)
     void spider.loadContradictions()
@@ -46,7 +47,7 @@ export function App() {
       <main className="canvas-column">
         {spider.consistency?.status === 'INVALID' && <div className="consistency-warning" role="alert"><AlertTriangle size={16} /> Graph consistency is invalid. Inspect the backend before relying on this view.</div>}
         {spider.error && !loaderOpen && <div className="canvas-error" role="alert"><AlertTriangle size={16} /> {spider.error}<button aria-label="Dismiss error" onClick={spider.clearError}><X size={15} /></button></div>}
-        <GraphWorkspace graph={spider.graph} filters={filters} selectedId={spider.selectedId} pathNodeIds={pathNodeIds} pathEdgeIds={pathEdgeIds} focusId={focusId} fitSignal={fitSignal} onSelect={select} onExpand={(id) => { void spider.expand(id).then(() => setFitSignal((value) => value + 1)) }} onClear={spider.clearSelection} expandingId={spider.expandingId} />
+        <GraphWorkspace graph={spider.graph} filters={filters} selectedId={spider.selectedId} pathNodeIds={pathNodeIds} pathEdgeIds={pathEdgeIds} focusId={focusId} fitSignal={fitSignal} onSelect={selectFromCanvas} onExpand={(id) => { void spider.expand(id) }} onClear={spider.clearSelection} expandingId={spider.expandingId} />
         {!loaderOpen && (spider.phase === 'loading' || spider.phase === 'building') && <div className="canvas-state" role="status"><LoaderCircle className="spin" size={23} /><strong>{spider.phase === 'building' ? 'Building graph…' : 'Loading graph…'}</strong><span>Checking the snapshot and loading its bounded research neighborhood.</span></div>}
         {spider.path && <button className="path-clear" onClick={spider.clearPath}><GitBranch size={15} /> Path highlighted · clear <X size={14} /></button>}
         {!loaded && !loaderOpen && <div className="canvas-empty"><h2>No graph loaded</h2><p>Connect to a validated Phase 7 graph to start exploring.</p><button className="primary-button" onClick={() => setLoaderOpen(true)}>Load graph <ArrowRight size={16} /></button></div>}
