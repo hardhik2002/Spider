@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ArrowRight, AlertTriangle, GitBranch, LoaderCircle, X } from 'lucide-react'
 import { useSpiderGraph } from '../hooks/useSpiderGraph'
 import { allFilters, filterGraph, type GraphFilters } from '../features/graph/graphAdapter'
@@ -22,21 +22,21 @@ export function App() {
     if (started.current) return
     started.current = true
     if (spider.ids.researchId && spider.ids.snapshotId) void spider.load(spider.ids.researchId, spider.ids.snapshotId)
-  }, [spider])
+  }, [spider.ids.researchId, spider.ids.snapshotId, spider.load])
   useEffect(() => { if (spider.phase === 'ready') setLoaderOpen(false) }, [spider.phase])
 
-  const select = (node: GraphNodeDto) => {
+  const select = useCallback((node: GraphNodeDto) => {
     if (!filterGraph(spider.graph, filters).nodes.some((item) => item.id === node.id)) setFilters(allFilters())
     setInspectorOpen(true)
     setFocusId(node.id)
     void spider.select(node)
-  }
+  }, [spider.graph, spider.select, filters])
   const showContradictions = () => {
     setContradictionsOpen(true)
     void spider.loadContradictions()
   }
-  const pathNodeIds = new Set(spider.path?.nodes.map((node) => node.id) ?? [])
-  const pathEdgeIds = new Set(spider.path?.edges.map((edge) => edge.id) ?? [])
+  const pathNodeIds = useMemo(() => new Set(spider.path?.nodes.map((node) => node.id) ?? []), [spider.path])
+  const pathEdgeIds = useMemo(() => new Set(spider.path?.edges.map((edge) => edge.id) ?? []), [spider.path])
   const loaded = spider.phase === 'ready'
 
   return <div className="app-shell">

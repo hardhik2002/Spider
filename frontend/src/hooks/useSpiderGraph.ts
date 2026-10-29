@@ -60,6 +60,7 @@ export function useSpiderGraph() {
         graphApi.consistency(researchId, snapshotId),
         graphApi.subgraph(researchId, snapshotId, `research:${researchId}`, 2, 100, 'outgoing'),
       ])
+      if (request !== loadRequest.current) return
       setSummary(nextSummary); setConsistency(nextConsistency); setGraph(first)
       setIds({ researchId, snapshotId }); setPhase('ready')
       localStorage.setItem('spidermind:last-graph', JSON.stringify({ researchId, snapshotId }))
