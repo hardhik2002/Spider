@@ -1,10 +1,10 @@
 # SpiderMind project context
 
-_Repository snapshot: 29 October 2026. This describes the current working tree, including uncommitted Phase 6 changes. It is a guide to the implementation, not a replacement for the source code or the recorded result JSON._
+_Updated 29 October 2026 for Phase 7. This describes the current working tree, including pre-existing uncommitted Phase 6 changes. It is a guide to the implementation, not a replacement for the source code or the recorded result JSON._
 
 ## 1. Purpose and current boundary
 
-SpiderMind is a Python 3.11+ FastAPI research backend. It accepts a URL or research question, crawls public HTML, plans searches, indexes retrieved passages, runs a bounded research loop, and produces a claim/evidence ledger. It has no frontend, authentication, knowledge graph, or final answer writer. The API advertises version `0.6.0` in `backend/app/main.py`; `pyproject.toml` still labels the package `0.1.0` and describes the original Phase 1 foundation.
+SpiderMind is a Python 3.11+ FastAPI research backend. It accepts a URL or research question, crawls public HTML, plans searches, indexes retrieved passages, runs a bounded research loop, produces a claim/evidence ledger, and materializes a deterministic citation graph from that ledger. It has no frontend, authentication, or final answer writer. The API advertises version `0.7.0` in `backend/app/main.py`; `pyproject.toml` still labels the package `0.1.0` and describes the original Phase 1 foundation.
 
 The phases build on one another:
 
@@ -16,6 +16,7 @@ The phases build on one another:
 | 4 | Passage indexing and dense/lexical/hybrid retrieval | Documents, chunks, retrieval results |
 | 5 | Bounded iterative acquisition of missing evidence | Agent run, gaps, actions, checkpoints |
 | 6 | Atomic claim extraction and evidence verification | Claim relations, exact citations, ledger |
+| 7 | Deterministic projection, validation, traversal, analytics, export | Versioned knowledge/citation graph |
 
 ### End-to-end flow
 
@@ -25,9 +26,10 @@ question -> validated plan -> deduplicated web queries -> public search results
          -> token chunks -> SQLite/FTS5 + Qdrant -> hybrid retrieval
          -> optional agent gap loop -> claim extraction -> NLI/adjudication
          -> citation checks + independent source groups -> evidence ledger
+         -> versioned SQLite graph -> validation/traversal/analytics/JSON export
 ```
 
-Phase 1/2 crawls can be used directly without a research job. Phases 4–6 consume the persisted research corpus. Phase 6 retrieves within that indexed corpus; it does not launch new web searches or crawls.
+Phase 1/2 crawls can be used directly without a research job. Phases 4–6 consume the persisted research corpus. Phase 6 retrieves within that indexed corpus; it does not launch new web searches or crawls. Phase 7 projects only persisted Phase 1–6 relationships and makes no new LLM decisions.
 
 ## 2. Runtime architecture
 
@@ -72,6 +74,18 @@ All job creation endpoints below return HTTP 202. IDs in paths are UUIDs. Unknow
 | `GET /api/v1/research/{research_job_id}/evidence/{job_id}/claims/{claim_id}` | Claim, origins, relations, citations, rule metadata. |
 | `GET /api/v1/research/{research_job_id}/evidence/{job_id}/contradictions` | Contradictory evidence view. |
 | `GET /api/v1/research/{research_job_id}/evidence/{job_id}/ledger` | Structured claim/evidence ledger. |
+| `POST /api/v1/research/{research_job_id}/graph` | Build/reuse graph snapshot for an evidence job. |
+| `GET /api/v1/research/{research_job_id}/graph/{snapshot_id}` | Build/validation status and counts. |
+| `GET /api/v1/research/{research_job_id}/graph/{snapshot_id}/nodes` | Filtered/paged compact nodes. |
+| `GET /api/v1/research/{research_job_id}/graph/{snapshot_id}/nodes/{node_id}` | Node detail; optional chunk text. |
+| `GET /api/v1/research/{research_job_id}/graph/{snapshot_id}/edges` | Filtered/paged semantic edges. |
+| `GET /api/v1/research/{research_job_id}/graph/{snapshot_id}/subgraph` | Bounded directional neighborhood. |
+| `GET /api/v1/research/{research_job_id}/graph/{snapshot_id}/path` | Bounded shortest directed provenance paths. |
+| `GET /api/v1/research/{research_job_id}/graph/{snapshot_id}/claims/{claim_id}` | Complete claim neighborhood. |
+| `GET /api/v1/research/{research_job_id}/graph/{snapshot_id}/contradictions` | Contested/contradicted claim views. |
+| `GET /api/v1/research/{research_job_id}/graph/{snapshot_id}/summary` | Structural graph analytics. |
+| `GET /api/v1/research/{research_job_id}/graph/{snapshot_id}/consistency` | Compare graph with authoritative evidence. |
+| `GET /api/v1/research/{research_job_id}/graph/{snapshot_id}/export` | Deterministically ordered JSON export. |
 
 Important request models:
 
@@ -80,6 +94,7 @@ Important request models:
 - `RetrievalRequest`: query, `dense`/`lexical`/`hybrid`, stage-specific top-K overrides, rerank and neighbor flags, and optional subquestion, source domain, document, or crawl filters. Returned results include text, URL, IDs, source metadata, rank paths, raw scores, neighbor context, and timing.
 - `AgentRequest`: iteration/query/seed/page/runtime budgets, deterministic evidence minimums, retrieval depth, rerank and bounded assessment settings.
 - `EvidenceRequest`: optional agent run, subquestion/claim/candidate/citation limits, runtime, NLI/adjudication/counterquery/rerank switches, extraction pack limits. The subquestion × claim × candidate product is capped at 2,000, and final citations cannot exceed candidate count.
+- `GraphBuildRequest`: evidence-job UUID and optional uncited-relation inclusion. Graph status is asynchronous; validated snapshots can be queried once completed.
 
 ### Typical local sequence
 
@@ -127,9 +142,17 @@ Each claim searches the whole indexed research corpus using Phase 4 retrieval an
 
 The deterministic status rule counts **valid-cited independent source groups**: two or more supporting groups without contradiction → `CORROBORATED`/`HIGH`; one → `SUPPORTED`/`MEDIUM`; partial support alone → `PARTIALLY_SUPPORTED`/`LOW`; support plus contradiction → `CONTESTED`/`UNRESOLVED`; contradiction alone → `CONTRADICTED`/`UNRESOLVED`; otherwise → `INSUFFICIENT_EVIDENCE`/`UNRESOLVED`. An uncited strong relation prevents a resolved status unless both support and contradiction are already validly cited. The confidence tier is evidence strength, not calibrated truth probability. The ledger exposes origins, relation decisions, citations, source groups, and rule metadata; it does not compose an answer.
 
+### Knowledge and citation graph: Phase 7
+
+`GraphBuilder` loads one finished Phase 6 evidence job and its Phase 3/4 provenance, then creates deterministic nodes and edges. SQLite graph tables are a derived, versioned view; Phase 1–6 rows remain authoritative. Node IDs have the form `research:<id>`, `subquestion:<id>`, `claim:<id>`, `citation:<id>`, `evidence_chunk:<id>`, `document:<id>`, and `source_group:<id>`. Edge IDs are SHA-256 hashes of edge type, endpoints, and source-row identity. The graph is a directed multigraph, so claim origin and verified support remain distinct even for the same claim/chunk pair. The builder maps only persisted direct support, partial support, contradiction, citation, chunk occurrence, and source-group membership relationships. It does not infer claim-to-claim relations or call an LLM.
+
+`GraphService` fingerprints authoritative rows and the uncited-relation option. An unchanged completed graph reuses its snapshot; changed evidence produces a new snapshot/content hash. `SQLiteGraphStore` writes a snapshot's nodes/edges in one transaction. `GraphValidator` checks expected entities/edges, endpoints, exact citation offsets, claim status/confidence, research-job scope, source occurrences/groups, and provenance paths. Invalid snapshots remain visible through status/consistency but cannot be queried through graph data APIs. `GraphProjection` supports bounded directional neighborhoods, shortest paths, and weak connected components without NetworkX. `GraphQueryService`, `GraphAnalytics`, and `GraphExporter` provide filters, claim/contradiction views, structural counts, and sorted JSON. Normal graph responses omit full chunk bodies; node detail can fetch authoritative text on request. GraphML and a frontend are not implemented.
+
+The controlled fixture records 24 nodes, 42 edges, 100% exact-set accuracy on five labeled graph queries, complete claim/citation/source-group path coverage, zero orphan edges, and zero cross-job leakage. Those are fixture properties, not factual accuracy claims. A copied live Phase 6 database produced 12 nodes and 19 edges with `VALID` integrity status. See `docs/phase7-graph-results.json` and `docs/phase7-live-smoke-results.json`.
+
 ## 5. Data model and migration
 
-SQLAlchemy's `Base.metadata.create_all` and `migrate_sqlite` create missing tables and add columns to older SQLite files. The migration is additive and idempotent, installs FTS5 triggers when available, and sets `PRAGMA user_version = 6`; it is not an Alembic migration history. FTS5 absence switches lexical retrieval to local BM25.
+SQLAlchemy's `Base.metadata.create_all` and `migrate_sqlite` create missing tables and add columns to older SQLite files. The migration is additive and idempotent, installs FTS5 triggers when available, and sets `PRAGMA user_version = 7`; graph schema version 1 is separate. It is not an Alembic migration history. FTS5 absence switches lexical retrieval to local BM25.
 
 | Data area | Tables and relationships |
 | --- | --- |
@@ -138,6 +161,7 @@ SQLAlchemy's `Base.metadata.create_all` and `migrate_sqlite` create missing tabl
 | Index | `knowledge_documents` references crawled pages; `knowledge_chunks` stores canonical passages and vector IDs; `knowledge_chunk_sources` stores occurrence/adjacency; `index_jobs` and `index_document_statuses` track work; `knowledge_chunks_fts` is derived lexical index. |
 | Agent | `agent_runs` owns budgets/state/counters; `agent_iterations` holds structured trace JSON; `research_gaps`; `evidence_assessments`; `agent_actions` provide lineage and resume checks. Graph checkpoints are in a separate SQLite file. |
 | Evidence | `evidence_jobs` owns fingerprint/request/progress; `verified_claims` owns typed claim/status; `claim_origins`; `claim_evidence_relations` stores scores, decisions, and qualifier flags; `claim_citations` stores exact offsets/text; `source_groups` records independent source identity. |
+| Graph | `graph_build_jobs` tracks asynchronous work; `graph_snapshots` stores source fingerprint, schema version, hash, validation and metrics; `graph_nodes` and `graph_edges` store snapshot-scoped materialization. |
 
 ## 6. Configuration and dependencies
 
@@ -152,6 +176,7 @@ SQLAlchemy's `Base.metadata.create_all` and `migrate_sqlite` create missing tabl
 | Retrieval | Dense/lexical top K 50 each, fusion 30, RRF K 60, equal weights; rerank 30 candidates with BGE reranker on CPU, batch 4; final top K 8, max 2 chunks/document, one neighbor each side, 700-token neighbor budget. |
 | Agent | Checkpoints `data/langgraph-checkpoints.sqlite`; 5 iterations, 12 new queries, 10 seeds, 40 attempted pages, 900 s; 3 chunks and 2 distinct sources minimum; top K 8; 2 stagnant iterations; bounded assessment packs and query generation. |
 | Evidence | DeBERTa base NLI, CPU, batch 2; up to 4 subquestions, 5 claims each, 8 candidates each; semantic duplicate threshold 0.88; adjudication enabled at 0.18 margin; claim retrieval K 40 dense/40 lexical/30 fused/20 rerank. Request limits may override service defaults. |
+| Graph | Max neighborhood depth 4, 200 nodes, 500 edges; max 3 shortest paths and 8 path hops; uncited relations included by default; no full chunk text in export. |
 
 `backend/requirements.txt` contains FastAPI, Uvicorn, HTTPX, BeautifulSoup, Trafilatura, Pydantic Settings, SQLAlchemy async, aiosqlite, pytest, pytest-asyncio, and Ruff. Each later requirements file includes the previous phase: intelligent adds Sentence Transformers; research adds `ddgs`; RAG adds `qdrant-client`; agent adds LangGraph and SQLite checkpointer; evidence adds Transformers, Torch, and SentencePiece. `pyproject.toml` configures pytest asyncio mode/test path and Ruff E/F/I/B/UP rules with 100-character line length. `.gitignore` excludes local environments/caches, SQLite files, Qdrant data, `.env`, and live-run stores. `.vscode/settings.json` only configures editor colors.
 
@@ -172,6 +197,7 @@ This lists every Python source/test/script file and every tracked text artifact,
 | `backend/app/api/routes/rag.py` | Index creation/status/consistency and retrieval. |
 | `backend/app/api/routes/agent.py` | Agent start/status/iteration/gap/cancel views. |
 | `backend/app/api/routes/evidence.py` | Evidence start/status/claim/contradiction/ledger views. |
+| `backend/app/api/routes/graph.py` | Graph build/status, nodes/edges, traversal, analytics, consistency and export endpoints. |
 | `backend/app/schemas/crawl.py` | Crawl request validation and response models. |
 | `backend/app/schemas/research.py` | Research request and validated planner output. |
 | `backend/app/schemas/rag.py` | Retrieval request and filter limits. |
@@ -199,7 +225,7 @@ This lists every Python source/test/script file and every tracked text artifact,
 | `backend/app/services/crawl_service.py` | Crawl job creation/task lifecycle and shared HTTP/robots/rate-limit state. |
 | `backend/app/services/research_service.py` | Query dedup/search/result persistence, seed scoring/selection, crawl budgets. |
 | `backend/app/db/database.py` | Async SQLAlchemy engine/session, initialization and ready check. |
-| `backend/app/db/migrations.py` | Additive columns, FTS5 virtual table/triggers, schema version 6. |
+| `backend/app/db/migrations.py` | Additive columns, FTS5 virtual table/triggers, schema version 7. |
 | `backend/app/db/models.py` | Crawl and research relational models/constraints. |
 | `backend/app/db/repositories.py` | Crawl job/page/link persistence and lookup. |
 
@@ -227,6 +253,16 @@ This lists every Python source/test/script file and every tracked text artifact,
 | `backend/app/evidence/nli.py` | Lazy Transformers NLI, model label mapping, batching/counters. |
 | `backend/app/evidence/logic.py` | Claim normalization/merging/scope checks, source grouping, citation/status rules. |
 | `backend/app/evidence/service.py` | Fingerprint/recovery, extraction, dedup, retrieval, verification, citations, status. |
+| `backend/app/graph/types.py` | Graph schema version and explicit node/edge enums. |
+| `backend/app/graph/models.py` | Graph build job/snapshot/node/edge SQL models. |
+| `backend/app/graph/builder.py` | Scoped domain loading, fingerprints, stable IDs, deterministic materialization. |
+| `backend/app/graph/store.py` | Snapshot-scoped SQLite graph store. |
+| `backend/app/graph/projection.py` | Directed multigraph adjacency, bounded traversal and components. |
+| `backend/app/graph/validation.py` | Domain-to-graph consistency and provenance integrity checks. |
+| `backend/app/graph/analytics.py` | Structural claim/source counts and degree distributions. |
+| `backend/app/graph/query.py` | Node/edge filtering, claim/contradiction views and summaries. |
+| `backend/app/graph/export.py` | Stable JSON graph export. |
+| `backend/app/graph/service.py` | Asynchronous build/recovery/idempotency lifecycle. |
 
 ### Evaluation code and scripts
 
@@ -248,6 +284,8 @@ This lists every Python source/test/script file and every tracked text artifact,
 | `backend/scripts/evaluate_phase6_hybrid.py` | Real NLI plus Qwen3 adjudication pilot. |
 | `backend/scripts/live_phase6_smoke.py` | Bounded live Phase 6 connectivity run. |
 | `backend/scripts/show_agent_graph.py` | Prints LangGraph Mermaid graph. |
+| `backend/scripts/evaluate_phase7.py` | Controlled Phase 7 fixture metrics and JSON result. |
+| `backend/scripts/live_phase7_smoke.py` | Offline graph build on a copied successful Phase 6 database. |
 
 ### Tests and fixtures
 
@@ -263,6 +301,10 @@ This lists every Python source/test/script file and every tracked text artifact,
 | `backend/tests/test_evidence_engine.py` | Evidence API, citations, source groups, fingerprint idempotency. |
 | `backend/tests/test_evidence_llm.py` | Atomic claims, qualifiers, ambiguity routing, prompt envelope. |
 | `backend/tests/test_evidence_rules.py` | Merge/qualifier guards, NLI label mapping, citation spans, status/group rules. |
+| `backend/tests/graph_fixture.py` | Deterministic multi-status, mirrored-source, two-job graph fixture. |
+| `backend/tests/test_graph_builder.py` | Stable IDs, graph materialization, migration, idempotency, changed evidence, validation. |
+| `backend/tests/test_graph_queries.py` | Filters, paths, neighborhoods, claim views, analytics and JSON round trip. |
+| `backend/tests/test_graph_api.py` | HTTP graph contract, bounds, consistency and research-job isolation. |
 | `backend/tests/fixtures/phase3_benchmarks.json` | Labeled facets, seeds, and crawl-page targets. |
 | `backend/tests/fixtures/phase4_benchmark.json` | Eight controlled retrieval queries and relevant documents. |
 | `backend/tests/fixtures/research_site/index.html` | Local fixture link hub. |
@@ -290,6 +332,8 @@ This lists every Python source/test/script file and every tracked text artifact,
 | `docs/phase6-live-smoke-attempt1.json` | First bounded live attempt; timeout. |
 | `docs/phase6-live-smoke-attempt2.json` | Second bounded live attempt and claim/ledger snapshots. |
 | `docs/phase6-live-smoke-results.json` | Final unlabeled connectivity run, completed with two extracted claims. |
+| `docs/phase7-graph-results.json` | Controlled graph counts, coverage, query accuracy, determinism, export and timings. |
+| `docs/phase7-live-smoke-results.json` | Phase 6-to-7 copied-live-data graph and actual provenance paths. |
 
 The controlled Phase 5/6 fixtures use fake model components, so perfect fixture scores do not estimate real-world model accuracy. The real Phase 6 NLI pilot has only six labeled pairs. Phase 4's 180- and 500-token profiles each create eight chunks for its short documents, so that fixture cannot distinguish them. Live smokes check connectivity and execution, not labeled accuracy.
 
