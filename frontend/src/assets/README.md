@@ -1,6 +1,7 @@
-Place the supplied visual references here:
+Visual assets for Phase 8A:
 
-- `spider-reference.png` — loaded by `SpiderHub` at runtime.
-- `spidermind-ui-reference.png` — design reference only; never rendered as a background.
+- `spider-reference.png` is the supplied 800 × 800 source image, retained unchanged for identity comparison.
+- `spider-cutout.png` is a transparent background extraction of that spider. `SpiderHub` imports it for the central visual and header mark because the source has a white background and overlaid stock text.
+- `spidermind-ui-reference.png` is the supplied 1672 × 941 design reference. The app never renders it as a background or graph data.
 
-The two PNG files were absent from the repository and text attachment when Phase 8A implementation began. The UI shows an explicit pending-asset marker until the spider image is available.
+The cutout preserves the black spider and red X, but its surface details are reconstructed, so it is not pixel-identical to the source. The UI's labels, counts, claims, citations, and links come from the Phase 7 API.

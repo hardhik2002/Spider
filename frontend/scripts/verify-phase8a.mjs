@@ -1,3 +1,4 @@
+import assert from 'node:assert/strict'
 import { mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import process from 'node:process'
@@ -54,17 +55,30 @@ try {
         return { x: Math.round(rect.x), y: Math.round(rect.y), width: Math.round(rect.width), height: Math.round(rect.height) }
       }
       const spider = globalThis.document.querySelector('.spider-hub img')
+      const inspectorScroll = globalThis.document.querySelector('.inspector-scroll')
       return {
         viewport: { width: globalThis.innerWidth, height: globalThis.innerHeight },
         page: { scrollWidth: globalThis.document.documentElement.scrollWidth, scrollHeight: globalThis.document.documentElement.scrollHeight },
         header: box('.top-header'), sidebar: box('.sidebar'), graph: box('.graph-workspace'),
         spider: box('.spider-hub img'), inspector: box('.inspector'), toolbar: box('.graph-toolbar'),
         spiderImageLoaded: Boolean(spider?.complete && spider.naturalWidth),
+        inspectorScroll: inspectorScroll ? { clientHeight: inspectorScroll.clientHeight, scrollHeight: inspectorScroll.scrollHeight } : null,
         visibleGraphNodes: globalThis.document.querySelectorAll('.graph-node').length,
         selectedClaim: globalThis.document.querySelector('.selected-node-heading h2')?.textContent ?? null,
       }
     })
-    report.viewports.push({ width, height, screenshot, measurements, consoleErrors, consoleWarnings, pageErrors, failedRequests })
+    assert.equal(measurements.page.scrollWidth, width, `Horizontal overflow at ${width}x${height}`)
+    assert.equal(measurements.page.scrollHeight, height, `Vertical page overflow at ${width}x${height}`)
+    assert.ok(measurements.spiderImageLoaded, `Spider asset failed at ${width}x${height}`)
+    assert.ok(measurements.selectedClaim, `Claim inspector missing at ${width}x${height}`)
+    assert.ok(measurements.spider && measurements.graph && Math.abs(
+      measurements.spider.x + measurements.spider.width / 2 - measurements.graph.x - measurements.graph.width / 2,
+    ) <= 1, `Spider not centered at ${width}x${height}`)
+    assert.deepEqual(consoleErrors, [])
+    assert.deepEqual(consoleWarnings, [])
+    assert.deepEqual(pageErrors, [])
+    assert.deepEqual(failedRequests, [])
+    report.viewports.push({ width, height, screenshot: path.relative(path.resolve(process.cwd(), '..'), screenshot).replaceAll('\\', '/'), measurements, consoleErrors, consoleWarnings, pageErrors, failedRequests })
     await page.close()
   }
 } finally {

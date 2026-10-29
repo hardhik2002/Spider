@@ -36,11 +36,16 @@ export function graphLayout(nodes: GraphNodeDto[], viewport?: LayoutViewport): M
     left: (sidePadding - viewport.width / 2) / zoom,
     right: (viewport.width / 2 - sidePadding - cardWidth) / zoom,
   } : null
+  const upperCount = Math.max(grouped.get('SUBQUESTION')?.length ?? 0, grouped.get('CLAIM')?.length ?? 0)
+  const middleCount = Math.max(grouped.get('SOURCE_GROUP')?.length ?? 0, grouped.get('EVIDENCE_CHUNK')?.length ?? 0)
+  const upperScreenY = dynamic ? viewport.height * 0.21 : 0
+  const middleScreenY = dynamic ? Math.max(viewport.height * 0.47, upperScreenY + upperCount * 132 * zoom + 10) : 0
+  const lowerScreenY = dynamic ? Math.max(viewport.height * 0.72, middleScreenY + middleCount * 132 * zoom + 10) : 0
   const rowY = dynamic ? {
     top: (55 - viewport.height / 2) / zoom,
-    upper: (viewport.height * 0.21 - viewport.height / 2) / zoom,
-    middle: (viewport.height * 0.47 - viewport.height / 2) / zoom,
-    lower: (viewport.height * 0.72 - viewport.height / 2) / zoom,
+    upper: (upperScreenY - viewport.height / 2) / zoom,
+    middle: (middleScreenY - viewport.height / 2) / zoom,
+    lower: (lowerScreenY - viewport.height / 2) / zoom,
   } : null
   for (const [type, items] of grouped) {
     items.sort((a, b) => a.id.localeCompare(b.id))

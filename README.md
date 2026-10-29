@@ -365,7 +365,7 @@ Additional graph endpoints list/filter edges, inspect node detail (chunk text is
 
 ## Phase 8A interactive Spider Graph UI
 
-The [frontend](frontend/README.md) is a React/TypeScript/Vite client using React Flow for a spider-centered, progressive Phase 7 graph. It loads a bounded research neighborhood, expands nodes on demand, and shows exact claim evidence, citations, contradictions, paths, summary counts, and consistency status from the existing API. The client has no fake production graph data and makes no graph or claim decisions. The supplied `frontend/src/assets/spider-reference.png` is required for the intended central visual; `spidermind-ui-reference.png` is design-only. These PNGs were not present when this implementation began and must be added for final visual approval.
+The [frontend](frontend/README.md) is a React/TypeScript/Vite client using React Flow for a spider-centered, progressive Phase 7 graph. It loads a bounded research neighborhood, expands nodes on demand, and shows exact claim evidence, citations, contradictions, paths, summary counts, and consistency status from the existing API. The client has no fake production graph data and makes no graph or claim decisions. The supplied `frontend/src/assets/spider-reference.png` is retained as the source identity; `spider-cutout.png` is the transparent runtime derivative, and `spidermind-ui-reference.png` is design-only. Live screenshots and viewport measurements are in `docs/phase8a/screenshots/`; results are recorded in `docs/phase8a-ui-smoke-results.json`.
 
 From the repository root, start the backend as in the Phase 7 section. Then:
 

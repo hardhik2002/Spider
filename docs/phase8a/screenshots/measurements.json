@@ -7,7 +7,7 @@
     {
       "width": 1920,
       "height": 1080,
-      "screenshot": "C:\\My3TechAi\\spider\\docs\\phase8a\\screenshots\\phase8a-1920x1080.png",
+      "screenshot": "docs/phase8a/screenshots/phase8a-1920x1080.png",
       "measurements": {
         "viewport": {
           "width": 1920,
@@ -54,6 +54,10 @@
           "height": 44
         },
         "spiderImageLoaded": true,
+        "inspectorScroll": {
+          "clientHeight": 888,
+          "scrollHeight": 1285
+        },
         "visibleGraphNodes": 11,
         "selectedClaim": "GraphRAG methods include Knowledge Graph-based GraphRAG Liu (2022) which extracts a Knowledge Graph (KG) from text and performs retrieval solely based on the KG."
       },
@@ -65,7 +69,7 @@
     {
       "width": 1440,
       "height": 900,
-      "screenshot": "C:\\My3TechAi\\spider\\docs\\phase8a\\screenshots\\phase8a-1440x900.png",
+      "screenshot": "docs/phase8a/screenshots/phase8a-1440x900.png",
       "measurements": {
         "viewport": {
           "width": 1440,
@@ -112,6 +116,10 @@
           "height": 44
         },
         "spiderImageLoaded": true,
+        "inspectorScroll": {
+          "clientHeight": 708,
+          "scrollHeight": 1285
+        },
         "visibleGraphNodes": 11,
         "selectedClaim": "GraphRAG methods include Knowledge Graph-based GraphRAG Liu (2022) which extracts a Knowledge Graph (KG) from text and performs retrieval solely based on the KG."
       },
@@ -123,7 +131,7 @@
     {
       "width": 1366,
       "height": 768,
-      "screenshot": "C:\\My3TechAi\\spider\\docs\\phase8a\\screenshots\\phase8a-1366x768.png",
+      "screenshot": "docs/phase8a/screenshots/phase8a-1366x768.png",
       "measurements": {
         "viewport": {
           "width": 1366,
@@ -170,6 +178,10 @@
           "height": 44
         },
         "spiderImageLoaded": true,
+        "inspectorScroll": {
+          "clientHeight": 576,
+          "scrollHeight": 1278
+        },
         "visibleGraphNodes": 11,
         "selectedClaim": "GraphRAG methods include Knowledge Graph-based GraphRAG Liu (2022) which extracts a Knowledge Graph (KG) from text and performs retrieval solely based on the KG."
       },
@@ -181,7 +193,7 @@
     {
       "width": 1024,
       "height": 768,
-      "screenshot": "C:\\My3TechAi\\spider\\docs\\phase8a\\screenshots\\phase8a-1024x768.png",
+      "screenshot": "docs/phase8a/screenshots/phase8a-1024x768.png",
       "measurements": {
         "viewport": {
           "width": 1024,
@@ -228,6 +240,10 @@
           "height": 44
         },
         "spiderImageLoaded": true,
+        "inspectorScroll": {
+          "clientHeight": 576,
+          "scrollHeight": 1295
+        },
         "visibleGraphNodes": 11,
         "selectedClaim": "GraphRAG methods include Knowledge Graph-based GraphRAG Liu (2022) which extracts a Knowledge Graph (KG) from text and performs retrieval solely based on the KG."
       },

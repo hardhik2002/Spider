@@ -40,7 +40,7 @@ Phase 8A reads Phase 7 records and does not create claims, change confidence, or
 
 The HTTP layer under `app/api/routes` performs request parsing, status lookup, filtering, and serialization. `app/services` owns crawl/research orchestration. `app/crawler`, `app/rag`, `app/agent`, and `app/evidence` implement the phase logic. SQLAlchemy models live in `app/db/models.py` and the phase-specific `models.py` files. All main job types run as in-process `asyncio` tasks. The agent uses LangGraph checkpoints; the other job types persist their status/progress in SQLite.
 
-`frontend/` is a separate Vite client. Its central API module maps the actual Phase 7 DTOs; a hook coordinates snapshot loading, polling, bounded `/subgraph` expansion, claim inspection, contradictions, and directed paths. A deterministic layout adapter converts graph records into customized React Flow nodes and edges. The spider is a decorative asset, not a graph node. Vite proxies local API requests to FastAPI, so the backend needs no CORS change for the documented development setup. The frontend does not use LLMs or mock production graph data.
+`frontend/` is a separate Vite client. Its central API module maps the actual Phase 7 DTOs; a hook coordinates snapshot loading, polling, bounded `/subgraph` expansion, claim inspection, contradictions, and directed paths. A deterministic responsive layout adapter converts graph records into customized React Flow nodes and edges around the central spider. The spider is a decorative transparent derivative of the supplied reference, not a graph node. Vite proxies local API requests to FastAPI, so the backend needs no CORS change for the documented development setup. The frontend does not use LLMs or mock production graph data.
 
 The shared embedding provider is local Sentence Transformers `BAAI/bge-m3`. Phase 3 planning and structured Phase 5/6 LLM calls use local Ollama, default `Qwen3:latest`. Search uses `ddgs`. Phase 4 vectors use local Qdrant; lexical search uses SQLite FTS5 or a local BM25 fallback. Reranking defaults to the local `BAAI/bge-reranker-v2-m3` cross encoder on CPU. Phase 6 NLI defaults to `MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli` on CPU. Model loading/downloading can dominate the first request; no external hosted LLM API is wired in the default app.
 
@@ -338,7 +338,8 @@ This lists every Python source/test/script file and every tracked text artifact,
 | `frontend/src/utils/safety.ts` | Safe HTTP(S) source links and short IDs. |
 | `frontend/src/styles/global.css` | Dark responsive design, web motif, reduced-motion behavior. |
 | `frontend/src/tests/{fixture,setup,graphLogic,safetyAndApi,InspectorDrawer,Navigation,App.integration,liveApi}.*` | Controlled DTO fixtures, frontend behavior tests, and an optional real Phase 7 API integration test. |
-| `frontend/src/assets/README.md` | Placement for the two required PNG assets, which were absent at implementation time. |
+| `frontend/src/assets/{spider-reference,spider-cutout,spidermind-ui-reference}.png`, `README.md` | Original spider and UI references, transparent runtime cutout, and asset provenance. |
+| `frontend/scripts/verify-phase8a{,-interactions}.mjs` | Local Chrome screenshots, viewport/console measurements, and real UI interaction checks. |
 | `frontend/README.md`, `.env.example` | Setup, API origin, interaction, and quality-gate documentation. |
 | `backend/scripts/prepare_phase8a_ui_smoke.py` | Copies completed Phase 6 data and builds a real local Phase 7 snapshot for UI development. |
 
@@ -391,13 +392,15 @@ cd frontend
 npm run lint
 npm run test
 npm run build
+npm run visual:verify
+npm run visual:interactions
 ```
 
 For targeted development, `pytest backend/tests/test_phase2.py`, `test_phase3.py`, `test_phase4.py`, `test_phase5.py`, or the three evidence test files isolate a phase. Controlled evaluation commands are documented in `README.md`; they may load local models and create SQLite/Qdrant artifacts. Run smoke scripts only when a bounded live search/model run is intended.
 
 ## 10. How this context was assembled
 
-The original Phase 1–6 inventory covered 165 non-cache files (93 Python files) before this document and the Phase 7 implementation were added. The Phase 7 and 8A source, tests, scripts, requirements, result JSON, and documentation are included in the guide above. Python files parsed successfully as Python AST; JSON files parsed successfully; text files decoded as UTF-8; SQLite files were opened read-only for table inventories. The application, route, schema, service, model, test, fixture, script, and evaluation behavior was cross-checked against the current source and recorded artifacts. The Phase 8A API and frontend tests passed, but visual review remains pending because the referenced PNGs and an in-app browser were unavailable. This document summarizes each file's role and important contracts; the source remains authoritative for every branch and field.
+The original Phase 1–6 inventory covered 165 non-cache files (93 Python files) before this document and the Phase 7 implementation were added. The Phase 7 and 8A source, tests, scripts, requirements, result JSON, and documentation are included in the guide above. Python files parsed successfully as Python AST; JSON files parsed successfully; text files decoded as UTF-8; SQLite files were opened read-only for table inventories. The application, route, schema, service, model, test, fixture, script, and evaluation behavior was cross-checked against the current source and recorded artifacts. Phase 8A was rendered with a real copied Phase 7 graph and compared manually against the supplied UI reference at 1920×1080, 1440×900, 1366×768, and 1024×768. Local Chrome recorded zero application console errors and warnings. The source remains authoritative for every branch and field.
 
 ## Appendix A. Complete `SPIDERMIND_` settings inventory
 

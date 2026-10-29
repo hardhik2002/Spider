@@ -1,34 +1,68 @@
 {
-  "kind": "phase8a_copied_live_phase6_to_phase7_api_client_smoke",
+  "kind": "phase8a_real_phase7_graph_ui_visual_smoke",
   "source_database": "data/phase6-live-20261010-102304.db",
   "copied_database": "data/phase8a-ui-smoke.db",
   "research_job_id": "38f3b146-6170-49c2-8b5c-64677210dd3f",
   "evidence_job_id": "249893a3-6887-45b0-95b0-dae6132aa62d",
   "graph_snapshot_id": "c259c850-3af0-4610-b29e-78019a971bb2",
-  "backend_health": "ok",
-  "backend_ready": "ok",
-  "graph_status": "COMPLETED",
-  "graph_consistency": "VALID",
-  "graph_nodes": 12,
-  "graph_edges": 19,
-  "bounded_initial_subgraph_nodes": 5,
-  "claim_status_sample": "INSUFFICIENT_EVIDENCE",
-  "sample_claim_citations": 1,
-  "contradiction_view_claims": 1,
-  "research_to_claim_paths": 1,
-  "vite_html_status": 200,
-  "vite_proxy_graph_status": "COMPLETED",
-  "backend_regression_tests_passed": 88,
-  "frontend_offline_tests_passed": 16,
-  "frontend_live_api_tests_passed": 17,
-  "frontend_lint": "PASSED",
-  "frontend_typescript_and_production_build": "PASSED",
-  "visual_verification": {
-    "spider_reference_png_present": false,
-    "ui_reference_png_present": false,
-    "browser_available": false,
-    "screenshots_captured": [],
-    "viewports_verified": []
+  "assets_present": true,
+  "asset_paths": {
+    "spider_source": "frontend/src/assets/spider-reference.png",
+    "spider_runtime_cutout": "frontend/src/assets/spider-cutout.png",
+    "ui_reference": "frontend/src/assets/spidermind-ui-reference.png"
   },
-  "accuracy_scope": "API connectivity and client behavior only; this is not a visual approval or labeled accuracy benchmark"
+  "asset_build": {
+    "runtime_png_emitted_by_vite": true,
+    "runtime_image_loaded_in_browser": true,
+    "source_and_ui_reference_excluded_from_runtime_bundle": true,
+    "absolute_windows_browser_paths": false
+  },
+  "backend_tests": { "passed": 88, "failed": 0 },
+  "frontend_tests": { "offline_passed": 17, "optional_live_api_passed": 18, "failed": 0 },
+  "lint": "PASSED",
+  "build": "PASSED",
+  "live_api": {
+    "backend_health": "ok",
+    "backend_ready": "ok",
+    "vite_html_status": 200,
+    "vite_proxy_graph_status": "COMPLETED",
+    "graph_consistency": "VALID",
+    "initial_subgraph_nodes": 5,
+    "expanded_subgraph_nodes": 11,
+    "expanded_subgraph_edges": 16,
+    "sample_claim_status": "INSUFFICIENT_EVIDENCE",
+    "sample_claim_citations": 1,
+    "contradiction_view_claims": 1,
+    "research_to_claim_paths": 1
+  },
+  "graph_node_count": 12,
+  "graph_edge_count": 19,
+  "browser": "Local Chrome 155 via Playwright; in-app browser unavailable",
+  "viewport_checks": [
+    { "size": "1920x1080", "graph_width": 1294, "spider_size": 480, "inspector_width": 380, "inspector_scrollable": true, "horizontal_overflow": false, "spider_centered": true, "selected_claim_visible": true, "console_errors": 0 },
+    { "size": "1440x900", "graph_width": 814, "spider_size": 400, "inspector_width": 380, "inspector_scrollable": true, "horizontal_overflow": false, "spider_centered": true, "selected_claim_visible": true, "console_errors": 0 },
+    { "size": "1366x768", "graph_width": 740, "spider_size": 360, "inspector_width": 380, "inspector_scrollable": true, "horizontal_overflow": false, "spider_centered": true, "selected_claim_visible": true, "console_errors": 0 },
+    { "size": "1024x768", "graph_width": 684, "spider_size": 340, "inspector_width": 340, "inspector_scrollable": true, "sidebar_collapsed": true, "horizontal_overflow": false, "spider_centered": true, "selected_claim_visible": true, "console_errors": 0 }
+  ],
+  "screenshots": [
+    "docs/phase8a/screenshots/phase8a-1920x1080.png",
+    "docs/phase8a/screenshots/phase8a-1440x900.png",
+    "docs/phase8a/screenshots/phase8a-1366x768.png",
+    "docs/phase8a/screenshots/phase8a-1024x768.png"
+  ],
+  "console_errors": 0,
+  "console_warnings": 0,
+  "failed_api_requests": 0,
+  "interactions_verified": [
+    "graph load", "search", "select claim", "claim inspector", "citation exact text and offsets",
+    "supporting evidence", "contradictory evidence", "node expansion", "document and public URL",
+    "source group", "node and claim-status filters", "contradictions view", "directed path highlight",
+    "zoom", "pan", "reduced motion"
+  ],
+  "known_visual_differences": [
+    "The reference mockup shows many illustrative nodes and sample jobs; the UI shows only the 12 persisted nodes and real job status.",
+    "The transparent spider cutout preserves the source identity but reconstructs surface details, so it is not pixel-identical to the source PNG.",
+    "Web lines and glow are deliberately quieter than the mockup so semantic edges and exact evidence remain readable."
+  ],
+  "accuracy_scope": "Visual and interaction verification of a real copied Phase 7 graph; this does not benchmark research factual accuracy."
 }

@@ -25,6 +25,7 @@ function Canvas(props: Props) {
   const flow = useReactFlow<UiNode>()
   const workspaceRef = useRef<HTMLDivElement>(null)
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
+  const [flowReady, setFlowReady] = useState(false)
   const [zoom, setZoom] = useState(0.76)
   const [labels, setLabels] = useState(true)
   const [web, setWeb] = useState(true)
@@ -49,10 +50,10 @@ function Canvas(props: Props) {
   }, [])
   useEffect(() => {
     if (!props.graph.nodes.length) { initialized.current = false; return }
-    if (!dimensions.width || !dimensions.height || initialized.current) return
+    if (!flowReady || !dimensions.width || !dimensions.height || initialized.current) return
     initialized.current = true
     void flow.setCenter(0, 0, { zoom: layoutZoom, duration: 0 })
-  }, [props.graph.nodes.length, dimensions, layoutZoom, flow])
+  }, [props.graph.nodes.length, dimensions, layoutZoom, flow, flowReady])
   useEffect(() => {
     if (!props.focusId) { lastFocus.current = null; return }
     if (lastFocus.current === props.focusId) return
@@ -77,6 +78,7 @@ function Canvas(props: Props) {
     <div className="graph-workspace-label"><span className="eyebrow">LIVE RESEARCH TOPOLOGY</span><strong>Spider graph</strong><span>{visible.nodes.length} nodes in view · {visible.edges.length} connections{props.graph.truncated ? ' · bounded view' : ''}</span></div>
     <ReactFlow
       nodes={visual.nodes} edges={visual.edges} nodeTypes={nodeTypes} edgeTypes={edgeTypes}
+      onInit={() => setFlowReady(true)}
       onNodeClick={handleClick} onNodeDoubleClick={handleDoubleClick} onPaneClick={props.onClear}
       onMoveEnd={(_event, viewport) => setZoom(viewport.zoom)}
       minZoom={0.18} maxZoom={1.65}

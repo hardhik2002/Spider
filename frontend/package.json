@@ -8,7 +8,9 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "lint": "eslint .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "visual:verify": "node scripts/verify-phase8a.mjs",
+    "visual:interactions": "node scripts/verify-phase8a-interactions.mjs"
   },
   "dependencies": {
     "@xyflow/react": "^12.12.0",

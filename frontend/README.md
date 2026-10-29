@@ -4,7 +4,7 @@ React, TypeScript, Vite, and React Flow display the existing Phase 7 knowledge/c
 
 ## Required assets
 
-Place the supplied `spider-reference.png` and `spidermind-ui-reference.png` in `src/assets/`. The spider image is rendered by `SpiderHub`; the UI reference is used only for design review. If the spider image is absent, the workspace explicitly marks the asset as pending.
+The supplied `spider-reference.png` and `spidermind-ui-reference.png` are stored in `src/assets/`. The original spider has a white background and overlaid stock text, so `SpiderHub` renders the transparent `spider-cutout.png` derivative. The original remains unchanged for comparison. The UI reference is used only for design review and is never rendered as the app background. The cutout retains the black spider, angular pose, and glowing red X, with reconstructed surface details.
 
 ## Start locally
 
@@ -59,7 +59,16 @@ npm run test
 npm run build
 ```
 
-Tests use controlled Phase 7 response fixtures and do not require a live backend. The live UI smoke requires a running backend and the supplied spider image for visual approval. The React Flow canvas loads one bounded subgraph at a time; very large graph exploration would benefit from server-side search and viewport-aware paging.
+Tests use controlled Phase 7 response fixtures and do not require a live backend. The live UI smoke requires a running backend. The React Flow canvas loads bounded neighborhoods and merges them on demand; very large graph exploration would benefit from server-side search and viewport-aware paging.
+
+With the copied live backend and Vite server running, local Chrome visual checks can be repeated with:
+
+```powershell
+npm run visual:verify
+npm run visual:interactions
+```
+
+Set `CHROME_PATH` if Chrome is not at the default Windows installation path. The visual script captures the live expanded graph at 1920×1080, 1440×900, 1366×768, and 1024×768 under `docs/phase8a/screenshots/`, and records viewport geometry and console errors in `measurements.json`. The interaction script checks search, claim evidence, citation offsets, document links, source groups, filters, contradictions, paths, zoom, pan, and reduced motion. The screenshots use the real 12-node/19-edge copied Phase 7 snapshot. The design reference shows many more decorative nodes and sample jobs; the live UI displays only persisted graph data and actual job status.
 
 With the copied live backend running, the optional API-client integration test is:
 

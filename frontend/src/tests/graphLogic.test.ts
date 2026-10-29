@@ -75,6 +75,9 @@ describe('Phase 7 graph adapter', () => {
           expect(cardLeft).toBeGreaterThan(spiderRight)
         }
       }
+      const bottomMiddle = positions.get('evidence_chunk:2')!
+      const firstLower = positions.get('citation:1')!
+      expect((firstLower.y - bottomMiddle.y) * viewport.zoom).toBeGreaterThan(90)
     }
   })
 })

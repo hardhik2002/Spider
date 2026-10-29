@@ -86,9 +86,34 @@ try {
   await page.waitForTimeout(350)
   assert.notEqual(await page.locator('.zoom-readout').innerText(), beforeZoom)
   verified.push('zoom')
+  const graphBox = await page.locator('.graph-workspace').boundingBox()
+  assert.ok(graphBox)
+  const viewportBeforePan = await page.locator('.react-flow__viewport').getAttribute('style')
+  const panPoint = await page.evaluate(({ x, y, width, height }) => {
+    for (const yFactor of [0.75, 0.85, 0.6, 0.5]) {
+      for (const xFactor of [0.12, 0.28, 0.5, 0.72, 0.88]) {
+        const point = { x: x + width * xFactor, y: y + height * yFactor }
+        if (globalThis.document.elementFromPoint(point.x, point.y)?.classList.contains('react-flow__pane')) return point
+      }
+    }
+    return null
+  }, graphBox)
+  assert.ok(panPoint, 'No visible graph pane target for pan')
+  const panX = panPoint.x
+  const panY = panPoint.y
+  await page.mouse.move(panX, panY)
+  await page.mouse.down()
+  await page.mouse.move(panX + 80, panY - 35, { steps: 6 })
+  await page.mouse.up()
+  assert.notEqual(await page.locator('.react-flow__viewport').getAttribute('style'), viewportBeforePan)
+  verified.push('pan')
   await page.emulateMedia({ reducedMotion: 'reduce' })
-  const animationDuration = await page.locator('.spider-halo').evaluate((element) => getComputedStyle(element).animationDuration)
+  const animationDuration = await page.locator('.spider-halo').evaluate((element) => globalThis.getComputedStyle(element).animationDuration)
   assert.ok(animationDuration === '1e-05s' || animationDuration === '0.00001s' || animationDuration === '0s')
+  const animatedEdges = page.locator('.react-flow__edge.animated path')
+  if (await animatedEdges.count()) {
+    assert.equal(await animatedEdges.first().evaluate((element) => globalThis.getComputedStyle(element).animationName), 'none')
+  }
   verified.push('reduced motion')
 
   assert.deepEqual(consoleErrors, [])
