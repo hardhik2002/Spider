@@ -7,7 +7,7 @@ import pytest
 from app.core.config import Settings
 from app.db.database import initialize_database, make_engine, make_session_factory
 from app.evidence.models import ClaimEvidenceRelation
-from app.graph.models import GraphEdge, GraphSnapshot
+from app.graph.models import GraphEdge
 from app.graph.projection import GraphProjection
 from app.graph.service import GraphService
 from app.graph.types import EdgeType, NodeType
@@ -34,27 +34,43 @@ async def test_graph_build_all_types_mirrors_uncited_and_idempotency(tmp_path):
         )
         assert set(node["type"] for node in graph.nodes.values()) == set(NodeType)
         assert set(edge["type"] for edge in graph.edges.values()) == set(EdgeType)
-        assert len([
-            edge for edge in graph.edges.values()
-            if edge["type"] == EdgeType.PART_OF_DOCUMENT
-            and edge["source"] == f"evidence_chunk:{ids['chunks'][0]}"
-        ]) == 2
-        assert len([
-            edge for edge in graph.edges.values()
-            if edge["type"] == EdgeType.MEMBER_OF_SOURCE_GROUP
-            and edge["target"] == f"source_group:{ids['groups'][0]}"
-        ]) == 2
+        assert (
+            len(
+                [
+                    edge
+                    for edge in graph.edges.values()
+                    if edge["type"] == EdgeType.PART_OF_DOCUMENT
+                    and edge["source"] == f"evidence_chunk:{ids['chunks'][0]}"
+                ]
+            )
+            == 2
+        )
+        assert (
+            len(
+                [
+                    edge
+                    for edge in graph.edges.values()
+                    if edge["type"] == EdgeType.MEMBER_OF_SOURCE_GROUP
+                    and edge["target"] == f"source_group:{ids['groups'][0]}"
+                ]
+            )
+            == 2
+        )
         uncited = [
-            edge for edge in graph.edges.values()
+            edge
+            for edge in graph.edges.values()
             if edge["source"] == f"claim:{ids['claims']['INSUFFICIENT_EVIDENCE']}"
             and edge["type"] == EdgeType.SUPPORTED_BY
         ]
         assert len(uncited) == 1 and uncited[0]["properties"]["citation_valid"] is False
         assert not any(
             edge["source"] == f"claim:{ids['claims']['INSUFFICIENT_EVIDENCE']}"
-            and edge["type"] == EdgeType.HAS_CITATION for edge in graph.edges.values()
+            and edge["type"] == EdgeType.HAS_CITATION
+            for edge in graph.edges.values()
         )
-        assert not any("other job secret" in json.dumps(node).lower() for node in graph.nodes.values())
+        assert not any(
+            "other job secret" in json.dumps(node).lower() for node in graph.nodes.values()
+        )
         repeated_job, repeated = await service.start(ids["research_job_id"], ids["evidence_job_id"])
         assert repeated.id == saved.id and repeated_job.id == job.id
         assert repeated.graph_content_hash == saved.graph_content_hash
@@ -67,9 +83,13 @@ async def test_graph_build_all_types_mirrors_uncited_and_idempotency(tmp_path):
         assert consistency["cross_job_leakage_count"] == 0
 
         async with sessions() as session:
-            relation = (await session.scalars(select(ClaimEvidenceRelation).where(
-                ClaimEvidenceRelation.claim_id == ids["claims"]["SUPPORTED"]
-            ))).one()
+            relation = (
+                await session.scalars(
+                    select(ClaimEvidenceRelation).where(
+                        ClaimEvidenceRelation.claim_id == ids["claims"]["SUPPORTED"]
+                    )
+                )
+            ).one()
             relation.retrieval_score = 0.4
             await session.commit()
         changed_job, changed = await service.start(ids["research_job_id"], ids["evidence_job_id"])
@@ -95,18 +115,20 @@ async def test_graph_validation_detects_missing_endpoint_and_uncited_filter(tmp_
     ids = await seed_graph_fixture(sessions)
     service = GraphService(sessions, Settings())
     try:
-        _, snapshot = await service.start(
-            ids["research_job_id"], ids["evidence_job_id"], False
-        )
+        _, snapshot = await service.start(ids["research_job_id"], ids["evidence_job_id"], False)
         await service.tasks.pop()
         saved = await service.store.get_snapshot(snapshot.id)
         assert saved.status == "COMPLETED"
         assert saved.edge_count == 40
         async with sessions() as session:
-            edge = (await session.scalars(select(GraphEdge).where(
-                GraphEdge.snapshot_id == saved.id,
-                GraphEdge.edge_type == EdgeType.HAS_CITATION,
-            ))).first()
+            edge = (
+                await session.scalars(
+                    select(GraphEdge).where(
+                        GraphEdge.snapshot_id == saved.id,
+                        GraphEdge.edge_type == EdgeType.HAS_CITATION,
+                    )
+                )
+            ).first()
             edge.target_node_id = "citation:missing"
             await session.commit()
         result = await service.consistency(ids["research_job_id"], saved.id)
@@ -134,7 +156,8 @@ async def test_graph_schema_migrates_additively_from_six(tmp_path):
     with sqlite3.connect(path) as connection:
         assert connection.execute("PRAGMA user_version").fetchone()[0] == 7
         assert connection.execute("SELECT value FROM existing_marker").fetchone()[0] == "preserved"
-        tables = {row[0] for row in connection.execute(
-            "SELECT name FROM sqlite_master WHERE type='table'"
-        )}
+        tables = {
+            row[0]
+            for row in connection.execute("SELECT name FROM sqlite_master WHERE type='table'")
+        }
         assert {"graph_build_jobs", "graph_snapshots", "graph_nodes", "graph_edges"} <= tables

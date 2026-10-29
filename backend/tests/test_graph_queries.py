@@ -5,7 +5,6 @@ import json
 import pytest
 from app.core.config import Settings
 from app.db.database import initialize_database, make_engine, make_session_factory
-from app.graph.projection import GraphProjection
 from app.graph.query import GraphQueryService
 from app.graph.service import GraphService
 from app.graph.types import EdgeType, NodeType
@@ -28,9 +27,12 @@ async def test_graph_queries_paths_neighborhood_analytics_and_export(tmp_path):
         assert query.list_nodes(graph, claim_status="CONTESTED")["total"] == 1
         assert query.list_nodes(graph, node_type=NodeType.CLAIM, limit=2, offset=1)["total"] == 6
         assert query.list_edges(graph, edge_type=EdgeType.SUPPORTED_BY)["total"] == 5
-        assert query.list_edges(
-            graph, claim_id=ids["claims"]["CONTESTED"], edge_type=EdgeType.CONTRADICTED_BY
-        )["total"] == 1
+        assert (
+            query.list_edges(
+                graph, claim_id=ids["claims"]["CONTESTED"], edge_type=EdgeType.CONTRADICTED_BY
+            )["total"]
+            == 1
+        )
         contested = query.claim_view(graph, ids["claims"]["CONTESTED"])
         assert contested["status"] == "CONTESTED"
         assert len(contested["supporting_chunks"]) == 1
@@ -43,7 +45,9 @@ async def test_graph_queries_paths_neighborhood_analytics_and_export(tmp_path):
         citation = contested["citations"][0]["id"]
         paths = graph.shortest_paths(root, citation, max_hops=8, max_paths=3)
         assert paths and [edge["type"] for edge in paths[0]["edges"]] == [
-            EdgeType.HAS_SUBQUESTION, EdgeType.HAS_CLAIM, EdgeType.HAS_CITATION,
+            EdgeType.HAS_SUBQUESTION,
+            EdgeType.HAS_CLAIM,
+            EdgeType.HAS_CITATION,
         ]
         assert graph.shortest_paths(claim, root, max_hops=8, max_paths=3) == []
         neighborhood = graph.neighborhood(claim, depth=1, direction="outgoing", max_nodes=3)
@@ -57,8 +61,10 @@ async def test_graph_queries_paths_neighborhood_analytics_and_export(tmp_path):
         assert summary["claims_with_multiple_independent_sources"] == 1
         assert summary["source_group_contribution"][ids["groups"][0]]["unique_documents"] == 2
         assert await query.node_detail(
-            graph, f"evidence_chunk:{ids['chunks'][0]}",
-            include_text=True, research_job_id=ids["research_job_id"],
+            graph,
+            f"evidence_chunk:{ids['chunks'][0]}",
+            include_text=True,
+            research_job_id=ids["research_job_id"],
         )
         payload = query.export(graph, snapshot)
         serialized = query.exporter.canonical_json(payload)
@@ -66,8 +72,9 @@ async def test_graph_queries_paths_neighborhood_analytics_and_export(tmp_path):
         assert serialized == query.exporter.canonical_json(query.export(graph, snapshot))
         assert payload["graph"]["graph_content_hash"] == snapshot.graph_content_hash
         assert "vector_id" not in serialized and "embedding" not in serialized
-        assert all(node["id"] != "claim:" + ids["claims"].get("OTHER", "")
-                   for node in payload["nodes"])
+        assert all(
+            node["id"] != "claim:" + ids["claims"].get("OTHER", "") for node in payload["nodes"]
+        )
     finally:
         await service.shutdown()
         await engine.dispose()

@@ -34,7 +34,6 @@ async def main() -> None:
             roundtrip = json.loads(query.exporter.canonical_json(export)) == export
             contested = query.claim_view(graph, ids["claims"]["CONTESTED"])
             root = f"research:{ids['research_job_id']}"
-            contested_key = f"claim:{ids['claims']['CONTESTED']}"
             citation = contested["citations"][0]["id"]
             query_checks = {
                 "contested_support_chunks": {
@@ -47,33 +46,46 @@ async def main() -> None:
                 },
                 "insufficient_claims": {
                     "expected": [f"claim:{ids['claims']['INSUFFICIENT_EVIDENCE']}"],
-                    "actual": [x["id"] for x in query.list_nodes(
-                        graph, node_type=NodeType.CLAIM,
-                        claim_status="INSUFFICIENT_EVIDENCE",
-                    )["nodes"]],
+                    "actual": [
+                        x["id"]
+                        for x in query.list_nodes(
+                            graph,
+                            node_type=NodeType.CLAIM,
+                            claim_status="INSUFFICIENT_EVIDENCE",
+                        )["nodes"]
+                    ],
                 },
                 "contradiction_source_groups": {
                     "expected": [f"source_group:{ids['groups'][1]}"],
-                    "actual": sorted({
-                        f"source_group:{edge['properties']['source_group_id']}"
-                        for edge in contested["edges"]
-                        if edge["type"] == EdgeType.CONTRADICTED_BY
-                    }),
+                    "actual": sorted(
+                        {
+                            f"source_group:{edge['properties']['source_group_id']}"
+                            for edge in contested["edges"]
+                            if edge["type"] == EdgeType.CONTRADICTED_BY
+                        }
+                    ),
                 },
                 "research_to_citation_path": {
                     "expected": ["HAS_SUBQUESTION", "HAS_CLAIM", "HAS_CITATION"],
-                    "actual": [x["type"] for x in graph.shortest_paths(
-                        root, citation, max_hops=8, max_paths=1
-                    )[0]["edges"]],
+                    "actual": [
+                        x["type"]
+                        for x in graph.shortest_paths(root, citation, max_hops=8, max_paths=1)[0][
+                            "edges"
+                        ]
+                    ],
                 },
             }
             query_accuracy = sum(
                 item["expected"] == item["actual"] for item in query_checks.values()
             ) / len(query_checks)
             async with sessions() as session:
-                relation = (await session.scalars(select(ClaimEvidenceRelation).where(
-                    ClaimEvidenceRelation.claim_id == ids["claims"]["SUPPORTED"]
-                ))).one()
+                relation = (
+                    await session.scalars(
+                        select(ClaimEvidenceRelation).where(
+                            ClaimEvidenceRelation.claim_id == ids["claims"]["SUPPORTED"]
+                        )
+                    )
+                ).one()
                 relation.retrieval_score = 0.4
                 await session.commit()
             _, changed = await service.start(ids["research_job_id"], ids["evidence_job_id"])
@@ -95,14 +107,21 @@ async def main() -> None:
                 "expected_node_count": 24,
                 "expected_edge_count": 42,
                 "coverage_metrics": {
-                    key: validation[key] for key in (
-                        "node_coverage", "edge_coverage", "claim_provenance_path_coverage",
-                        "citation_path_coverage", "source_group_path_coverage",
+                    key: validation[key]
+                    for key in (
+                        "node_coverage",
+                        "edge_coverage",
+                        "claim_provenance_path_coverage",
+                        "citation_path_coverage",
+                        "source_group_path_coverage",
                     )
                 },
                 "integrity_metrics": {
-                    key: validation[key] for key in (
-                        "orphan_node_count", "orphan_edge_count", "cross_job_leakage_count",
+                    key: validation[key]
+                    for key in (
+                        "orphan_node_count",
+                        "orphan_edge_count",
+                        "cross_job_leakage_count",
                         "connected_components",
                     )
                 },
@@ -117,7 +136,8 @@ async def main() -> None:
                     "changed_data_new_snapshot": changed.id != snapshot.id,
                 },
                 "export": {
-                    "format": "json", "round_trip_exact": roundtrip,
+                    "format": "json",
+                    "round_trip_exact": roundtrip,
                     "deterministic_ordering": (
                         [x["id"] for x in export["nodes"]]
                         == sorted(x["id"] for x in export["nodes"])
@@ -152,11 +172,17 @@ async def main() -> None:
             }
             path = Path("docs/phase7-graph-results.json")
             path.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
-            print(json.dumps({
-                "result": str(path), "nodes": snapshot.node_count,
-                "edges": snapshot.edge_count, "validation": validation["status"],
-                "query_accuracy": query_accuracy,
-            }))
+            print(
+                json.dumps(
+                    {
+                        "result": str(path),
+                        "nodes": snapshot.node_count,
+                        "edges": snapshot.edge_count,
+                        "validation": validation["status"],
+                        "query_accuracy": query_accuracy,
+                    }
+                )
+            )
         finally:
             await service.shutdown()
             await engine.dispose()

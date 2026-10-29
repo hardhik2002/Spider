@@ -6,13 +6,12 @@ import shutil
 import tempfile
 from pathlib import Path
 
-from sqlalchemy import select
-
 from app.core.config import Settings
 from app.db.database import initialize_database, make_engine, make_session_factory
 from app.evidence.models import EvidenceJob
 from app.graph.query import GraphQueryService
 from app.graph.service import GraphService
+from sqlalchemy import select
 
 
 async def main() -> None:
@@ -29,9 +28,13 @@ async def main() -> None:
         query = GraphQueryService(service)
         try:
             async with sessions() as session:
-                evidence = (await session.scalars(select(EvidenceJob).where(
-                    EvidenceJob.status == "COMPLETED"
-                ).order_by(EvidenceJob.completed_at.desc()))).first()
+                evidence = (
+                    await session.scalars(
+                        select(EvidenceJob)
+                        .where(EvidenceJob.status == "COMPLETED")
+                        .order_by(EvidenceJob.completed_at.desc())
+                    )
+                ).first()
             if evidence is None:
                 raise ValueError("No completed Phase 6 evidence job in live snapshot")
             _, snapshot = await service.start(evidence.research_job_id, evidence.id)
@@ -45,26 +48,40 @@ async def main() -> None:
                 claim_view = query.claim_view(graph, claim["properties"]["claim_id"])
                 citation_nodes = claim_view["citations"]
                 research_path = graph.shortest_paths(
-                    f"research:{evidence.research_job_id}", claim["id"],
-                    max_hops=8, max_paths=1,
+                    f"research:{evidence.research_job_id}",
+                    claim["id"],
+                    max_hops=8,
+                    max_paths=1,
                 )
-                citation_path = graph.shortest_paths(
-                    claim["id"], citation_nodes[0]["id"], max_hops=8, max_paths=1
-                ) if citation_nodes else []
+                citation_path = (
+                    graph.shortest_paths(
+                        claim["id"], citation_nodes[0]["id"], max_hops=8, max_paths=1
+                    )
+                    if citation_nodes
+                    else []
+                )
                 group_nodes = claim_view["source_groups"]
-                source_path = graph.shortest_paths(
-                    claim["id"], group_nodes[0]["id"], max_hops=8, max_paths=1
-                ) if group_nodes else []
-                examples.append({
-                    "claim_id": claim["id"], "status": claim["properties"]["status"],
-                    "research_to_claim_node_ids": [x["id"] for x in research_path[0]["nodes"]]
-                    if research_path else [],
-                    "claim_to_citation_node_ids": [x["id"] for x in citation_path[0]["nodes"]]
-                    if citation_path else [],
-                    "claim_to_source_group_node_ids": [x["id"] for x in source_path[0]["nodes"]]
-                    if source_path else [],
-                    "citation_ids": [x["id"] for x in citation_nodes],
-                })
+                source_path = (
+                    graph.shortest_paths(claim["id"], group_nodes[0]["id"], max_hops=8, max_paths=1)
+                    if group_nodes
+                    else []
+                )
+                examples.append(
+                    {
+                        "claim_id": claim["id"],
+                        "status": claim["properties"]["status"],
+                        "research_to_claim_node_ids": [x["id"] for x in research_path[0]["nodes"]]
+                        if research_path
+                        else [],
+                        "claim_to_citation_node_ids": [x["id"] for x in citation_path[0]["nodes"]]
+                        if citation_path
+                        else [],
+                        "claim_to_source_group_node_ids": [x["id"] for x in source_path[0]["nodes"]]
+                        if source_path
+                        else [],
+                        "citation_ids": [x["id"] for x in citation_nodes],
+                    }
+                )
             result = {
                 "kind": "offline_live_phase6_to_phase7_smoke_not_labeled_accuracy_benchmark",
                 "source_database": str(source),
@@ -87,20 +104,32 @@ async def main() -> None:
                 "contradiction_edges": summary["contradiction_edges"],
                 "path_examples": examples,
                 "integrity_metrics": {
-                    key: validation[key] for key in (
-                        "node_coverage", "edge_coverage", "claim_provenance_path_coverage",
-                        "citation_path_coverage", "source_group_path_coverage",
-                        "orphan_node_count", "orphan_edge_count", "cross_job_leakage_count",
+                    key: validation[key]
+                    for key in (
+                        "node_coverage",
+                        "edge_coverage",
+                        "claim_provenance_path_coverage",
+                        "citation_path_coverage",
+                        "source_group_path_coverage",
+                        "orphan_node_count",
+                        "orphan_edge_count",
+                        "cross_job_leakage_count",
                     )
                 },
                 "timings_ms": json.loads(snapshot.timings_json),
             }
             path = Path("docs/phase7-live-smoke-results.json")
             path.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
-            print(json.dumps({
-                "result": str(path), "nodes": snapshot.node_count,
-                "edges": snapshot.edge_count, "validation": validation["status"],
-            }))
+            print(
+                json.dumps(
+                    {
+                        "result": str(path),
+                        "nodes": snapshot.node_count,
+                        "edges": snapshot.edge_count,
+                        "validation": validation["status"],
+                    }
+                )
+            )
         finally:
             await service.shutdown()
             await engine.dispose()

@@ -5,7 +5,7 @@ from typing import Protocol
 
 from sqlalchemy import delete, select
 
-from app.graph.models import GraphEdge, GraphNode, GraphSnapshot
+from app.graph.models import GraphBuildJob, GraphEdge, GraphNode, GraphSnapshot
 
 
 def node_record(row: GraphNode) -> dict:
@@ -68,17 +68,17 @@ class SQLiteGraphStore:
 
     async def upsert_nodes(self, snapshot_id: str, nodes: dict[str, dict]) -> tuple[int, int]:
         async with self.sessions() as session:
-            existing = set(
-                (
-                    await session.scalars(
-                        select(GraphNode.node_id).where(GraphNode.snapshot_id == snapshot_id)
-                    )
-                ).all()
-            )
+            rows = (
+                await session.scalars(select(GraphNode).where(GraphNode.snapshot_id == snapshot_id))
+            ).all()
+            existing = {row.node_id: row for row in rows}
             created = 0
             for key in sorted(nodes):
                 item = nodes[key]
                 if key in existing:
+                    existing[key].node_type = item["type"]
+                    existing[key].label = item["label"]
+                    existing[key].properties_json = json.dumps(item["properties"], sort_keys=True)
                     continue
                 session.add(
                     GraphNode(
@@ -96,27 +96,21 @@ class SQLiteGraphStore:
 
     async def upsert_edges(self, snapshot_id: str, edges: dict[str, dict]) -> tuple[int, int]:
         async with self.sessions() as session:
-            existing = set(
-                (
-                    await session.scalars(
-                        select(GraphEdge.edge_id).where(GraphEdge.snapshot_id == snapshot_id)
-                    )
-                ).all()
-            )
+            rows = (
+                await session.scalars(select(GraphEdge).where(GraphEdge.snapshot_id == snapshot_id))
+            ).all()
+            existing = {row.edge_id: row for row in rows}
             created = 0
             for key in sorted(edges):
                 item = edges[key]
                 if key in existing:
+                    existing[key].edge_type = item["type"]
+                    existing[key].source_node_id = item["source"]
+                    existing[key].target_node_id = item["target"]
+                    existing[key].source_entity_id = item["properties"]["source_entity_id"]
+                    existing[key].properties_json = json.dumps(item["properties"], sort_keys=True)
                     continue
                 props = item["properties"]
-                source_entity_id = str(
-                    props.get("claim_evidence_relation_id")
-                    or props.get("citation_id")
-                    or props.get("claim_origin_id")
-                    or props.get("chunk_source_id")
-                    or props.get("document_id")
-                    or ""
-                )
                 session.add(
                     GraphEdge(
                         snapshot_id=snapshot_id,
@@ -124,7 +118,7 @@ class SQLiteGraphStore:
                         edge_type=item["type"],
                         source_node_id=item["source"],
                         target_node_id=item["target"],
-                        source_entity_id=source_entity_id,
+                        source_entity_id=props["source_entity_id"],
                         properties_json=json.dumps(props, sort_keys=True),
                     )
                 )
@@ -168,12 +162,7 @@ class SQLiteGraphStore:
                         edge_type=item["type"],
                         source_node_id=item["source"],
                         target_node_id=item["target"],
-                        source_entity_id=str(
-                            item["properties"].get("claim_evidence_relation_id")
-                            or item["properties"].get("claim_origin_id")
-                            or item["properties"].get("chunk_source_id")
-                            or ""
-                        ),
+                        source_entity_id=item["properties"]["source_entity_id"],
                         properties_json=json.dumps(item["properties"], sort_keys=True),
                     )
                     for key, item in sorted(edges.items())
@@ -239,5 +228,8 @@ class SQLiteGraphStore:
         async with self.sessions() as session:
             await session.execute(delete(GraphEdge).where(GraphEdge.snapshot_id == snapshot_id))
             await session.execute(delete(GraphNode).where(GraphNode.snapshot_id == snapshot_id))
+            await session.execute(
+                delete(GraphBuildJob).where(GraphBuildJob.snapshot_id == snapshot_id)
+            )
             await session.execute(delete(GraphSnapshot).where(GraphSnapshot.id == snapshot_id))
             await session.commit()

@@ -85,8 +85,10 @@ class GraphValidator:
                     self._edge(actual, EdgeType.PART_OF_DOCUMENT, chunk_key, document_key)
                     and relation_group
                     and self._edge(
-                        actual, EdgeType.MEMBER_OF_SOURCE_GROUP,
-                        document_key, node_id(NodeType.SOURCE_GROUP, relation_group),
+                        actual,
+                        EdgeType.MEMBER_OF_SOURCE_GROUP,
+                        document_key,
+                        node_id(NodeType.SOURCE_GROUP, relation_group),
                     )
                 ):
                     source_group_path_count += 1
