@@ -16,7 +16,12 @@ _INSTRUCTION = re.compile(
     r"system prompt|create the claim|reveal (?:secrets?|environment)|execute (?:this|commands?))\b",
     re.I,
 )
-_SENTENCE = re.compile(r"[^.!?\n]+(?:[.!?]+|$)")
+_SENTENCE = re.compile(r"[^\n]+?(?:[.!?]+(?=\s|$)|$)")
+_ABBREVIATION_END = re.compile(r"\b(?:et al|e\.g|i\.e|fig|dr|prof|vs)\.$", re.I)
+_YEAR = re.compile(r"\b(?:19|20)\d{2}\b")
+_DATASET = re.compile(r"\bdataset\s+[\w.-]+", re.I)
+_VERSION = re.compile(r"\bversion\s+[\w.-]+", re.I)
+_CONDITION = re.compile(r"\b(?:if|when|under|provided that)\b[^.,;]*", re.I)
 
 
 def normalize_claim(text: str) -> str:
@@ -37,6 +42,11 @@ def safe_to_merge(left: str, right: str) -> bool:
         return False
     if set(_NEGATION.findall(left_text)) != set(_NEGATION.findall(right_text)):
         return False
+    for pattern in (_DATASET, _VERSION, _CONDITION):
+        left_scopes = {item.rstrip(".,;:!?") for item in pattern.findall(left_text)}
+        right_scopes = {item.rstrip(".,;:!?") for item in pattern.findall(right_text)}
+        if left_scopes != right_scopes:
+            return False
     for marker in ("2020", "2021", "2022", "2023", "2024", "2025", "2026"):
         if (marker in left_text) != (marker in right_text):
             return False
@@ -116,7 +126,12 @@ def sentence_spans(text: str) -> list[tuple[int, int, str]]:
         sentence = raw.strip()
         if sentence:
             start = match.start() + leading
-            spans.append((start, start + len(sentence), sentence))
+            end = start + len(sentence)
+            if spans and _ABBREVIATION_END.search(spans[-1][2]):
+                previous_start, _, _ = spans.pop()
+                spans.append((previous_start, end, text[previous_start:end]))
+            else:
+                spans.append((start, end, sentence))
     return spans
 
 
@@ -151,6 +166,13 @@ def decide_claim(relations: list[dict]) -> dict:
         status = ClaimStatus.PARTIALLY_SUPPORTED
     else:
         status = ClaimStatus.INSUFFICIENT_EVIDENCE
+    uncited_strong = any(
+        row["relation"] in {DecisionLabel.DIRECT_SUPPORT, DecisionLabel.CONTRADICTION}
+        and not row["valid_citation"]
+        for row in relations
+    )
+    if uncited_strong and status != ClaimStatus.CONTESTED:
+        status = ClaimStatus.INSUFFICIENT_EVIDENCE
     confidence = {
         ClaimStatus.CORROBORATED: ConfidenceTier.HIGH,
         ClaimStatus.SUPPORTED: ConfidenceTier.MEDIUM,
@@ -165,3 +187,25 @@ def decide_claim(relations: list[dict]) -> dict:
         "needs_more_verification": status
         in {ClaimStatus.CONTESTED, ClaimStatus.INSUFFICIENT_EVIDENCE},
     }
+
+
+def apply_qualifier_safety(
+    decision: DecisionLabel, important_qualifier_mismatch: bool
+) -> DecisionLabel:
+    if not important_qualifier_mismatch:
+        return decision
+    if decision == DecisionLabel.DIRECT_SUPPORT:
+        return DecisionLabel.PARTIAL_SUPPORT
+    if decision == DecisionLabel.CONTRADICTION:
+        return DecisionLabel.UNCLEAR
+    return decision
+
+
+def scope_mismatch(claim: str, evidence: str) -> bool:
+    """Reject direct relation when both texts name different explicit scopes."""
+    for pattern in (_YEAR, _DATASET, _VERSION):
+        claim_scope = {value.casefold().rstrip(".,;:!?") for value in pattern.findall(claim)}
+        evidence_scope = {value.casefold().rstrip(".,;:!?") for value in pattern.findall(evidence)}
+        if claim_scope and evidence_scope and not claim_scope.intersection(evidence_scope):
+            return True
+    return False

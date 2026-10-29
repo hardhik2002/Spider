@@ -50,10 +50,11 @@ class DecisionLabel(StrEnum):
 
 class EvidenceRequest(BaseModel):
     agent_run_id: str | None = None
-    max_subquestions: int = Field(default=8, ge=1, le=30)
-    max_claims_per_subquestion: int = Field(default=20, ge=1, le=40)
-    evidence_candidates_per_claim: int = Field(default=20, ge=1, le=50)
-    final_evidence_per_claim: int = Field(default=8, ge=1, le=30)
+    max_subquestions: int = Field(default=4, ge=1, le=30)
+    max_claims_per_subquestion: int = Field(default=5, ge=1, le=40)
+    evidence_candidates_per_claim: int = Field(default=8, ge=1, le=50)
+    final_evidence_per_claim: int = Field(default=4, ge=1, le=30)
+    max_runtime_seconds: int = Field(default=1800, ge=1, le=7200)
     use_nli: bool = True
     use_llm_adjudication: bool = True
     adjudicate_all: bool = False
@@ -67,6 +68,13 @@ class EvidenceRequest(BaseModel):
     def valid_limits(self):
         if self.final_evidence_per_claim > self.evidence_candidates_per_claim:
             raise ValueError("final_evidence_per_claim exceeds evidence_candidates_per_claim")
+        if (
+            self.max_subquestions
+            * self.max_claims_per_subquestion
+            * self.evidence_candidates_per_claim
+            > 2000
+        ):
+            raise ValueError("Maximum claim/evidence pair budget exceeds 2,000")
         return self
 
 

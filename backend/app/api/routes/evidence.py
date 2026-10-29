@@ -28,9 +28,7 @@ async def _job(request: Request, research_job_id: UUID, job_id: UUID) -> Evidenc
 
 
 @router.post("/{research_job_id}/evidence", status_code=status.HTTP_202_ACCEPTED)
-async def start_evidence(
-    research_job_id: UUID, payload: EvidenceRequest, request: Request
-) -> dict:
+async def start_evidence(research_job_id: UUID, payload: EvidenceRequest, request: Request) -> dict:
     try:
         row = await request.app.state.evidence_service.start(str(research_job_id), payload)
     except KeyError as exc:
@@ -50,15 +48,39 @@ async def evidence_status(research_job_id: UUID, job_id: UUID, request: Request)
         "agent_run_id": row.agent_run_id,
         "status": row.status,
         "stage": row.stage,
-        **{name: counters.get(name, 0) for name in (
-            "subquestions_processed", "claims_extracted", "claims_normalized",
-            "claims_deduplicated", "support_relations", "direct_support_relations", "contradiction_relations",
-            "neutral_relations", "claims_corroborated", "claims_supported",
-            "claims_contested", "claims_contradicted", "claims_partially_supported",
-            "claims_insufficient_evidence", "citations_created", "citations_validated",
-            "citation_failures", "nli_pairs", "nli_batches", "llm_extraction_calls",
-            "llm_adjudication_calls",
-        )},
+        **{
+            name: counters.get(name, 0)
+            for name in (
+                "subquestions_processed",
+                "claims_extracted",
+                "claims_normalized",
+                "claims_deduplicated",
+                "support_relations",
+                "direct_support_relations",
+                "contradiction_relations",
+                "neutral_relations",
+                "claims_corroborated",
+                "claims_supported",
+                "claims_contested",
+                "claims_contradicted",
+                "claims_partially_supported",
+                "claims_insufficient_evidence",
+                "citations_created",
+                "citations_validated",
+                "citation_failures",
+                "nli_pairs",
+                "nli_batches",
+                "llm_extraction_calls",
+                "llm_adjudication_calls",
+                "llm_adjudication_failures",
+                "llm_counterquery_calls",
+                "llm_counterquery_failures",
+                "llm_equivalence_calls",
+                "llm_equivalence_failures",
+                "subquestion_failures",
+                "claim_failures",
+            )
+        },
         "timings": json.loads(row.timings_json),
         "duration_ms": row.duration_ms,
         "error": row.error_message,
@@ -109,9 +131,11 @@ async def list_claims(
         order_by=order_by,
     )
     async with request.app.state.evidence_service.sessions() as session:
-        query = select(VerifiedClaim, ResearchSubquestion).join(
-            ResearchSubquestion, ResearchSubquestion.id == VerifiedClaim.subquestion_id
-        ).where(VerifiedClaim.evidence_job_id == str(job_id))
+        query = (
+            select(VerifiedClaim, ResearchSubquestion)
+            .join(ResearchSubquestion, ResearchSubquestion.id == VerifiedClaim.subquestion_id)
+            .where(VerifiedClaim.evidence_job_id == str(job_id))
+        )
         if filters.subquestion_id:
             query = query.where(ResearchSubquestion.plan_id == filters.subquestion_id)
         if filters.status:
@@ -142,10 +166,13 @@ async def list_claims(
         }
         if filters.order_by not in ordering:
             raise HTTPException(422, "Unsupported order_by")
-        rows = (await session.execute(query.order_by(ordering[filters.order_by], VerifiedClaim.id))).all()
-    return {"evidence_job_id": str(job_id), "claims": [
-        _claim_summary(claim, sub.question) for claim, sub in rows
-    ]}
+        rows = (
+            await session.execute(query.order_by(ordering[filters.order_by], VerifiedClaim.id))
+        ).all()
+    return {
+        "evidence_job_id": str(job_id),
+        "claims": [_claim_summary(claim, sub.question) for claim, sub in rows],
+    }
 
 
 async def _detail(service, job_id: str, claim_id: str) -> dict:
@@ -155,24 +182,36 @@ async def _detail(service, job_id: str, claim_id: str) -> dict:
             raise HTTPException(404, "Claim not found")
         sub = await session.get(ResearchSubquestion, claim.subquestion_id)
         relations = (
-            await session.execute(
-                select(ClaimEvidenceRelation)
-                .where(ClaimEvidenceRelation.claim_id == claim_id)
-                .order_by(ClaimEvidenceRelation.retrieval_rank, ClaimEvidenceRelation.id)
+            (
+                await session.execute(
+                    select(ClaimEvidenceRelation)
+                    .where(ClaimEvidenceRelation.claim_id == claim_id)
+                    .order_by(ClaimEvidenceRelation.retrieval_rank, ClaimEvidenceRelation.id)
+                )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
         citations = (
-            await session.execute(select(ClaimCitation).where(ClaimCitation.claim_id == claim_id))
-        ).scalars().all()
+            (await session.execute(select(ClaimCitation).where(ClaimCitation.claim_id == claim_id)))
+            .scalars()
+            .all()
+        )
         origins = (
-            await session.execute(select(ClaimOrigin).where(ClaimOrigin.claim_id == claim_id))
-        ).scalars().all()
+            (await session.execute(select(ClaimOrigin).where(ClaimOrigin.claim_id == claim_id)))
+            .scalars()
+            .all()
+        )
     citation_items = [
         {
-            "id": row.id, "relation_id": row.relation_id,
-            "chunk_id": row.chunk_id, "document_id": row.document_id,
-            "source_url": row.source_url, "start_offset": row.start_offset,
-            "end_offset": row.end_offset, "exact_text": row.exact_text,
+            "id": row.id,
+            "relation_id": row.relation_id,
+            "chunk_id": row.chunk_id,
+            "document_id": row.document_id,
+            "source_url": row.source_url,
+            "start_offset": row.start_offset,
+            "end_offset": row.end_offset,
+            "exact_text": row.exact_text,
             "relation": row.relation,
         }
         for row in citations
@@ -180,10 +219,13 @@ async def _detail(service, job_id: str, claim_id: str) -> dict:
     relation_items = [
         {
             "id": row.id,
-            "chunk_id": row.chunk_id, "document_id": row.document_id,
+            "chunk_id": row.chunk_id,
+            "document_id": row.document_id,
             "source_group_id": row.source_group_id,
-            "source_url": row.source_url, "source_domain": row.source_domain,
-            "retrieval_rank": row.retrieval_rank, "retrieval_score": row.retrieval_score,
+            "source_url": row.source_url,
+            "source_domain": row.source_domain,
+            "retrieval_rank": row.retrieval_rank,
+            "retrieval_score": row.retrieval_score,
             "nli_relation": row.nli_relation,
             "nli_scores": {
                 "entailment": row.entailment_score,
@@ -231,7 +273,9 @@ async def _detail(service, job_id: str, claim_id: str) -> dict:
 
 
 @router.get("/{research_job_id}/evidence/{job_id}/claims/{claim_id}")
-async def claim_detail(research_job_id: UUID, job_id: UUID, claim_id: str, request: Request) -> dict:
+async def claim_detail(
+    research_job_id: UUID, job_id: UUID, claim_id: str, request: Request
+) -> dict:
     await _job(request, research_job_id, job_id)
     return await _detail(request.app.state.evidence_service, str(job_id), claim_id)
 
@@ -241,17 +285,23 @@ async def contradictions(research_job_id: UUID, job_id: UUID, request: Request) 
     await _job(request, research_job_id, job_id)
     async with request.app.state.evidence_service.sessions() as session:
         ids = (
-            await session.execute(
-                select(VerifiedClaim.id).where(
-                    VerifiedClaim.evidence_job_id == str(job_id),
-                    VerifiedClaim.contradiction_count > 0,
+            (
+                await session.execute(
+                    select(VerifiedClaim.id).where(
+                        VerifiedClaim.evidence_job_id == str(job_id),
+                        VerifiedClaim.contradiction_count > 0,
+                    )
                 )
             )
-        ).scalars().all()
-    return {"claims": [
-        await _detail(request.app.state.evidence_service, str(job_id), claim_id)
-        for claim_id in ids
-    ]}
+            .scalars()
+            .all()
+        )
+    return {
+        "claims": [
+            await _detail(request.app.state.evidence_service, str(job_id), claim_id)
+            for claim_id in ids
+        ]
+    }
 
 
 @router.get("/{research_job_id}/evidence/{job_id}/ledger")
@@ -259,25 +309,32 @@ async def ledger(research_job_id: UUID, job_id: UUID, request: Request) -> dict:
     await _job(request, research_job_id, job_id)
     async with request.app.state.evidence_service.sessions() as session:
         claims = (
-            await session.execute(
-                select(VerifiedClaim)
-                .where(VerifiedClaim.evidence_job_id == str(job_id))
-                .order_by(VerifiedClaim.created_at, VerifiedClaim.id)
+            (
+                await session.execute(
+                    select(VerifiedClaim)
+                    .where(VerifiedClaim.evidence_job_id == str(job_id))
+                    .order_by(VerifiedClaim.created_at, VerifiedClaim.id)
+                )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
     items = []
     for claim in claims:
         detail = await _detail(request.app.state.evidence_service, str(job_id), claim.id)
-        items.append({
-            "claim_id": claim.id,
-            "claim": claim.claim_text,
-            "status": claim.status,
-            "confidence": claim.confidence_tier,
-            "supporting_sources": claim.independent_support_groups,
-            "contradicting_sources": claim.independent_contradiction_groups,
-            "needs_more_verification": claim.needs_more_verification,
-            "evidence_mapping": detail["supporting_evidence"] + detail["contradicting_evidence"],
-            "citations": detail["citations"],
-            "verification_metadata": detail["decision_metadata"],
-        })
+        items.append(
+            {
+                "claim_id": claim.id,
+                "claim": claim.claim_text,
+                "status": claim.status,
+                "confidence": claim.confidence_tier,
+                "supporting_sources": claim.independent_support_groups,
+                "contradicting_sources": claim.independent_contradiction_groups,
+                "needs_more_verification": claim.needs_more_verification,
+                "evidence_mapping": detail["supporting_evidence"]
+                + detail["contradicting_evidence"],
+                "citations": detail["citations"],
+                "verification_metadata": detail["decision_metadata"],
+            }
+        )
     return {"evidence_job_id": str(job_id), "claims": items}

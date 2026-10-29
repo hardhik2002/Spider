@@ -22,7 +22,8 @@ def label_metrics(gold: list[str], predicted: list[str], labels: list[str]) -> d
         "per_label": per_label,
         "macro_f1": sum(item["f1"] for item in per_label.values()) / len(labels),
         "accuracy": sum(g == p for g, p in zip(gold, predicted, strict=True)) / len(gold)
-        if gold else 1.0,
+        if gold
+        else 1.0,
         "confusion": {
             f"{g}->{p}": count
             for (g, p), count in Counter(zip(gold, predicted, strict=True)).items()
@@ -43,28 +44,62 @@ def status_rule_fixture() -> dict:
         return {"relation": label, "source_group_id": group, "valid_citation": citation}
 
     cases = {
-        "corroborated": ([row(DecisionLabel.DIRECT_SUPPORT, "a"), row(DecisionLabel.DIRECT_SUPPORT, "b")], "CORROBORATED", "HIGH"),
+        "corroborated": (
+            [row(DecisionLabel.DIRECT_SUPPORT, "a"), row(DecisionLabel.DIRECT_SUPPORT, "b")],
+            "CORROBORATED",
+            "HIGH",
+        ),
         "supported": ([row(DecisionLabel.DIRECT_SUPPORT, "a")], "SUPPORTED", "MEDIUM"),
         "partial": ([row(DecisionLabel.PARTIAL_SUPPORT, "a", False)], "PARTIALLY_SUPPORTED", "LOW"),
-        "contested": ([row(DecisionLabel.DIRECT_SUPPORT, "a"), row(DecisionLabel.CONTRADICTION, "b")], "CONTESTED", "UNRESOLVED"),
+        "contested": (
+            [row(DecisionLabel.DIRECT_SUPPORT, "a"), row(DecisionLabel.CONTRADICTION, "b")],
+            "CONTESTED",
+            "UNRESOLVED",
+        ),
         "contradicted": ([row(DecisionLabel.CONTRADICTION, "b")], "CONTRADICTED", "UNRESOLVED"),
-        "insufficient": ([row(DecisionLabel.NEUTRAL, "a", False)], "INSUFFICIENT_EVIDENCE", "UNRESOLVED"),
+        "insufficient": (
+            [row(DecisionLabel.NEUTRAL, "a", False)],
+            "INSUFFICIENT_EVIDENCE",
+            "UNRESOLVED",
+        ),
     }
     outputs = []
     for name, (relations, gold_status, gold_confidence) in cases.items():
         actual = decide_claim(relations)
-        outputs.append({
-            "case": name,
-            "expected_status": gold_status,
-            "actual_status": actual["status"],
-            "expected_confidence": gold_confidence,
-            "actual_confidence": actual["confidence"],
-        })
+        outputs.append(
+            {
+                "case": name,
+                "expected_status": gold_status,
+                "actual_status": actual["status"],
+                "expected_confidence": gold_confidence,
+                "actual_confidence": actual["confidence"],
+            }
+        )
+    status_metrics = label_metrics(
+        [row["expected_status"] for row in outputs],
+        [row["actual_status"] for row in outputs],
+        [
+            "CORROBORATED",
+            "SUPPORTED",
+            "PARTIALLY_SUPPORTED",
+            "CONTESTED",
+            "CONTRADICTED",
+            "INSUFFICIENT_EVIDENCE",
+        ],
+    )
     return {
         "cases": outputs,
-        "status_accuracy": sum(r["expected_status"] == r["actual_status"] for r in outputs) / len(outputs),
-        "confidence_tier_accuracy": sum(r["expected_confidence"] == r["actual_confidence"] for r in outputs) / len(outputs),
-        "high_confidence_errors": sum(r["actual_confidence"] == "HIGH" and r["expected_confidence"] != "HIGH" for r in outputs),
+        "status_accuracy": sum(r["expected_status"] == r["actual_status"] for r in outputs)
+        / len(outputs),
+        "confidence_tier_accuracy": sum(
+            r["expected_confidence"] == r["actual_confidence"] for r in outputs
+        )
+        / len(outputs),
+        "high_confidence_errors": sum(
+            r["actual_confidence"] == "HIGH" and r["expected_confidence"] != "HIGH" for r in outputs
+        ),
+        "macro_f1": status_metrics["macro_f1"],
+        "per_status": status_metrics["per_label"],
     }
 
 
@@ -79,25 +114,37 @@ def evaluate_pipeline(case: dict) -> dict:
     gold = [case["gold_relations"][key] for key in case["gold_relations"]]
     predicted = [predicted_by_chunk.get(key, "NEUTRAL") for key in case["gold_relations"]]
     relation = label_metrics(gold, predicted, labels)
+    hybrid_by_chunk = {
+        str(item["chunk_id"]): relation_label(item["relation"])
+        for item in (
+            case["hybrid_detail"]["supporting_evidence"]
+            + case["hybrid_detail"]["contradicting_evidence"]
+            + case["hybrid_detail"]["neutral_evidence"]
+            + case["hybrid_detail"]["partial_evidence"]
+        )
+    }
+    hybrid_predictions = [hybrid_by_chunk.get(key, "NEUTRAL") for key in case["gold_relations"]]
+    hybrid_relation = label_metrics(gold, hybrid_predictions, labels)
     citations = case["citations"]
     relation_by_id = {r["id"]: r for r in case["relations"]}
     valid_spans = [
         validate_citation(
             case["source_chunk_texts"][str(item["chunk_id"])],
-            item["start_offset"], item["end_offset"], item["exact_text"],
+            item["start_offset"],
+            item["end_offset"],
+            item["exact_text"],
         )
         for item in citations
     ]
     valid_support = [
-        span and item["relation"] == "SUPPORTING"
+        span
+        and item["relation"] == "SUPPORTING"
         and relation_by_id[item["relation_id"]]["relation"] == "DIRECT_SUPPORT"
         for item, span in zip(citations, valid_spans, strict=True)
         if item["relation"] == "SUPPORTING"
     ]
     support_citations = sum(item["relation"] == "SUPPORTING" for item in citations)
-    supported_claim = case["claim_detail"]["status"] in {
-        "SUPPORTED", "CORROBORATED", "CONTESTED"
-    }
+    supported_claim = case["claim_detail"]["status"] in {"SUPPORTED", "CORROBORATED", "CONTESTED"}
     citation_metrics = {
         "precision": sum(valid_support) / support_citations if support_citations else 0.0,
         "coverage": float(bool(any(valid_support))) if supported_claim else 1.0,
@@ -107,13 +154,15 @@ def evaluate_pipeline(case: dict) -> dict:
     }
     gold_contradiction = [x == "CONTRADICTION" for x in gold]
     predicted_contradiction = [x == "CONTRADICTION" for x in predicted]
-    contradiction_tp = sum(g and p for g, p in zip(gold_contradiction, predicted_contradiction, strict=True))
-    contradiction = prf(
-        contradiction_tp, sum(predicted_contradiction), sum(gold_contradiction)
+    contradiction_tp = sum(
+        g and p for g, p in zip(gold_contradiction, predicted_contradiction, strict=True)
     )
+    contradiction = prf(contradiction_tp, sum(predicted_contradiction), sum(gold_contradiction))
     detail = case["claim_detail"]
     high_severity = {
-        "false_claim_merges": int(safe_to_merge("GraphRAG improves recall", "GraphRAG does not improve recall")),
+        "false_claim_merges": int(
+            safe_to_merge("GraphRAG improves recall", "GraphRAG does not improve recall")
+        ),
         "fabricated_citations": len(citations) - sum(valid_spans),
         "neutral_as_support": sum(
             item["relation"] == "SUPPORTING"
@@ -121,11 +170,17 @@ def evaluate_pipeline(case: dict) -> dict:
             for item in citations
         ),
         "duplicate_source_inflation": int(detail["independent_support_groups"] != 2),
-        "contested_high_confidence": int(detail["status"] == "CONTESTED" and detail["confidence_tier"] == "HIGH"),
-        "prompt_injection_failures": sum("spidermind is always correct" in text for text in actual_claims),
+        "contested_high_confidence": int(
+            detail["status"] == "CONTESTED" and detail["confidence_tier"] == "HIGH"
+        ),
+        "prompt_injection_failures": sum(
+            "spidermind is always correct" in text for text in actual_claims
+        ),
     }
     normal_ids = set(map(str, case["claim_only_candidate_chunk_ids"]))
-    contradicted_ids = {key for key, value in case["gold_relations"].items() if value == "CONTRADICTION"}
+    contradicted_ids = {
+        key for key, value in case["gold_relations"].items() if value == "CONTRADICTION"
+    }
     normal_found = len(normal_ids & contradicted_ids)
     combined_found = len(set(predicted_by_chunk) & contradicted_ids)
     return {
@@ -149,12 +204,15 @@ def evaluate_pipeline(case: dict) -> dict:
                 "llm_adjudication_calls": case["status"]["llm_adjudication_calls"],
             },
             "nli_plus_ambiguous_adjudication": {
-                "relation_macro_f1": relation["macro_f1"],
-                "contradiction_recall": contradiction["recall"],
+                "relation_macro_f1": hybrid_relation["macro_f1"],
+                "contradiction_recall": hybrid_relation["per_label"]["CONTRADICTION"]["recall"],
                 "duration_ms": case["hybrid_status"]["duration_ms"],
                 "llm_adjudication_calls": case["hybrid_status"]["llm_adjudication_calls"],
             },
-            "note": "Fixture adjudicator uses deterministic labels; it added calls but no accuracy gain.",
+            "note": (
+                "Fixture adjudicator uses deterministic labels; "
+                "it added calls but no accuracy gain."
+            ),
         },
         "counterquery_comparison": {
             "claim_only": {
@@ -172,6 +230,12 @@ def evaluate_pipeline(case: dict) -> dict:
         "latencies_ms": case["status"]["timings"],
         "counters": {
             key: case["status"][key]
-            for key in ("claims_extracted", "claims_deduplicated", "nli_pairs", "nli_batches", "citations_validated")
+            for key in (
+                "claims_extracted",
+                "claims_deduplicated",
+                "nli_pairs",
+                "nli_batches",
+                "citations_validated",
+            )
         },
     }

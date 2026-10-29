@@ -1,6 +1,6 @@
 # SpiderMind — research, crawling, and evidence retrieval
 
-SpiderMind is an incremental AI research project. Phase 3 plans a question and collects sources with targeted crawls. Phase 4 indexes and retrieves traceable evidence. Phase 5 uses a bounded LangGraph loop to assess coverage, identify gaps, search, crawl, index, and reassess. It does not generate final answers, verify claims, build a knowledge graph, or provide a frontend.
+SpiderMind is an incremental AI research project. Phase 1 crawls, Phase 2 focuses crawling, Phase 3 plans and searches, Phase 4 indexes and retrieves, Phase 5 iterates to fill evidence gaps, and Phase 6 maps atomic claims to supporting and contradicting passages. It does not generate final research answers, build a knowledge graph, or provide a frontend.
 
 ## Phase 1 foundation
 
@@ -284,6 +284,48 @@ The [controlled Phase 5 results](docs/phase5-agent-results.json) come from a rep
 
 For a local Mermaid graph export, run `cd backend; ..\.venv\Scripts\python.exe scripts/show_agent_graph.py`.
 
+## Phase 6 evidence engine
+
+Install `backend/requirements-evidence.txt`. Once Phase 4 has indexed a research job, `POST /api/v1/research/{job_id}/evidence` starts a separate, bounded evidence job. An optional completed Phase 5 agent run ID links the verification to that run. The engine selects a small source-diverse evidence pack for each subquestion, asks local Qwen3 for structured atomic claims, normalizes and conservatively deduplicates them, then retrieves against the **whole existing research index** using each claim and up to two counterqueries. Phase 6 has no web-search or web-fetch path.
+
+The default local NLI model is `MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli` on CPU, batch size 2; the larger model is configurable. NLI loads lazily, validates its label IDs from model config, and returns entailment, neutral, and contradiction **model scores**. Numeric, temporal, comparative, close-score, or conflicting pairs can go through structured Qwen3 adjudication. Different explicit years, datasets, or versions prevent a direct support or contradiction decision even if the model disagrees. A requested fallback model is logged and stored; there is no silent switch. Evidence confidence is an ordinal source-based tier, **not a probability that a claim is true**. Retrieval relevance scores never enter that tier. CPU defaults cap a job at four subquestions, five claims each, eight candidates per claim and 1,800 seconds; the API also rejects a request whose maximum claim/evidence pair budget exceeds 2,000.
+
+Supporting and contradicting citations are selected from single sentences or adjacent sentence pairs, required to overlap the claim lexically, checked against persisted chunk text with exact offsets, and linked to claim/evidence relation rows. If a selected passage cannot yield a valid citation, the engine tries the next candidate within the final citation budget. Exact content mirrors and canonical URL matches share a source group, so a repost cannot create independent corroboration. The ledger contains claims, relations, citations, provenance, status and verification metadata. It does not contain final answers or recommendations. Schema version 6 adds the evidence tables without replacing Phase 1–5 records. See [architecture.md](docs/architecture.md) for the decision rules and limits.
+
+From the repository root in PowerShell:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r backend\requirements-evidence.txt
+ollama pull Qwen3:latest
+$env:SPIDERMIND_EVIDENCE_NLI_MODEL = "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli"
+.\.venv\Scripts\python.exe -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000
+```
+
+After indexing, in another PowerShell window:
+
+```powershell
+$researchJobId = "<research job UUID>"
+$agentRunId = "<completed Phase 5 run UUID>"
+$body = @{
+  agent_run_id = $agentRunId
+  max_subquestions = 1
+  max_claims_per_subquestion = 2
+  evidence_candidates_per_claim = 4
+  final_evidence_per_claim = 2
+  use_nli = $true
+  use_llm_adjudication = $true
+  rerank = $false
+} | ConvertTo-Json
+$job = Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/api/v1/research/$researchJobId/evidence" -ContentType "application/json" -Body $body
+$evidenceJobId = $job.evidence_job_id
+Invoke-RestMethod "http://127.0.0.1:8000/api/v1/research/$researchJobId/evidence/$evidenceJobId"
+Invoke-RestMethod "http://127.0.0.1:8000/api/v1/research/$researchJobId/evidence/$evidenceJobId/claims"
+Invoke-RestMethod "http://127.0.0.1:8000/api/v1/research/$researchJobId/evidence/$evidenceJobId/contradictions"
+Invoke-RestMethod "http://127.0.0.1:8000/api/v1/research/$researchJobId/evidence/$evidenceJobId/ledger"
+```
+
+Run `cd backend; ..\.venv\Scripts\python.exe scripts/evaluate_phase6.py` for the controlled deterministic fixture, and `..\.venv\Scripts\python.exe scripts/evaluate_phase6_nli.py` for the small labeled real-NLI pilot. Run `..\.venv\Scripts\python.exe scripts/evaluate_phase6_hybrid.py` to adjudicate the triggered pilot pairs with local Qwen3. The [controlled results](docs/phase6-evidence-results.json) explicitly separate fake pipeline metrics from [real base-model pilot results](docs/phase6-nli-base-results.json). `scripts/live_phase6_smoke.py` uses a copy of an existing Phase 5 job and produces a separate connectivity artifact. None of these small fixtures establishes broad factual accuracy.
+
 ## Tests and checks
 
 ```powershell
@@ -297,4 +339,4 @@ The suite uses HTTPX mock transports and temporary SQLite databases, with no dep
 
 ## Current limits and roadmap
 
-Jobs run as in-process tasks. The Phase 5 agent resumes from its SQLite LangGraph checkpoint on restart; earlier research and index jobs retain their separate interruption behavior. There is no distributed worker scheduling. The SQLite migration is additive, not a general migration framework. BGE-M3, BGE-reranker-v2-m3, and Qwen3 have substantial memory and startup costs. Search quality and availability depend on public engines used by `ddgs`; timeout or rate limiting can produce partial jobs. The controlled Phase 5 assessor is deterministic and does not establish real-world coverage accuracy. A threshold may exclude useful low-scoring pages, and link context can be sparse or misleading. The crawler does not run JavaScript, authenticate to sites, enforce site-specific crawl-delay directives, or parse sitemaps. Robots retrieval fails closed when unavailable, except 404/410. The URL guard rejects local/private and non-global resolved IPs, validates every redirect hop, and disables environment proxies. DNS validation and connection resolution are separate, so DNS rebinding remains a known SSRF limit; production exposure to untrusted users needs connection-level address pinning and network egress controls. Retrieved passages may contain prompt injection; Phase 5 treats them as untrusted data but model output still requires independent review. Answer generation, claim verification, and knowledge graph engines remain future work.
+Jobs run as in-process tasks. The Phase 5 agent resumes from its SQLite LangGraph checkpoint on restart; earlier research and index jobs retain their separate interruption behavior. There is no distributed worker scheduling. The SQLite migration is additive, not a general migration framework. BGE-M3, BGE-reranker-v2-m3, and Qwen3 have substantial memory and startup costs. Search quality and availability depend on public engines used by `ddgs`; timeout or rate limiting can produce partial jobs. The controlled Phase 5 assessor is deterministic and does not establish real-world coverage accuracy. A threshold may exclude useful low-scoring pages, and link context can be sparse or misleading. The crawler does not run JavaScript, authenticate to sites, enforce site-specific crawl-delay directives, or parse sitemaps. Robots retrieval fails closed when unavailable, except 404/410. The URL guard rejects local/private and non-global resolved IPs, validates every redirect hop, and disables environment proxies. DNS validation and connection resolution are separate, so DNS rebinding remains a known SSRF limit; production exposure to untrusted users needs connection-level address pinning and network egress controls. Retrieved passages may contain prompt injection; Phase 5 treats them as untrusted data but model output still requires independent review. Answer generation and knowledge graph construction remain future work. Phase 6 verifies evidence provisionally; real NLI can misclassify passages, and exact citation rules may leave a claim unresolved.

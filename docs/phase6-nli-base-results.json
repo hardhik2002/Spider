@@ -1,0 +1,99 @@
+{
+  "model": "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli",
+  "device": "cpu",
+  "batch_size": 2,
+  "pairs": [
+    {
+      "premise": "GraphRAG improves recall on Dataset X.",
+      "hypothesis": "GraphRAG improves recall on Dataset X.",
+      "gold": "ENTAILMENT",
+      "relation": "ENTAILMENT",
+      "entailment_score": 0.99658203125,
+      "neutral_score": 0.0026874542236328125,
+      "contradiction_score": 0.0004973411560058594,
+      "model_name": "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli"
+    },
+    {
+      "premise": "GraphRAG does not improve recall on Dataset X.",
+      "hypothesis": "GraphRAG improves recall on Dataset X.",
+      "gold": "CONTRADICTION",
+      "relation": "CONTRADICTION",
+      "entailment_score": 0.0004253387451171875,
+      "neutral_score": 0.0007405281066894531,
+      "contradiction_score": 0.9990234375,
+      "model_name": "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli"
+    },
+    {
+      "premise": "BM25 is a lexical ranking algorithm.",
+      "hypothesis": "GraphRAG improves recall on Dataset X.",
+      "gold": "NEUTRAL",
+      "relation": "CONTRADICTION",
+      "entailment_score": 0.037017822265625,
+      "neutral_score": 0.2744140625,
+      "contradiction_score": 0.6884765625,
+      "model_name": "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli"
+    },
+    {
+      "premise": "Latency increased by 18% on Dataset X.",
+      "hypothesis": "Latency decreased by 18% on Dataset X.",
+      "gold": "CONTRADICTION",
+      "relation": "CONTRADICTION",
+      "entailment_score": 0.00069427490234375,
+      "neutral_score": 0.0007119178771972656,
+      "contradiction_score": 0.99853515625,
+      "model_name": "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli"
+    },
+    {
+      "premise": "In 2023, system A cost $10.",
+      "hypothesis": "In 2026, system A cost $10.",
+      "gold": "NEUTRAL",
+      "relation": "NEUTRAL",
+      "entailment_score": 0.012176513671875,
+      "neutral_score": 0.525390625,
+      "contradiction_score": 0.46240234375,
+      "model_name": "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli"
+    },
+    {
+      "premise": "GraphRAG improves recall on Dataset Y.",
+      "hypothesis": "GraphRAG improves recall on Dataset X.",
+      "gold": "NEUTRAL",
+      "relation": "CONTRADICTION",
+      "entailment_score": 0.0026092529296875,
+      "neutral_score": 0.09161376953125,
+      "contradiction_score": 0.90576171875,
+      "model_name": "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli"
+    }
+  ],
+  "metrics": {
+    "per_label": {
+      "ENTAILMENT": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "NEUTRAL": {
+        "precision": 1.0,
+        "recall": 0.3333333333333333,
+        "f1": 0.5
+      },
+      "CONTRADICTION": {
+        "precision": 0.5,
+        "recall": 1.0,
+        "f1": 0.6666666666666666
+      }
+    },
+    "macro_f1": 0.7222222222222222,
+    "accuracy": 0.6666666666666666,
+    "confusion": {
+      "ENTAILMENT->ENTAILMENT": 1,
+      "CONTRADICTION->CONTRADICTION": 2,
+      "NEUTRAL->CONTRADICTION": 2,
+      "NEUTRAL->NEUTRAL": 1
+    }
+  },
+  "duration_ms": 67084,
+  "pairs_classified": 6,
+  "nli_batches": 3,
+  "nli_duration_ms": 67083,
+  "scores_are_truth_probabilities": false
+}

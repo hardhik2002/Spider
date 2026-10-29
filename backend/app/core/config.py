@@ -61,7 +61,9 @@ class Settings(BaseSettings):
     evidence_nli_batch_size: int = Field(default=2, ge=1, le=32)
     evidence_nli_device: str = "cpu"
     evidence_claim_extraction_batch_size: int = Field(default=1, ge=1, le=8)
-    evidence_max_candidates_per_claim: int = Field(default=20, ge=1, le=50)
+    evidence_max_candidates_per_claim: int = Field(default=8, ge=1, le=50)
+    evidence_max_claims_per_subquestion: int = Field(default=5, ge=1, le=40)
+    evidence_max_subquestions: int = Field(default=4, ge=1, le=30)
     evidence_adjudication_enabled: bool = True
     evidence_adjudication_margin_threshold: float = Field(default=0.18, ge=0, le=1)
     evidence_adjudicate_all: bool = False

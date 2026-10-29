@@ -1,6 +1,6 @@
 {
   "evaluation": "Controlled deterministic local fixture; model accuracy is not estimated by fake components",
-  "generated_at_utc": "2026-10-10T09:37:33.660794+00:00",
+  "generated_at_utc": "2026-10-10T10:37:34.741719+00:00",
   "fixture": {
     "question": "Does GraphRAG improve recall on Dataset X?",
     "gold_claims": [
@@ -12,8 +12,69 @@
       "3": "CONTRADICTION",
       "4": "NEUTRAL"
     },
+    "gold_equivalence_group": [
+      "GraphRAG improves recall on Dataset X.",
+      "On Dataset X, GraphRAG improves recall."
+    ],
+    "gold_valid_citation_spans": [
+      {
+        "chunk_id": 1,
+        "start_offset": 0,
+        "end_offset": 38,
+        "exact_text": "GraphRAG improves recall on Dataset X."
+      },
+      {
+        "chunk_id": 2,
+        "start_offset": 0,
+        "end_offset": 57,
+        "exact_text": "On Dataset X, GraphRAG improves recall compared with RAG."
+      },
+      {
+        "chunk_id": 3,
+        "start_offset": 0,
+        "end_offset": 46,
+        "exact_text": "GraphRAG does not improve recall on Dataset X."
+      }
+    ],
     "gold_status": "CONTESTED",
     "gold_confidence": "UNRESOLVED",
+    "additional_gold_cases": [
+      {
+        "feature": "numeric variation",
+        "left": "Latency decreased by 18% on Dataset X.",
+        "right": "Latency decreased by 20% on Dataset X.",
+        "expected_merge": false,
+        "actual_merge": false
+      },
+      {
+        "feature": "temporal variation",
+        "left": "System A cost $10 in 2023.",
+        "right": "System A cost $10 in 2026.",
+        "expected_merge": false,
+        "actual_merge": false
+      },
+      {
+        "feature": "condition-dependent variation",
+        "left": "System A is accurate when labels exist.",
+        "right": "System A is accurate.",
+        "expected_merge": false,
+        "actual_merge": false
+      },
+      {
+        "feature": "dataset variation",
+        "left": "GraphRAG improves recall on Dataset X.",
+        "right": "GraphRAG improves recall on Dataset Y.",
+        "expected_merge": false,
+        "actual_merge": false
+      },
+      {
+        "feature": "negated contradiction",
+        "left": "GraphRAG improves recall on Dataset X.",
+        "right": "GraphRAG does not improve recall on Dataset X.",
+        "expected_merge": false,
+        "actual_merge": false
+      }
+    ],
     "features": [
       "support",
       "independent corroboration",
@@ -22,7 +83,11 @@
       "neutral distractor",
       "mirrored source",
       "semantic paraphrase",
-      "prompt injection"
+      "prompt injection",
+      "partial support status rule",
+      "numeric variation",
+      "temporal variation",
+      "condition-dependent variation"
     ]
   },
   "models": {
@@ -41,6 +106,14 @@
       "claim plus counterquery"
     ],
     "no_internet": true
+  },
+  "qualifier_guard_accuracy": 1.0,
+  "deduplication_metrics": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "gold_merge_pairs": 1,
+    "gold_nonmerge_pairs": 5
   },
   "claim_metrics": {
     "precision": 1.0,
@@ -133,7 +206,40 @@
     ],
     "status_accuracy": 1.0,
     "confidence_tier_accuracy": 1.0,
-    "high_confidence_errors": 0
+    "high_confidence_errors": 0,
+    "macro_f1": 1.0,
+    "per_status": {
+      "CORROBORATED": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "SUPPORTED": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "PARTIALLY_SUPPORTED": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "CONTESTED": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "CONTRADICTED": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "INSUFFICIENT_EVIDENCE": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      }
+    }
   },
   "confidence_metrics": {
     "pipeline_accuracy": 1.0,
@@ -143,13 +249,13 @@
     "nli_only": {
       "relation_macro_f1": 1.0,
       "contradiction_recall": 1.0,
-      "duration_ms": 200,
+      "duration_ms": 914,
       "llm_adjudication_calls": 0
     },
     "nli_plus_ambiguous_adjudication": {
       "relation_macro_f1": 1.0,
       "contradiction_recall": 1.0,
-      "duration_ms": 221,
+      "duration_ms": 510,
       "llm_adjudication_calls": 4
     },
     "note": "Fixture adjudicator uses deterministic labels; it added calls but no accuracy gain."
@@ -175,28 +281,266 @@
     "prompt_injection_failures": 0
   },
   "latencies_ms": {
-    "claim_extraction_ms": 1,
-    "claim_deduplication_ms": 0,
+    "claim_extraction_ms": 3,
+    "claim_deduplication_ms": 1,
     "counter_retrieval_ms": 0,
     "retrieval_ms": 0,
     "nli_ms": 0,
-    "citation_validation_ms": 0
+    "citation_validation_ms": 0,
+    "total_ms": 914
   },
   "counters": {
     "claims_extracted": 2,
     "claims_deduplicated": 1,
-    "nli_pairs": 10,
+    "nli_pairs": 7,
     "nli_batches": 4,
     "citations_validated": 4
   },
   "nli_comparison": {
     "base": {
-      "status": "not measured in deterministic fixture"
+      "status": "measured",
+      "model": "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli",
+      "device": "cpu",
+      "batch_size": 2,
+      "raw_metrics": {
+        "per_label": {
+          "ENTAILMENT": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0
+          },
+          "NEUTRAL": {
+            "precision": 1.0,
+            "recall": 0.3333333333333333,
+            "f1": 0.5
+          },
+          "CONTRADICTION": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1": 0.6666666666666666
+          }
+        },
+        "macro_f1": 0.7222222222222222,
+        "accuracy": 0.6666666666666666,
+        "confusion": {
+          "ENTAILMENT->ENTAILMENT": 1,
+          "CONTRADICTION->CONTRADICTION": 2,
+          "NEUTRAL->CONTRADICTION": 2,
+          "NEUTRAL->NEUTRAL": 1
+        }
+      },
+      "scope_guarded_metrics": {
+        "per_label": {
+          "ENTAILMENT": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0
+          },
+          "NEUTRAL": {
+            "precision": 1.0,
+            "recall": 0.6666666666666666,
+            "f1": 0.8
+          },
+          "CONTRADICTION": {
+            "precision": 0.6666666666666666,
+            "recall": 1.0,
+            "f1": 0.8
+          }
+        },
+        "macro_f1": 0.8666666666666667,
+        "accuracy": 0.8333333333333334,
+        "confusion": {
+          "ENTAILMENT->ENTAILMENT": 1,
+          "CONTRADICTION->CONTRADICTION": 2,
+          "NEUTRAL->CONTRADICTION": 1,
+          "NEUTRAL->NEUTRAL": 2
+        }
+      },
+      "latency_ms": 67084,
+      "batches": 3,
+      "fixture_size": 6,
+      "pairs": [
+        {
+          "premise": "GraphRAG improves recall on Dataset X.",
+          "hypothesis": "GraphRAG improves recall on Dataset X.",
+          "gold": "ENTAILMENT",
+          "relation": "ENTAILMENT",
+          "entailment_score": 0.99658203125,
+          "neutral_score": 0.0026874542236328125,
+          "contradiction_score": 0.0004973411560058594,
+          "model_name": "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli"
+        },
+        {
+          "premise": "GraphRAG does not improve recall on Dataset X.",
+          "hypothesis": "GraphRAG improves recall on Dataset X.",
+          "gold": "CONTRADICTION",
+          "relation": "CONTRADICTION",
+          "entailment_score": 0.0004253387451171875,
+          "neutral_score": 0.0007405281066894531,
+          "contradiction_score": 0.9990234375,
+          "model_name": "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli"
+        },
+        {
+          "premise": "BM25 is a lexical ranking algorithm.",
+          "hypothesis": "GraphRAG improves recall on Dataset X.",
+          "gold": "NEUTRAL",
+          "relation": "CONTRADICTION",
+          "entailment_score": 0.037017822265625,
+          "neutral_score": 0.2744140625,
+          "contradiction_score": 0.6884765625,
+          "model_name": "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli"
+        },
+        {
+          "premise": "Latency increased by 18% on Dataset X.",
+          "hypothesis": "Latency decreased by 18% on Dataset X.",
+          "gold": "CONTRADICTION",
+          "relation": "CONTRADICTION",
+          "entailment_score": 0.00069427490234375,
+          "neutral_score": 0.0007119178771972656,
+          "contradiction_score": 0.99853515625,
+          "model_name": "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli"
+        },
+        {
+          "premise": "In 2023, system A cost $10.",
+          "hypothesis": "In 2026, system A cost $10.",
+          "gold": "NEUTRAL",
+          "relation": "NEUTRAL",
+          "entailment_score": 0.012176513671875,
+          "neutral_score": 0.525390625,
+          "contradiction_score": 0.46240234375,
+          "model_name": "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli"
+        },
+        {
+          "premise": "GraphRAG improves recall on Dataset Y.",
+          "hypothesis": "GraphRAG improves recall on Dataset X.",
+          "gold": "NEUTRAL",
+          "relation": "CONTRADICTION",
+          "entailment_score": 0.0026092529296875,
+          "neutral_score": 0.09161376953125,
+          "contradiction_score": 0.90576171875,
+          "model_name": "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli"
+        }
+      ],
+      "scores_are_truth_probabilities": false
     },
     "large": {
       "status": "skipped",
       "reason": "16 GB laptop had under 1 GB available memory during evaluation"
     }
+  },
+  "real_adjudication_pilot": {
+    "kind": "tiny six-pair labeled real-model pilot, not a representative benchmark",
+    "generated_at_utc": "2026-10-10T10:35:02.302752+00:00",
+    "nli_model": "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli",
+    "adjudicator_model": "Qwen3:latest",
+    "fixture_size": 6,
+    "baseline_scope_guarded_metrics": {
+      "per_label": {
+        "ENTAILMENT": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "NEUTRAL": {
+          "precision": 1.0,
+          "recall": 0.6666666666666666,
+          "f1": 0.8
+        },
+        "CONTRADICTION": {
+          "precision": 0.6666666666666666,
+          "recall": 1.0,
+          "f1": 0.8
+        }
+      },
+      "macro_f1": 0.8666666666666667,
+      "accuracy": 0.8333333333333334,
+      "confusion": {
+        "ENTAILMENT->ENTAILMENT": 1,
+        "CONTRADICTION->CONTRADICTION": 2,
+        "NEUTRAL->CONTRADICTION": 1,
+        "NEUTRAL->NEUTRAL": 2
+      }
+    },
+    "hybrid_metrics": {
+      "per_label": {
+        "ENTAILMENT": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "NEUTRAL": {
+          "precision": 1.0,
+          "recall": 0.6666666666666666,
+          "f1": 0.8
+        },
+        "CONTRADICTION": {
+          "precision": 0.6666666666666666,
+          "recall": 1.0,
+          "f1": 0.8
+        }
+      },
+      "macro_f1": 0.8666666666666667,
+      "accuracy": 0.8333333333333334,
+      "confusion": {
+        "ENTAILMENT->ENTAILMENT": 1,
+        "CONTRADICTION->CONTRADICTION": 2,
+        "NEUTRAL->CONTRADICTION": 1,
+        "NEUTRAL->NEUTRAL": 2
+      }
+    },
+    "llm_call_count": 2,
+    "llm_calls": [
+      {
+        "pair_index": 3,
+        "decision": {
+          "relation": "CONTRADICTION",
+          "decision_summary": "The passage directly contradicts the claim by stating that latency increased by 18% on Dataset X, whereas the claim states latency decreased by 18%.",
+          "important_qualifier_mismatch": false
+        },
+        "final_relation": "CONTRADICTION",
+        "latency_ms": 57355
+      },
+      {
+        "pair_index": 4,
+        "decision": {
+          "relation": "CONTRADICTION",
+          "decision_summary": "The passage states that in 2023, system A cost $10, which directly contradicts the claim that in 2026, system A cost $10.",
+          "important_qualifier_mismatch": false
+        },
+        "final_relation": "NEUTRAL",
+        "latency_ms": 14939
+      }
+    ],
+    "baseline_predictions": [
+      "ENTAILMENT",
+      "CONTRADICTION",
+      "CONTRADICTION",
+      "CONTRADICTION",
+      "NEUTRAL",
+      "NEUTRAL"
+    ],
+    "hybrid_predictions": [
+      "ENTAILMENT",
+      "CONTRADICTION",
+      "CONTRADICTION",
+      "CONTRADICTION",
+      "NEUTRAL",
+      "NEUTRAL"
+    ],
+    "gold": [
+      "ENTAILMENT",
+      "CONTRADICTION",
+      "NEUTRAL",
+      "CONTRADICTION",
+      "NEUTRAL",
+      "NEUTRAL"
+    ],
+    "total_adjudication_ms": 72331,
+    "nli_latency_ms_from_prior_pilot": 67084,
+    "limitations": [
+      "Only two of six pairs meet the configured ambiguity/type trigger.",
+      "The NLI baseline is reused from a previous run; total times are not a paired end-to-end benchmark."
+    ]
   },
   "limitations": [
     "One claim in the integrated pipeline fixture; six deterministic status-rule cases are measured separately.",

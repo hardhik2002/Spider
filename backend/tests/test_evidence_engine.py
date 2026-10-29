@@ -23,7 +23,8 @@ from app.evidence.schemas import (
 )
 from app.main import create_app
 from app.rag.models import KnowledgeChunk, KnowledgeChunkSource, KnowledgeDocument
-from sqlalchemy import select
+from app.schemas.rag import RetrievalRequest
+from sqlalchemy import select, text
 
 
 class FakeEmbedding:
@@ -273,7 +274,27 @@ async def test_evidence_job_api_citations_groups_and_idempotency(tmp_path: Path)
     )
     async with app.router.lifespan_context(app):
         service = app.state.evidence_service
+        async with service.sessions() as session:
+            assert (await session.execute(text("PRAGMA user_version"))).scalar_one() == 6
         research_id, chunks = await seed_research(service.sessions)
+        await app.state.retrieval_service.vectors.upsert(
+            [
+                (chunk.vector_id, [1.0, 0.0], {"research_job_id": research_id})
+                for chunk in chunks.values()
+            ]
+        )
+        indexed = await app.state.retrieval_service.retrieve(
+            research_id,
+            RetrievalRequest(
+                query="GraphRAG recall Dataset X",
+                rerank=False,
+                final_top_k=4,
+                include_neighbor_context=False,
+            ),
+        )
+        assert indexed["results"]
+        assert indexed["dense_candidates"] >= 1
+        assert indexed["lexical_candidates"] >= 1
         retrieval = FixtureRetrieval(chunks)
         service.retrieval = retrieval
         async with httpx.AsyncClient(
@@ -283,6 +304,11 @@ async def test_evidence_job_api_citations_groups_and_idempotency(tmp_path: Path)
             response = await client.post(path, json={"use_llm_adjudication": False})
             assert response.status_code == 202, response.text
             job_id = response.json()["evidence_job_id"]
+            wrong_research = str(uuid4())
+            assert (
+                await client.get(f"/api/v1/research/{wrong_research}/evidence/{job_id}")
+            ).status_code == 404
+            assert (await client.post(path, json={"agent_run_id": str(uuid4())})).status_code == 409
             for _ in range(100):
                 async with service.sessions() as session:
                     row = await session.get(EvidenceJob, job_id)
@@ -335,9 +361,9 @@ async def test_evidence_job_api_citations_groups_and_idempotency(tmp_path: Path)
                 await asyncio.sleep(0.05)
             assert hybrid_row.status == "COMPLETED", hybrid_row.error_message
             hybrid_status = (await client.get(f"{path}/{hybrid_id}")).json()
-            hybrid_claim_id = (await client.get(f"{path}/{hybrid_id}/claims")).json()[
-                "claims"
-            ][0]["id"]
+            hybrid_claim_id = (await client.get(f"{path}/{hybrid_id}/claims")).json()["claims"][0][
+                "id"
+            ]
             hybrid_detail = (
                 await client.get(f"{path}/{hybrid_id}/claims/{hybrid_claim_id}")
             ).json()
@@ -366,12 +392,8 @@ async def test_evidence_job_api_citations_groups_and_idempotency(tmp_path: Path)
                     "gold_status": "CONTESTED",
                     "gold_confidence": "UNRESOLVED",
                     "retrieval_calls": retrieval.calls,
-                    "claim_only_candidate_chunk_ids": [
-                        chunks[index].id for index in (1, 3, 5)
-                    ],
-                    "source_chunk_texts": {
-                        str(chunk.id): chunk.text for chunk in chunks.values()
-                    },
+                    "claim_only_candidate_chunk_ids": [chunks[index].id for index in (1, 3, 5)],
+                    "source_chunk_texts": {str(chunk.id): chunk.text for chunk in chunks.values()},
                 }
                 (Path(report_dir) / "pipeline.json").write_text(
                     json.dumps(report, indent=2, default=str), encoding="utf-8"

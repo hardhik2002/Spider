@@ -21,10 +21,12 @@ from app.evidence.llm import (
     EvidenceAdjudicator,
 )
 from app.evidence.logic import (
+    apply_qualifier_safety,
     cosine,
     decide_claim,
     normalize_claim,
     safe_to_merge,
+    scope_mismatch,
     sentence_spans,
     source_groups,
     source_type,
@@ -110,6 +112,24 @@ class EvidenceEngineService:
         self._work_lock = asyncio.Lock()
 
     async def start(self, research_job_id: str, request: EvidenceRequest) -> EvidenceJob:
+        configured = {
+            "max_subquestions": self.settings.evidence_max_subquestions,
+            "max_claims_per_subquestion": self.settings.evidence_max_claims_per_subquestion,
+            "evidence_candidates_per_claim": self.settings.evidence_max_candidates_per_claim,
+            "use_llm_adjudication": self.settings.evidence_adjudication_enabled,
+            "adjudicate_all": self.settings.evidence_adjudicate_all,
+            "rerank": self.settings.rerank_enabled,
+        }
+        request = EvidenceRequest.model_validate(
+            {
+                **request.model_dump(),
+                **{
+                    key: value
+                    for key, value in configured.items()
+                    if key not in request.model_fields_set
+                },
+            }
+        )
         async with self.sessions() as session:
             job = await session.get(ResearchJob, research_job_id)
             if job is None:
@@ -129,12 +149,36 @@ class EvidenceEngineService:
             ).all()
             if not chunks:
                 raise ValueError("Research job has no indexed evidence")
+            documents = (
+                await session.execute(
+                    select(
+                        KnowledgeDocument.id,
+                        KnowledgeDocument.content_hash,
+                        KnowledgeDocument.canonical_url,
+                        KnowledgeDocument.source_url,
+                    )
+                    .where(
+                        KnowledgeDocument.research_job_id == research_job_id,
+                        KnowledgeDocument.index_status == "COMPLETED",
+                    )
+                    .order_by(KnowledgeDocument.id)
+                )
+            ).all()
+            source_links = (
+                await session.execute(
+                    select(KnowledgeChunkSource.chunk_id, KnowledgeChunkSource.document_id)
+                    .where(KnowledgeChunkSource.research_job_id == research_job_id)
+                    .order_by(KnowledgeChunkSource.chunk_id, KnowledgeChunkSource.document_id)
+                )
+            ).all()
             fingerprint = hashlib.sha256(
                 json.dumps(
                     {
                         "job": research_job_id,
                         "request": request.model_dump(mode="json"),
                         "chunks": [(chunk_id, text_hash) for chunk_id, text_hash in chunks],
+                        "documents": [tuple(row) for row in documents],
+                        "source_links": [tuple(row) for row in source_links],
                         "nli_model": self.classifier.model_name,
                         "llm_model": getattr(
                             self.extractor, "model", type(self.extractor).__name__
@@ -152,6 +196,10 @@ class EvidenceEngineService:
                 )
             ).scalar_one_or_none()
             if existing:
+                if existing.status == "FAILED":
+                    existing.status, existing.stage = "PENDING", "PENDING"
+                    existing.error_message = None
+                    await session.commit()
                 if existing.status not in _TERMINAL and existing.id not in self._tasks:
                     self._schedule(existing.id)
                 return existing
@@ -204,25 +252,54 @@ class EvidenceEngineService:
                 request = EvidenceRequest.model_validate_json(row.request_json)
                 research_job_id = row.research_job_id
             logger.info(
-                "evidence_job_started job_id=%s research_job_id=%s",
-                evidence_job_id,
-                research_job_id,
+                "evidence_job_started",
+                extra={"evidence_job_id": evidence_job_id, "research_job_id": research_job_id},
             )
             async with self._work_lock:
-                counters, timings = await self._process(evidence_job_id, research_job_id, request)
+                counters, timings = await asyncio.wait_for(
+                    self._process(evidence_job_id, research_job_id, request),
+                    timeout=request.max_runtime_seconds,
+                )
+            outcome = (
+                "PARTIAL"
+                if counters.get("subquestion_failures") or counters.get("claim_failures")
+                else "COMPLETED"
+            )
             async with self.sessions() as session:
                 row = await session.get(EvidenceJob, evidence_job_id)
-                row.status, row.stage = "COMPLETED", "COMPLETED"
-                row.counters_json, row.timings_json = json.dumps(counters), json.dumps(timings)
+                row.status, row.stage = outcome, outcome
+                row.counters_json = json.dumps(counters)
+                if outcome == "PARTIAL":
+                    row.error_message = (
+                        f"subquestion_failures={counters.get('subquestion_failures', 0)}; "
+                        f"claim_failures={counters.get('claim_failures', 0)}"
+                    )
+                row.completed_at = utc_now()
+                row.duration_ms = int((time.monotonic() - started) * 1000)
+                timings["total_ms"] = row.duration_ms
+                row.timings_json = json.dumps(timings)
+                await session.commit()
+            logger.info(
+                "evidence_job_%s",
+                outcome.lower(),
+                extra={"evidence_job_id": evidence_job_id, "duration_ms": row.duration_ms},
+            )
+        except asyncio.CancelledError:
+            logger.info("evidence_job_interrupted", extra={"evidence_job_id": evidence_job_id})
+            raise
+        except TimeoutError:
+            logger.warning(
+                "evidence_job_partial timeout", extra={"evidence_job_id": evidence_job_id}
+            )
+            async with self.sessions() as session:
+                row = await session.get(EvidenceJob, evidence_job_id)
+                row.status, row.stage = "PARTIAL", "TIME_BUDGET"
+                row.error_message = "Evidence job exceeded max_runtime_seconds"
                 row.completed_at = utc_now()
                 row.duration_ms = int((time.monotonic() - started) * 1000)
                 await session.commit()
-            logger.info("evidence_job_completed job_id=%s", evidence_job_id)
-        except asyncio.CancelledError:
-            logger.info("evidence_job_interrupted job_id=%s", evidence_job_id)
-            raise
         except Exception as exc:
-            logger.exception("evidence_job_failed job_id=%s", evidence_job_id)
+            logger.exception("evidence_job_failed", extra={"evidence_job_id": evidence_job_id})
             async with self.sessions() as session:
                 row = await session.get(EvidenceJob, evidence_job_id)
                 row.status, row.stage = "FAILED", "FAILED"
@@ -319,24 +396,45 @@ class EvidenceEngineService:
         for sub in subs:
             counters["subquestions_processed"] += 1
             started = time.monotonic()
-            pack = await self._extraction_pack(
-                research_job_id, sub, request, chunks_by_id, sources_by_chunk
-            )
+            try:
+                pack = await self._extraction_pack(
+                    research_job_id, sub, request, chunks_by_id, sources_by_chunk
+                )
+            except Exception as exc:
+                counters["subquestion_failures"] += 1
+                logger.warning(
+                    "claim_extraction_failed job_id=%s subquestion_id=%s error=%s",
+                    evidence_job_id,
+                    sub.id,
+                    type(exc).__name__,
+                )
+                continue
             if not pack:
                 continue
             logger.info(
-                "claim_extraction_started job_id=%s subquestion_id=%s", evidence_job_id, sub.id
+                "claim_extraction_started",
+                extra={"evidence_job_id": evidence_job_id, "subquestion_id": sub.id},
             )
-            candidates = await self.extractor.extract(
-                {
-                    "plan_id": sub.plan_id,
-                    "question": sub.question,
-                    "max_claim_extraction_chunks": request.max_claim_extraction_chunks,
-                    "max_chars_per_chunk": request.max_chars_per_chunk,
-                    "max_claim_extraction_chars": request.max_claim_extraction_chars,
-                },
-                pack,
-            )
+            try:
+                candidates = await self.extractor.extract(
+                    {
+                        "plan_id": sub.plan_id,
+                        "question": sub.question,
+                        "max_claim_extraction_chunks": request.max_claim_extraction_chunks,
+                        "max_chars_per_chunk": request.max_chars_per_chunk,
+                        "max_claim_extraction_chars": request.max_claim_extraction_chars,
+                    },
+                    pack,
+                )
+            except Exception as exc:
+                counters["subquestion_failures"] += 1
+                logger.warning(
+                    "claim_extraction_failed job_id=%s subquestion_id=%s error=%s",
+                    evidence_job_id,
+                    sub.id,
+                    type(exc).__name__,
+                )
+                continue
             counters["llm_extraction_calls"] += 1
             permitted = {row["chunk_id"] for row in pack}
             candidates = [
@@ -352,7 +450,7 @@ class EvidenceEngineService:
             counters["claims_extracted"] += len(candidates)
             timings["claim_extraction_ms"] += int((time.monotonic() - started) * 1000)
             started = time.monotonic()
-            normalized = await self._deduplicate(candidates, counters)
+            normalized = await self._deduplicate(candidates, counters, evidence_job_id)
             counters["claims_normalized"] += len(candidates)
             counters["claims_deduplicated"] += len(candidates) - len(normalized)
             timings["claim_deduplication_ms"] += int((time.monotonic() - started) * 1000)
@@ -367,21 +465,32 @@ class EvidenceEngineService:
                     sources_by_chunk,
                     docs_by_id,
                 )
-                logger.info("claim_extracted job_id=%s claim_id=%s", evidence_job_id, claim_row.id)
+                logger.info(
+                    "claim_extracted",
+                    extra={"evidence_job_id": evidence_job_id, "claim_id": claim_row.id},
+                )
+                if json.loads(claim_row.decision_metadata_json).get("rule"):
+                    continue
                 async with self.sessions() as session:
                     job_row = await session.get(EvidenceJob, evidence_job_id)
                     job_row.stage = "VERIFICATION"
                     await session.commit()
-                await self._verify_claim(
-                    claim_row,
-                    request,
-                    chunks_by_id,
-                    sources_by_chunk,
-                    docs_by_id,
-                    group_ids,
-                    counters,
-                    timings,
-                )
+                try:
+                    await self._verify_claim(
+                        claim_row,
+                        request,
+                        chunks_by_id,
+                        sources_by_chunk,
+                        docs_by_id,
+                        group_ids,
+                        counters,
+                        timings,
+                    )
+                except Exception as exc:
+                    counters["claim_failures"] += 1
+                    logger.exception(
+                        "claim_verification_failed claim_id=%s error=%s", claim_row.id, exc
+                    )
         async with self.sessions() as session:
             rows = (
                 (
@@ -402,19 +511,27 @@ class EvidenceEngineService:
         timings["nli_ms"] = self.classifier.nli_duration_ms - nli_ms_before
         async with self.sessions() as session:
             relation_rows = (
-                await session.execute(
-                    select(ClaimEvidenceRelation)
-                    .join(VerifiedClaim, VerifiedClaim.id == ClaimEvidenceRelation.claim_id)
-                    .where(VerifiedClaim.evidence_job_id == evidence_job_id)
+                (
+                    await session.execute(
+                        select(ClaimEvidenceRelation)
+                        .join(VerifiedClaim, VerifiedClaim.id == ClaimEvidenceRelation.claim_id)
+                        .where(VerifiedClaim.evidence_job_id == evidence_job_id)
+                    )
                 )
-            ).scalars().all()
+                .scalars()
+                .all()
+            )
             citation_rows = (
-                await session.execute(
-                    select(ClaimCitation)
-                    .join(VerifiedClaim, VerifiedClaim.id == ClaimCitation.claim_id)
-                    .where(VerifiedClaim.evidence_job_id == evidence_job_id)
+                (
+                    await session.execute(
+                        select(ClaimCitation)
+                        .join(VerifiedClaim, VerifiedClaim.id == ClaimCitation.claim_id)
+                        .where(VerifiedClaim.evidence_job_id == evidence_job_id)
+                    )
                 )
-            ).scalars().all()
+                .scalars()
+                .all()
+            )
         counters["relations_classified"] = len(relation_rows)
         counters["support_relations"] = sum(
             row.adjudicated_relation == DecisionLabel.DIRECT_SUPPORT for row in relation_rows
@@ -495,7 +612,9 @@ class EvidenceEngineService:
                 break
         return pack
 
-    async def _deduplicate(self, candidates, counters) -> list[tuple[ClaimCandidate, set[int]]]:
+    async def _deduplicate(
+        self, candidates, counters, evidence_job_id: str
+    ) -> list[tuple[ClaimCandidate, set[int]]]:
         kept: list[tuple[ClaimCandidate, set[int]]] = []
         vectors = (
             await self.retrieval.embedder.embed_many([c.text for c in candidates])
@@ -515,13 +634,20 @@ class EvidenceEngineService:
                     or set(candidate.conditions) != set(previous.conditions)
                 ):
                     continue
-                if not safe_to_merge(candidate.text, previous.text):
+                if not safe_to_merge(candidate.text, previous.text) or scope_mismatch(
+                    candidate.text, previous.text
+                ):
                     continue
                 similarity = cosine(vectors[index], vectors[candidates.index(previous)])
                 if similarity < self.settings.evidence_semantic_duplicate_threshold:
                     continue
                 counters["llm_equivalence_calls"] += 1
-                equivalent = await self.equivalence.equivalent(candidate.text, previous.text)
+                try:
+                    equivalent = await self.equivalence.equivalent(candidate.text, previous.text)
+                except Exception as exc:
+                    counters["llm_equivalence_failures"] += 1
+                    logger.warning("claim_equivalence_failed error=%s", type(exc).__name__)
+                    continue
                 if equivalent.same_claim:
                     match = previous_index
                     break
@@ -529,7 +655,7 @@ class EvidenceEngineService:
                 kept.append((candidate, set(candidate.originating_chunk_ids)))
             else:
                 kept[match][1].update(candidate.originating_chunk_ids)
-                logger.info("claim_deduplicated normalized=%s", normalized[:120])
+                logger.info("claim_deduplicated", extra={"evidence_job_id": evidence_job_id})
         return kept
 
     async def _persist_claim(
@@ -593,12 +719,20 @@ class EvidenceEngineService:
         queries = [claim.claim_text]
         if request.use_counterqueries:
             started = time.monotonic()
-            plan = await self.counterqueries.generate(claim.claim_text)
-            counters["llm_counterquery_calls"] += 1
-            for query in plan.queries[:2]:
-                query = query.strip()[:400]
-                if query and query.casefold() not in {item.casefold() for item in queries}:
-                    queries.append(query)
+            try:
+                plan = await self.counterqueries.generate(claim.claim_text)
+                counters["llm_counterquery_calls"] += 1
+                for query in plan.queries[:2]:
+                    query = query.strip()[:400]
+                    if query and query.casefold() not in {item.casefold() for item in queries}:
+                        queries.append(query)
+            except Exception as exc:
+                counters["llm_counterquery_failures"] += 1
+                logger.warning(
+                    "counterquery_generation_failed claim_id=%s error=%s",
+                    claim.id,
+                    type(exc).__name__,
+                )
             timings["counter_retrieval_ms"] += int((time.monotonic() - started) * 1000)
         selected = {}
         for index, query in enumerate(queries):
@@ -651,7 +785,7 @@ class EvidenceEngineService:
     async def _citation_span(self, claim: str, chunk_text: str, decision: DecisionLabel):
         if decision not in {DecisionLabel.DIRECT_SUPPORT, DecisionLabel.CONTRADICTION}:
             return None
-        sentences = [item for item in sentence_spans(chunk_text) if len(item[2]) >= 12][:12]
+        sentences = [item for item in sentence_spans(chunk_text) if len(item[2]) >= 12][:16]
         if not sentences:
             return None
         expected = (
@@ -659,24 +793,45 @@ class EvidenceEngineService:
             if decision == DecisionLabel.DIRECT_SUPPORT
             else RelationLabel.CONTRADICTION
         )
-        scores = await self.classifier.classify_many(
-            [(sentence, claim) for _, _, sentence in sentences]
-        )
-        candidates = []
-        for (start, end, sentence), score in zip(sentences, scores, strict=True):
-            strength = (
-                score.entailment_score
-                if expected == RelationLabel.ENTAILMENT
-                else score.contradiction_score
+        claim_terms = {term for term in _TOKEN.findall(normalize_claim(claim)) if len(term) > 2}
+        for spans in (
+            sentences,
+            [
+                (left[0], right[1], chunk_text[left[0] : right[1]])
+                for left, right in zip(sentences, sentences[1:], strict=False)
+            ],
+        ):
+            spans = [
+                span
+                for span in spans
+                if claim_terms
+                and not scope_mismatch(claim, span[2])
+                and len(
+                    claim_terms
+                    & {term for term in _TOKEN.findall(normalize_claim(span[2])) if len(term) > 2}
+                )
+                / len(claim_terms)
+                >= 0.4
+            ]
+            if not spans:
+                continue
+            scores = await self.classifier.classify_many(
+                [(sentence, claim) for _, _, sentence in spans]
             )
-            if score.relation == expected and strength >= 0.5:
-                candidates.append((len(sentence), -strength, start, end, sentence))
-        if not candidates:
-            return None
-        _, _, start, end, exact = min(candidates)
-        if not validate_citation(chunk_text, start, end, exact):
-            return None
-        return start, end, exact
+            candidates = []
+            for (start, end, sentence), score in zip(spans, scores, strict=True):
+                strength = (
+                    score.entailment_score
+                    if expected == RelationLabel.ENTAILMENT
+                    else score.contradiction_score
+                )
+                if score.relation == expected and strength >= 0.5:
+                    candidates.append((len(sentence), -strength, start, end, sentence))
+            if candidates:
+                _, _, start, end, exact = min(candidates)
+                if validate_citation(chunk_text, start, end, exact):
+                    return start, end, exact
+        return None
 
     async def _verify_claim(
         self,
@@ -690,7 +845,8 @@ class EvidenceEngineService:
         timings,
     ) -> None:
         logger.info(
-            "claim_verification_started job_id=%s claim_id=%s", claim.evidence_job_id, claim.id
+            "claim_verification_started",
+            extra={"evidence_job_id": claim.evidence_job_id, "claim_id": claim.id},
         )
         candidates = await self._retrieve_candidates(claim, request, counters, timings)
         # Verification searches the whole indexed corpus, including non-origin passages.
@@ -730,7 +886,8 @@ class EvidenceEngineService:
                 .all()
             )
         seen = {(row.chunk_id, row.document_id) for row in existing}
-        for rank, (candidate, nli) in enumerate(zip(candidate_rows, predictions, strict=True), 1):
+        evaluated = []
+        for candidate, nli in zip(candidate_rows, predictions, strict=True):
             chunk_id = candidate["chunk_id"]
             chunk = chunks_by_id[chunk_id]
             decision = _raw_decision(nli)
@@ -746,10 +903,12 @@ class EvidenceEngineService:
                     mismatch = adjudicated.important_qualifier_mismatch
                     counters["llm_adjudication_calls"] += 1
                     logger.info(
-                        "evidence_adjudicated job_id=%s claim_id=%s chunk_id=%s",
-                        claim.evidence_job_id,
-                        claim.id,
-                        chunk_id,
+                        "evidence_adjudicated",
+                        extra={
+                            "evidence_job_id": claim.evidence_job_id,
+                            "claim_id": claim.id,
+                            "chunk_id": chunk_id,
+                        },
                     )
                 except Exception as exc:
                     counters["llm_adjudication_failures"] += 1
@@ -761,28 +920,50 @@ class EvidenceEngineService:
                     )
                     decision = DecisionLabel.UNCLEAR
                 timings["adjudication_ms"] += int((time.monotonic() - started) * 1000)
-            if mismatch and decision in {DecisionLabel.DIRECT_SUPPORT, DecisionLabel.CONTRADICTION}:
-                decision = (
-                    DecisionLabel.PARTIAL_SUPPORT
-                    if decision == DecisionLabel.DIRECT_SUPPORT
-                    else DecisionLabel.UNCLEAR
-                )
-            citation = None
-            if request.use_nli and decision in {
+            mismatch = mismatch or scope_mismatch(claim.claim_text, chunk.text)
+            decision = apply_qualifier_safety(decision, mismatch)
+            evaluated.append((candidate, nli, decision, summary, mismatch))
+        priority = {
+            DecisionLabel.CONTRADICTION: 0,
+            DecisionLabel.DIRECT_SUPPORT: 1,
+            DecisionLabel.PARTIAL_SUPPORT: 2,
+            DecisionLabel.UNCLEAR: 3,
+            DecisionLabel.NEUTRAL: 4,
+        }
+        citations_by_index = {}
+        for index in sorted(
+            range(len(evaluated)),
+            key=lambda index: (priority[evaluated[index][2]], index),
+        ):
+            if len(citations_by_index) >= request.final_evidence_per_claim:
+                break
+            candidate, _, decision, _, _ = evaluated[index]
+            if not request.use_nli or decision not in {
                 DecisionLabel.DIRECT_SUPPORT,
                 DecisionLabel.CONTRADICTION,
             }:
-                started = time.monotonic()
-                citation = await self._citation_span(claim.claim_text, chunk.text, decision)
-                timings["citation_validation_ms"] += int((time.monotonic() - started) * 1000)
-                if citation is None:
-                    counters["citation_failures"] += 1
-                    logger.info(
-                        "citation_validation_failed job_id=%s claim_id=%s chunk_id=%s",
-                        claim.evidence_job_id,
-                        claim.id,
-                        chunk_id,
-                    )
+                continue
+            chunk_id = candidate["chunk_id"]
+            started = time.monotonic()
+            citation = await self._citation_span(
+                claim.claim_text, chunks_by_id[chunk_id].text, decision
+            )
+            timings["citation_validation_ms"] += int((time.monotonic() - started) * 1000)
+            if citation is None:
+                counters["citation_failures"] += 1
+                logger.info(
+                    "citation_validation_failed",
+                    extra={
+                        "evidence_job_id": claim.evidence_job_id,
+                        "claim_id": claim.id,
+                        "chunk_id": chunk_id,
+                    },
+                )
+            else:
+                citations_by_index[index] = citation
+        for rank, (candidate, nli, decision, summary, mismatch) in enumerate(evaluated, 1):
+            chunk_id = candidate["chunk_id"]
+            citation = citations_by_index.get(rank - 1)
             for source in sources_by_chunk.get(chunk_id, []):
                 document = docs_by_id[source.document_id]
                 key = (chunk_id, document.id)
@@ -832,21 +1013,25 @@ class EvidenceEngineService:
                         counters["citations_created"] += 1
                         counters["citations_validated"] += 1
                         logger.info(
-                            "citation_created job_id=%s claim_id=%s chunk_id=%s",
-                            claim.evidence_job_id,
-                            claim.id,
-                            chunk_id,
+                            "citation_created",
+                            extra={
+                                "evidence_job_id": claim.evidence_job_id,
+                                "claim_id": claim.id,
+                                "chunk_id": chunk_id,
+                            },
                         )
                     await session.commit()
                 seen.add(key)
                 counters[f"{decision.lower()}_relations"] += 1
                 counters["relations_classified"] += 1
                 logger.info(
-                    "evidence_relation_classified job_id=%s claim_id=%s chunk_id=%s relation=%s",
-                    claim.evidence_job_id,
-                    claim.id,
-                    chunk_id,
-                    decision,
+                    "evidence_relation_classified",
+                    extra={
+                        "evidence_job_id": claim.evidence_job_id,
+                        "claim_id": claim.id,
+                        "chunk_id": chunk_id,
+                        "relation": decision,
+                    },
                 )
         await self._assign_status(claim.id)
 
@@ -897,9 +1082,16 @@ class EvidenceEngineService:
             claim.independent_support_groups = decision["support_groups"]
             claim.independent_contradiction_groups = decision["contradiction_groups"]
             claim.needs_more_verification = decision["needs_more_verification"]
+            uncited_strong = any(
+                row["relation"] in {DecisionLabel.DIRECT_SUPPORT, DecisionLabel.CONTRADICTION}
+                and not row["valid_citation"]
+                for row in inputs
+            )
             claim.verification_gap_reason = (
                 "Independent support and contradiction both present"
                 if claim.status == ClaimStatus.CONTESTED
+                else "Potential support or contradiction lacks a validated citation"
+                if claim.status == ClaimStatus.INSUFFICIENT_EVIDENCE and uncited_strong
                 else "No validated direct support or contradiction"
                 if claim.status == ClaimStatus.INSUFFICIENT_EVIDENCE
                 else None
@@ -911,9 +1103,24 @@ class EvidenceEngineService:
                 }
             )
             await session.commit()
-        logger.info("claim_status_assigned claim_id=%s status=%s", claim_id, claim.status)
         logger.info(
-            "claim_confidence_assigned claim_id=%s tier=%s", claim_id, claim.confidence_tier
+            "claim_status_assigned",
+            extra={
+                "evidence_job_id": claim.evidence_job_id,
+                "claim_id": claim_id,
+                "claim_status": claim.status,
+            },
+        )
+        logger.info(
+            "claim_confidence_assigned",
+            extra={
+                "evidence_job_id": claim.evidence_job_id,
+                "claim_id": claim_id,
+                "confidence_tier": claim.confidence_tier,
+            },
         )
         if claim.status == ClaimStatus.CONTESTED:
-            logger.info("contradiction_detected claim_id=%s", claim_id)
+            logger.info(
+                "contradiction_detected",
+                extra={"evidence_job_id": claim.evidence_job_id, "claim_id": claim_id},
+            )

@@ -12,7 +12,20 @@ class JsonFormatter(logging.Formatter):
             "logger": record.name,
             "job_id": getattr(record, "job_id", None),
         }
-        for key in ("agent_run_id", "research_job_id", "iteration", "gap_id", "duration_ms"):
+        for key in (
+            "agent_run_id",
+            "research_job_id",
+            "iteration",
+            "gap_id",
+            "duration_ms",
+            "evidence_job_id",
+            "claim_id",
+            "chunk_id",
+            "subquestion_id",
+            "relation",
+            "claim_status",
+            "confidence_tier",
+        ):
             value = getattr(record, key, None)
             if value is not None:
                 payload[key] = value

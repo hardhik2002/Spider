@@ -1,0 +1,114 @@
+{
+  "kind": "tiny six-pair labeled real-model pilot, not a representative benchmark",
+  "generated_at_utc": "2026-10-10T10:35:02.302752+00:00",
+  "nli_model": "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli",
+  "adjudicator_model": "Qwen3:latest",
+  "fixture_size": 6,
+  "baseline_scope_guarded_metrics": {
+    "per_label": {
+      "ENTAILMENT": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "NEUTRAL": {
+        "precision": 1.0,
+        "recall": 0.6666666666666666,
+        "f1": 0.8
+      },
+      "CONTRADICTION": {
+        "precision": 0.6666666666666666,
+        "recall": 1.0,
+        "f1": 0.8
+      }
+    },
+    "macro_f1": 0.8666666666666667,
+    "accuracy": 0.8333333333333334,
+    "confusion": {
+      "ENTAILMENT->ENTAILMENT": 1,
+      "CONTRADICTION->CONTRADICTION": 2,
+      "NEUTRAL->CONTRADICTION": 1,
+      "NEUTRAL->NEUTRAL": 2
+    }
+  },
+  "hybrid_metrics": {
+    "per_label": {
+      "ENTAILMENT": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "NEUTRAL": {
+        "precision": 1.0,
+        "recall": 0.6666666666666666,
+        "f1": 0.8
+      },
+      "CONTRADICTION": {
+        "precision": 0.6666666666666666,
+        "recall": 1.0,
+        "f1": 0.8
+      }
+    },
+    "macro_f1": 0.8666666666666667,
+    "accuracy": 0.8333333333333334,
+    "confusion": {
+      "ENTAILMENT->ENTAILMENT": 1,
+      "CONTRADICTION->CONTRADICTION": 2,
+      "NEUTRAL->CONTRADICTION": 1,
+      "NEUTRAL->NEUTRAL": 2
+    }
+  },
+  "llm_call_count": 2,
+  "llm_calls": [
+    {
+      "pair_index": 3,
+      "decision": {
+        "relation": "CONTRADICTION",
+        "decision_summary": "The passage directly contradicts the claim by stating that latency increased by 18% on Dataset X, whereas the claim states latency decreased by 18%.",
+        "important_qualifier_mismatch": false
+      },
+      "final_relation": "CONTRADICTION",
+      "latency_ms": 57355
+    },
+    {
+      "pair_index": 4,
+      "decision": {
+        "relation": "CONTRADICTION",
+        "decision_summary": "The passage states that in 2023, system A cost $10, which directly contradicts the claim that in 2026, system A cost $10.",
+        "important_qualifier_mismatch": false
+      },
+      "final_relation": "NEUTRAL",
+      "latency_ms": 14939
+    }
+  ],
+  "baseline_predictions": [
+    "ENTAILMENT",
+    "CONTRADICTION",
+    "CONTRADICTION",
+    "CONTRADICTION",
+    "NEUTRAL",
+    "NEUTRAL"
+  ],
+  "hybrid_predictions": [
+    "ENTAILMENT",
+    "CONTRADICTION",
+    "CONTRADICTION",
+    "CONTRADICTION",
+    "NEUTRAL",
+    "NEUTRAL"
+  ],
+  "gold": [
+    "ENTAILMENT",
+    "CONTRADICTION",
+    "NEUTRAL",
+    "CONTRADICTION",
+    "NEUTRAL",
+    "NEUTRAL"
+  ],
+  "total_adjudication_ms": 72331,
+  "nli_latency_ms_from_prior_pilot": 67084,
+  "limitations": [
+    "Only two of six pairs meet the configured ambiguity/type trigger.",
+    "The NLI baseline is reused from a previous run; total times are not a paired end-to-end benchmark."
+  ]
+}

@@ -1,0 +1,400 @@
+{
+  "kind": "single bounded live connectivity smoke, not a labeled accuracy benchmark",
+  "research_job_id": "38f3b146-6170-49c2-8b5c-64677210dd3f",
+  "agent_run_id": "6c6a736f-5913-40ee-b144-3521cbd50fd5",
+  "source_database": "C:\\My3TechAi\\spider\\data\\phase5-live-20261009-135809.db",
+  "copied_database": "C:\\My3TechAi\\spider\\data\\phase6-live-20261010-094822.db",
+  "request": {
+    "agent_run_id": "6c6a736f-5913-40ee-b144-3521cbd50fd5",
+    "max_subquestions": 1,
+    "max_claims_per_subquestion": 2,
+    "evidence_candidates_per_claim": 4,
+    "final_evidence_per_claim": 2,
+    "max_claim_extraction_chunks": 3,
+    "max_chars_per_chunk": 1000,
+    "max_claim_extraction_chars": 3000,
+    "use_nli": true,
+    "use_llm_adjudication": true,
+    "use_counterqueries": false,
+    "rerank": false
+  },
+  "started_at_utc": "2026-10-10T09:48:22.173000+00:00",
+  "evidence_job_id": "fdcc1def-e717-42ff-b81b-8533a283f812",
+  "timeout": true,
+  "status": {
+    "evidence_job_id": "fdcc1def-e717-42ff-b81b-8533a283f812",
+    "research_job_id": "38f3b146-6170-49c2-8b5c-64677210dd3f",
+    "agent_run_id": "6c6a736f-5913-40ee-b144-3521cbd50fd5",
+    "status": "RUNNING",
+    "stage": "VERIFICATION",
+    "subquestions_processed": 0,
+    "claims_extracted": 0,
+    "claims_normalized": 0,
+    "claims_deduplicated": 0,
+    "support_relations": 0,
+    "direct_support_relations": 0,
+    "contradiction_relations": 0,
+    "neutral_relations": 0,
+    "claims_corroborated": 0,
+    "claims_supported": 0,
+    "claims_contested": 0,
+    "claims_contradicted": 0,
+    "claims_partially_supported": 0,
+    "claims_insufficient_evidence": 0,
+    "citations_created": 0,
+    "citations_validated": 0,
+    "citation_failures": 0,
+    "nli_pairs": 0,
+    "nli_batches": 0,
+    "llm_extraction_calls": 0,
+    "llm_adjudication_calls": 0,
+    "timings": {},
+    "duration_ms": null,
+    "error": null,
+    "errors": []
+  },
+  "claims": [
+    {
+      "id": "ad75f48f82358b131c0d30779bd5607146f8",
+      "stable_key": "97eca2c01483cca57b35318913b97bde5f51c47b8d9992461a5118590a7810d8",
+      "subquestion_id": 1,
+      "subquestion": "What are the key architectural differences between GraphRAG and traditional RAG?",
+      "claim": "GraphRAG methods include Knowledge Graph-based GraphRAG Liu (2022) and Community-based GraphRAG (Edge et al., 2024).",
+      "normalized_claim": "graphrag methods include knowledge graph-based graphrag liu (2022) and community-based graphrag (edge et al., 2024)",
+      "claim_type": "OTHER",
+      "status": "INSUFFICIENT_EVIDENCE",
+      "confidence_tier": "UNRESOLVED",
+      "support_count": 1,
+      "contradiction_count": 1,
+      "partial_count": 0,
+      "independent_support_groups": 0,
+      "independent_contradiction_groups": 0,
+      "needs_more_verification": true,
+      "created_at": "2026-10-10T09:51:42.648639"
+    },
+    {
+      "id": "1038ace12839ee2193a499d32b5bc1f026f8",
+      "stable_key": "7a67f1c59a73eb2c72c408439a61b13fc9661bf3b99c4038d031564a34664f88",
+      "subquestion_id": 1,
+      "subquestion": "What are the key architectural differences between GraphRAG and traditional RAG?",
+      "claim": "Knowledge Graph-based GraphRAG Liu (2022) extracts a Knowledge Graph (KG) from text and performs retrieval solely based on the KG.",
+      "normalized_claim": "knowledge graph-based graphrag liu (2022) extracts a knowledge graph (kg) from text and performs retrieval solely based on the kg",
+      "claim_type": "OTHER",
+      "status": "INSUFFICIENT_EVIDENCE",
+      "confidence_tier": "UNRESOLVED",
+      "support_count": 0,
+      "contradiction_count": 0,
+      "partial_count": 0,
+      "independent_support_groups": 0,
+      "independent_contradiction_groups": 0,
+      "needs_more_verification": true,
+      "created_at": "2026-10-10T09:56:12.974228"
+    }
+  ],
+  "contradictions": [
+    {
+      "id": "ad75f48f82358b131c0d30779bd5607146f8",
+      "stable_key": "97eca2c01483cca57b35318913b97bde5f51c47b8d9992461a5118590a7810d8",
+      "subquestion_id": 1,
+      "subquestion": "What are the key architectural differences between GraphRAG and traditional RAG?",
+      "claim": "GraphRAG methods include Knowledge Graph-based GraphRAG Liu (2022) and Community-based GraphRAG (Edge et al., 2024).",
+      "normalized_claim": "graphrag methods include knowledge graph-based graphrag liu (2022) and community-based graphrag (edge et al., 2024)",
+      "claim_type": "OTHER",
+      "status": "INSUFFICIENT_EVIDENCE",
+      "confidence_tier": "UNRESOLVED",
+      "support_count": 1,
+      "contradiction_count": 1,
+      "partial_count": 0,
+      "independent_support_groups": 0,
+      "independent_contradiction_groups": 0,
+      "needs_more_verification": true,
+      "created_at": "2026-10-10T09:51:42.648639",
+      "qualifiers": [],
+      "conditions": [],
+      "temporal_scope": null,
+      "subject": null,
+      "predicate": null,
+      "object": null,
+      "originating_chunks": [
+        {
+          "chunk_id": 3,
+          "document_id": 1,
+          "source_url": "https://arxiv.org/html/2502.11371v1"
+        }
+      ],
+      "supporting_evidence": [
+        {
+          "id": 1,
+          "chunk_id": 3,
+          "document_id": 1,
+          "source_group_id": "42fe7372c72917d792b639b9cf29cff4daad",
+          "source_url": "https://arxiv.org/html/2502.11371v1",
+          "source_domain": "arxiv.org",
+          "retrieval_rank": 1,
+          "retrieval_score": 0.03278688524590164,
+          "nli_relation": "ENTAILMENT",
+          "nli_scores": {
+            "entailment": 0.978515625,
+            "neutral": 0.0175628662109375,
+            "contradiction": 0.004131317138671875
+          },
+          "nli_model_name": "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli",
+          "relation": "DIRECT_SUPPORT",
+          "qualifier_mismatch": false,
+          "decision_summary": "The passage directly supports the claim by explicitly mentioning both Knowledge Graph-based GraphRAG Liu (2022) and Community-based GraphRAG (Edge et al., 2024) as representative GraphRAG methods."
+        }
+      ],
+      "contradicting_evidence": [
+        {
+          "id": 2,
+          "chunk_id": 8,
+          "document_id": 1,
+          "source_group_id": "42fe7372c72917d792b639b9cf29cff4daad",
+          "source_url": "https://arxiv.org/html/2502.11371v1",
+          "source_domain": "arxiv.org",
+          "retrieval_rank": 2,
+          "retrieval_score": 0.031754032258064516,
+          "nli_relation": "CONTRADICTION",
+          "nli_scores": {
+            "entailment": 0.22216796875,
+            "neutral": 0.09735107421875,
+            "contradiction": 0.6806640625
+          },
+          "nli_model_name": "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli",
+          "relation": "CONTRADICTION",
+          "qualifier_mismatch": false,
+          "decision_summary": "The passage mentions 'KG-GraphRAG' and 'Community-GraphRAG' but does not explicitly name 'Knowledge Graph-based GraphRAG Liu (2022)' or 'Community-based GraphRAG (Edge et al., 2024)' as distinct methods within the GraphRAG framework, leading to a contradiction."
+        }
+      ],
+      "neutral_evidence": [],
+      "partial_evidence": [],
+      "citations": [],
+      "source_diversity": {
+        "supporting_unique_documents": 1,
+        "supporting_unique_domains": 1,
+        "supporting_source_groups": 1,
+        "contradicting_unique_documents": 1,
+        "contradicting_unique_domains": 1,
+        "contradicting_source_groups": 1
+      },
+      "decision_metadata": {
+        "rule": "cited-independent-source-groups-v1",
+        "nli_scores_are_truth_probabilities": false
+      },
+      "verification_gap_reason": "No validated direct support or contradiction"
+    }
+  ],
+  "ledger": {
+    "evidence_job_id": "fdcc1def-e717-42ff-b81b-8533a283f812",
+    "claims": [
+      {
+        "claim_id": "ad75f48f82358b131c0d30779bd5607146f8",
+        "claim": "GraphRAG methods include Knowledge Graph-based GraphRAG Liu (2022) and Community-based GraphRAG (Edge et al., 2024).",
+        "status": "INSUFFICIENT_EVIDENCE",
+        "confidence": "UNRESOLVED",
+        "supporting_sources": 0,
+        "contradicting_sources": 0,
+        "needs_more_verification": true,
+        "evidence_mapping": [
+          {
+            "id": 1,
+            "chunk_id": 3,
+            "document_id": 1,
+            "source_group_id": "42fe7372c72917d792b639b9cf29cff4daad",
+            "source_url": "https://arxiv.org/html/2502.11371v1",
+            "source_domain": "arxiv.org",
+            "retrieval_rank": 1,
+            "retrieval_score": 0.03278688524590164,
+            "nli_relation": "ENTAILMENT",
+            "nli_scores": {
+              "entailment": 0.978515625,
+              "neutral": 0.0175628662109375,
+              "contradiction": 0.004131317138671875
+            },
+            "nli_model_name": "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli",
+            "relation": "DIRECT_SUPPORT",
+            "qualifier_mismatch": false,
+            "decision_summary": "The passage directly supports the claim by explicitly mentioning both Knowledge Graph-based GraphRAG Liu (2022) and Community-based GraphRAG (Edge et al., 2024) as representative GraphRAG methods."
+          },
+          {
+            "id": 2,
+            "chunk_id": 8,
+            "document_id": 1,
+            "source_group_id": "42fe7372c72917d792b639b9cf29cff4daad",
+            "source_url": "https://arxiv.org/html/2502.11371v1",
+            "source_domain": "arxiv.org",
+            "retrieval_rank": 2,
+            "retrieval_score": 0.031754032258064516,
+            "nli_relation": "CONTRADICTION",
+            "nli_scores": {
+              "entailment": 0.22216796875,
+              "neutral": 0.09735107421875,
+              "contradiction": 0.6806640625
+            },
+            "nli_model_name": "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli",
+            "relation": "CONTRADICTION",
+            "qualifier_mismatch": false,
+            "decision_summary": "The passage mentions 'KG-GraphRAG' and 'Community-GraphRAG' but does not explicitly name 'Knowledge Graph-based GraphRAG Liu (2022)' or 'Community-based GraphRAG (Edge et al., 2024)' as distinct methods within the GraphRAG framework, leading to a contradiction."
+          }
+        ],
+        "citations": [],
+        "verification_metadata": {
+          "rule": "cited-independent-source-groups-v1",
+          "nli_scores_are_truth_probabilities": false
+        }
+      },
+      {
+        "claim_id": "1038ace12839ee2193a499d32b5bc1f026f8",
+        "claim": "Knowledge Graph-based GraphRAG Liu (2022) extracts a Knowledge Graph (KG) from text and performs retrieval solely based on the KG.",
+        "status": "INSUFFICIENT_EVIDENCE",
+        "confidence": "UNRESOLVED",
+        "supporting_sources": 0,
+        "contradicting_sources": 0,
+        "needs_more_verification": true,
+        "evidence_mapping": [],
+        "citations": [],
+        "verification_metadata": {}
+      }
+    ]
+  },
+  "examples": [
+    {
+      "id": "ad75f48f82358b131c0d30779bd5607146f8",
+      "stable_key": "97eca2c01483cca57b35318913b97bde5f51c47b8d9992461a5118590a7810d8",
+      "subquestion_id": 1,
+      "subquestion": "What are the key architectural differences between GraphRAG and traditional RAG?",
+      "claim": "GraphRAG methods include Knowledge Graph-based GraphRAG Liu (2022) and Community-based GraphRAG (Edge et al., 2024).",
+      "normalized_claim": "graphrag methods include knowledge graph-based graphrag liu (2022) and community-based graphrag (edge et al., 2024)",
+      "claim_type": "OTHER",
+      "status": "INSUFFICIENT_EVIDENCE",
+      "confidence_tier": "UNRESOLVED",
+      "support_count": 1,
+      "contradiction_count": 1,
+      "partial_count": 0,
+      "independent_support_groups": 0,
+      "independent_contradiction_groups": 0,
+      "needs_more_verification": true,
+      "created_at": "2026-10-10T09:51:42.648639",
+      "qualifiers": [],
+      "conditions": [],
+      "temporal_scope": null,
+      "subject": null,
+      "predicate": null,
+      "object": null,
+      "originating_chunks": [
+        {
+          "chunk_id": 3,
+          "document_id": 1,
+          "source_url": "https://arxiv.org/html/2502.11371v1"
+        }
+      ],
+      "supporting_evidence": [
+        {
+          "id": 1,
+          "chunk_id": 3,
+          "document_id": 1,
+          "source_group_id": "42fe7372c72917d792b639b9cf29cff4daad",
+          "source_url": "https://arxiv.org/html/2502.11371v1",
+          "source_domain": "arxiv.org",
+          "retrieval_rank": 1,
+          "retrieval_score": 0.03278688524590164,
+          "nli_relation": "ENTAILMENT",
+          "nli_scores": {
+            "entailment": 0.978515625,
+            "neutral": 0.0175628662109375,
+            "contradiction": 0.004131317138671875
+          },
+          "nli_model_name": "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli",
+          "relation": "DIRECT_SUPPORT",
+          "qualifier_mismatch": false,
+          "decision_summary": "The passage directly supports the claim by explicitly mentioning both Knowledge Graph-based GraphRAG Liu (2022) and Community-based GraphRAG (Edge et al., 2024) as representative GraphRAG methods."
+        }
+      ],
+      "contradicting_evidence": [
+        {
+          "id": 2,
+          "chunk_id": 8,
+          "document_id": 1,
+          "source_group_id": "42fe7372c72917d792b639b9cf29cff4daad",
+          "source_url": "https://arxiv.org/html/2502.11371v1",
+          "source_domain": "arxiv.org",
+          "retrieval_rank": 2,
+          "retrieval_score": 0.031754032258064516,
+          "nli_relation": "CONTRADICTION",
+          "nli_scores": {
+            "entailment": 0.22216796875,
+            "neutral": 0.09735107421875,
+            "contradiction": 0.6806640625
+          },
+          "nli_model_name": "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli",
+          "relation": "CONTRADICTION",
+          "qualifier_mismatch": false,
+          "decision_summary": "The passage mentions 'KG-GraphRAG' and 'Community-GraphRAG' but does not explicitly name 'Knowledge Graph-based GraphRAG Liu (2022)' or 'Community-based GraphRAG (Edge et al., 2024)' as distinct methods within the GraphRAG framework, leading to a contradiction."
+        }
+      ],
+      "neutral_evidence": [],
+      "partial_evidence": [],
+      "citations": [],
+      "source_diversity": {
+        "supporting_unique_documents": 1,
+        "supporting_unique_domains": 1,
+        "supporting_source_groups": 1,
+        "contradicting_unique_documents": 1,
+        "contradicting_unique_domains": 1,
+        "contradicting_source_groups": 1
+      },
+      "decision_metadata": {
+        "rule": "cited-independent-source-groups-v1",
+        "nli_scores_are_truth_probabilities": false
+      },
+      "verification_gap_reason": "No validated direct support or contradiction"
+    },
+    {
+      "id": "1038ace12839ee2193a499d32b5bc1f026f8",
+      "stable_key": "7a67f1c59a73eb2c72c408439a61b13fc9661bf3b99c4038d031564a34664f88",
+      "subquestion_id": 1,
+      "subquestion": "What are the key architectural differences between GraphRAG and traditional RAG?",
+      "claim": "Knowledge Graph-based GraphRAG Liu (2022) extracts a Knowledge Graph (KG) from text and performs retrieval solely based on the KG.",
+      "normalized_claim": "knowledge graph-based graphrag liu (2022) extracts a knowledge graph (kg) from text and performs retrieval solely based on the kg",
+      "claim_type": "OTHER",
+      "status": "INSUFFICIENT_EVIDENCE",
+      "confidence_tier": "UNRESOLVED",
+      "support_count": 0,
+      "contradiction_count": 0,
+      "partial_count": 0,
+      "independent_support_groups": 0,
+      "independent_contradiction_groups": 0,
+      "needs_more_verification": true,
+      "created_at": "2026-10-10T09:56:12.974228",
+      "qualifiers": [],
+      "conditions": [],
+      "temporal_scope": null,
+      "subject": null,
+      "predicate": null,
+      "object": null,
+      "originating_chunks": [
+        {
+          "chunk_id": 3,
+          "document_id": 1,
+          "source_url": "https://arxiv.org/html/2502.11371v1"
+        }
+      ],
+      "supporting_evidence": [],
+      "contradicting_evidence": [],
+      "neutral_evidence": [],
+      "partial_evidence": [],
+      "citations": [],
+      "source_diversity": {
+        "supporting_unique_documents": 0,
+        "supporting_unique_domains": 0,
+        "supporting_source_groups": 0,
+        "contradicting_unique_documents": 0,
+        "contradicting_unique_domains": 0,
+        "contradicting_source_groups": 0
+      },
+      "decision_metadata": {},
+      "verification_gap_reason": null
+    }
+  ],
+  "finished_at_utc": "2026-10-10T09:58:28.341623+00:00"
+}
