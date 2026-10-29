@@ -1,6 +1,6 @@
 # SpiderMind — research, crawling, and evidence retrieval
 
-SpiderMind is an incremental AI research project. Phase 1 crawls, Phase 2 focuses crawling, Phase 3 plans and searches, Phase 4 indexes and retrieves, Phase 5 iterates to fill evidence gaps, Phase 6 maps atomic claims to supporting and contradicting passages, and Phase 7 materializes a deterministic knowledge/citation graph from those verified records. It does not generate final research answers or provide a frontend.
+SpiderMind is an incremental AI research project. Phase 1 crawls, Phase 2 focuses crawling, Phase 3 plans and searches, Phase 4 indexes and retrieves, Phase 5 iterates to fill evidence gaps, Phase 6 maps atomic claims to supporting and contradicting passages, and Phase 7 materializes a deterministic knowledge/citation graph from those verified records. Phase 8A adds an interactive React graph client. It does not generate final research answers.
 
 ## Phase 1 foundation
 
@@ -362,6 +362,20 @@ Invoke-RestMethod "$base/export?format=json"
 ```
 
 Additional graph endpoints list/filter edges, inspect node detail (chunk text is opt-in), and traverse a bounded `/subgraph` with `root_node_id`, `depth`, `direction`, `node_types`, `edge_types`, and `max_nodes`. Node/edge lists use `limit` and `offset`. The controlled [Phase 7 result](docs/phase7-graph-results.json) uses a local fixture with all six claim statuses, mirrored documents, two independent source groups, valid citations, and an uncited relation. The [live smoke](docs/phase7-live-smoke-results.json) builds from a copy of the final successful Phase 6 database; it is not a labeled graph accuracy benchmark. Reproduce them with `$env:PYTHONPATH='backend'; .\.venv\Scripts\python.exe backend/scripts/evaluate_phase7.py` and `backend/scripts/live_phase7_smoke.py` respectively.
+
+## Phase 8A interactive Spider Graph UI
+
+The [frontend](frontend/README.md) is a React/TypeScript/Vite client using React Flow for a spider-centered, progressive Phase 7 graph. It loads a bounded research neighborhood, expands nodes on demand, and shows exact claim evidence, citations, contradictions, paths, summary counts, and consistency status from the existing API. The client has no fake production graph data and makes no graph or claim decisions. The supplied `frontend/src/assets/spider-reference.png` is required for the intended central visual; `spidermind-ui-reference.png` is design-only. These PNGs were not present when this implementation began and must be added for final visual approval.
+
+From the repository root, start the backend as in the Phase 7 section. Then:
+
+```powershell
+cd frontend
+npm install
+npm run dev
+```
+
+Open `http://127.0.0.1:5173`. Enter a research-job and graph-snapshot ID, or a research-job and completed evidence-job ID to build a graph. The local Vite proxy reaches the backend on port 8000 without a CORS change. Set `VITE_API_BASE_URL` for a separately hosted API. Run `npm run lint`, `npm run test`, and `npm run build` before release.
 
 ## Tests and checks
 

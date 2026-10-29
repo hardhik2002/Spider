@@ -1,10 +1,10 @@
 # SpiderMind project context
 
-_Updated 29 October 2026 for Phase 7. This describes the current working tree. It is a guide to the implementation, not a replacement for the source code or the recorded result JSON._
+_Updated 29 October 2026 for Phase 8A. This describes the current working tree. It is a guide to the implementation, not a replacement for the source code or the recorded result JSON._
 
 ## 1. Purpose and current boundary
 
-SpiderMind is a Python 3.11+ FastAPI research backend. It accepts a URL or research question, crawls public HTML, plans searches, indexes retrieved passages, runs a bounded research loop, produces a claim/evidence ledger, and materializes a deterministic citation graph from that ledger. It has no frontend, authentication, or final answer writer. The API advertises version `0.7.0` in `backend/app/main.py`; `pyproject.toml` still labels the package `0.1.0` and describes the original Phase 1 foundation.
+SpiderMind has a Python 3.11+ FastAPI research backend and a Phase 8A React/TypeScript graph client. The backend accepts a URL or research question, crawls public HTML, plans searches, indexes passages, runs a bounded research loop, produces a claim/evidence ledger, and materializes a deterministic citation graph. The frontend explores that graph without changing evidence semantics. There is no authentication or final answer writer. The API advertises version `0.7.0` in `backend/app/main.py`; `pyproject.toml` still labels the Python package `0.1.0` and describes the original Phase 1 foundation.
 
 The phases build on one another:
 
@@ -17,6 +17,7 @@ The phases build on one another:
 | 5 | Bounded iterative acquisition of missing evidence | Agent run, gaps, actions, checkpoints |
 | 6 | Atomic claim extraction and evidence verification | Claim relations, exact citations, ledger |
 | 7 | Deterministic projection, validation, traversal, analytics, export | Versioned knowledge/citation graph |
+| 8A | Interactive, bounded visual exploration of the Phase 7 graph | Spider-centered React graph UI |
 
 ### End-to-end flow
 
@@ -27,15 +28,19 @@ question -> validated plan -> deduplicated web queries -> public search results
          -> optional agent gap loop -> claim extraction -> NLI/adjudication
          -> citation checks + independent source groups -> evidence ledger
          -> versioned SQLite graph -> validation/traversal/analytics/JSON export
+         -> bounded Phase 7 API client -> React Flow spider graph and inspector
 ```
 
 Phase 1/2 crawls can be used directly without a research job. Phases 4–6 consume the persisted research corpus. Phase 6 retrieves within that indexed corpus; it does not launch new web searches or crawls. Phase 7 projects only persisted Phase 1–6 relationships and makes no new LLM decisions.
+Phase 8A reads Phase 7 records and does not create claims, change confidence, or generate final answers.
 
 ## 2. Runtime architecture
 
 `backend/app/main.py` creates the FastAPI app and owns its lifespan. Startup configures JSON logging, creates/migrates the SQLite schema, opens one HTTPX client with redirects and environment proxies disabled, builds all services, opens a LangGraph SQLite checkpointer, recovers interrupted jobs, and attaches services to `app.state`. Shutdown cancels background tasks, closes the vector index and HTTP client, and disposes the SQLAlchemy engine. `create_app(...)` accepts injectable planner, search, embeddings, vectors, reranker, tokenizer, agent LLM interfaces, and evidence classifiers/LLM interfaces; tests use these seams.
 
 The HTTP layer under `app/api/routes` performs request parsing, status lookup, filtering, and serialization. `app/services` owns crawl/research orchestration. `app/crawler`, `app/rag`, `app/agent`, and `app/evidence` implement the phase logic. SQLAlchemy models live in `app/db/models.py` and the phase-specific `models.py` files. All main job types run as in-process `asyncio` tasks. The agent uses LangGraph checkpoints; the other job types persist their status/progress in SQLite.
+
+`frontend/` is a separate Vite client. Its central API module maps the actual Phase 7 DTOs; a hook coordinates snapshot loading, polling, bounded `/subgraph` expansion, claim inspection, contradictions, and directed paths. A deterministic layout adapter converts graph records into customized React Flow nodes and edges. The spider is a decorative asset, not a graph node. Vite proxies local API requests to FastAPI, so the backend needs no CORS change for the documented development setup. The frontend does not use LLMs or mock production graph data.
 
 The shared embedding provider is local Sentence Transformers `BAAI/bge-m3`. Phase 3 planning and structured Phase 5/6 LLM calls use local Ollama, default `Qwen3:latest`. Search uses `ddgs`. Phase 4 vectors use local Qdrant; lexical search uses SQLite FTS5 or a local BM25 fallback. Reranking defaults to the local `BAAI/bge-reranker-v2-m3` cross encoder on CPU. Phase 6 NLI defaults to `MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli` on CPU. Model loading/downloading can dominate the first request; no external hosted LLM API is wired in the default app.
 
@@ -314,6 +319,29 @@ This lists every Python source/test/script file and every tracked text artifact,
 | `backend/tests/fixtures/research_site/unrelated/{cooking,gardening}.html` | Unrelated distractor pages. |
 | `backend/tests/fixtures/research_site/labels.json` | Relevant fixture URL list. |
 
+### Phase 8A frontend
+
+| File | What it does |
+| --- | --- |
+| `frontend/package.json`, `package-lock.json` | React/TypeScript/Vite/React Flow dependencies and reproducible scripts. |
+| `frontend/vite.config.ts`, `tsconfig*.json`, `eslint.config.js` | Development proxy, TypeScript, Vitest, and lint configuration. |
+| `frontend/index.html`, `src/main.tsx` | Browser entry point and stylesheet loading. |
+| `frontend/src/app/App.tsx` | UI composition, graph selection, filters, overlays, and inspector state. |
+| `frontend/src/api/{client,graphApi}.ts` | Timed HTTP client and Phase 7 endpoint functions. |
+| `frontend/src/types/graph.ts` | Explicit node/edge/status DTO unions matching Phase 7. |
+| `frontend/src/hooks/useSpiderGraph.ts` | Build/load/poll, bounded expansion, detail/claim/path/contradiction state. |
+| `frontend/src/features/graph/{visuals,graphLayout,graphAdapter}.ts` | Visual semantics, deterministic coordinates, filters, and React Flow conversion. |
+| `frontend/src/components/layout/{TopHeader,Sidebar}.tsx` | Search, navigation, status, and graph filters. |
+| `frontend/src/components/graph/{GraphNodeCard,SemanticEdge,SpiderHub,GraphToolbar,GraphLegend,GraphWorkspace}.tsx` | Custom graph canvas, spider visual, controls, and legend. |
+| `frontend/src/components/inspector/InspectorDrawer.tsx` | Type-specific inspection and claim evidence/citation views. |
+| `frontend/src/components/research/GraphLoader.tsx` | Snapshot or evidence-job startup form. |
+| `frontend/src/utils/safety.ts` | Safe HTTP(S) source links and short IDs. |
+| `frontend/src/styles/global.css` | Dark responsive design, web motif, reduced-motion behavior. |
+| `frontend/src/tests/{fixture,setup,graphLogic,safetyAndApi,InspectorDrawer,App.integration}.*` | Controlled DTO fixtures and frontend behavior tests. |
+| `frontend/src/assets/README.md` | Placement for the two required PNG assets, which were absent at implementation time. |
+| `frontend/README.md`, `.env.example` | Setup, API origin, interaction, and quality-gate documentation. |
+| `backend/scripts/prepare_phase8a_ui_smoke.py` | Copies completed Phase 6 data and builds a real local Phase 7 snapshot for UI development. |
+
 ### Documentation and recorded runs
 
 `README.md` is the user-facing setup/API/phase guide. `docs/architecture.md` expands the implementation, provenance, security, and limitations by phase. The JSON files below are recorded outputs, not live guarantees:
@@ -358,6 +386,10 @@ From the repository root, with the relevant dependencies installed:
 ```powershell
 .\.venv\Scripts\python.exe -m pytest backend\tests
 .\.venv\Scripts\python.exe -m ruff check backend
+cd frontend
+npm run lint
+npm run test
+npm run build
 ```
 
 For targeted development, `pytest backend/tests/test_phase2.py`, `test_phase3.py`, `test_phase4.py`, `test_phase5.py`, or the three evidence test files isolate a phase. Controlled evaluation commands are documented in `README.md`; they may load local models and create SQLite/Qdrant artifacts. Run smoke scripts only when a bounded live search/model run is intended.
