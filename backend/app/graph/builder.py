@@ -184,7 +184,7 @@ class GraphBuilder:
                 "id": key,
                 "type": kind.value,
                 "label": " ".join(label.split())[:160],
-                "properties": properties,
+                "properties": {"research_job_id": state.research.id, **properties},
             }
             return key
 

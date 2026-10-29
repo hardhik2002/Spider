@@ -75,6 +75,16 @@ async def test_graph_queries_paths_neighborhood_analytics_and_export(tmp_path):
         assert all(
             node["id"] != "claim:" + ids["claims"].get("OTHER", "") for node in payload["nodes"]
         )
+        assert all("text_excerpt" not in node["properties"] for node in payload["nodes"])
+        service.settings.graph_export_include_chunk_text = True
+        with_text = await query.export_with_optional_text(graph, snapshot)
+        excerpts = [
+            node["properties"]["text_excerpt"]
+            for node in with_text["nodes"]
+            if node["type"] == NodeType.EVIDENCE_CHUNK
+        ]
+        assert len(excerpts) == 3 and all(0 < len(value) <= 1200 for value in excerpts)
+        assert all("text_excerpt" not in node["properties"] for node in payload["nodes"])
     finally:
         await service.shutdown()
         await engine.dispose()

@@ -1,6 +1,6 @@
 # SpiderMind project context
 
-_Updated 29 October 2026 for Phase 7. This describes the current working tree, including pre-existing uncommitted Phase 6 changes. It is a guide to the implementation, not a replacement for the source code or the recorded result JSON._
+_Updated 29 October 2026 for Phase 7. This describes the current working tree. It is a guide to the implementation, not a replacement for the source code or the recorded result JSON._
 
 ## 1. Purpose and current boundary
 
@@ -100,15 +100,15 @@ Important request models:
 
 ```powershell
 py -3 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r backend\requirements-evidence.txt
+.\.venv\Scripts\python.exe -m pip install -r backend\requirements-graph.txt
 ollama pull Qwen3:latest
 $env:PYTHONPATH = 'backend'
 .\.venv\Scripts\python.exe -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000
 ```
 
-The requirements files form a phase chain: `backend/requirements.txt`, then `requirements-intelligent.txt`, `requirements-research.txt`, `requirements-rag.txt`, `requirements-agent.txt`, and `requirements-evidence.txt`. The first model run may need downloads. Start a research job, poll it, post `/index`, poll indexing, optionally post `/agent`, and then post `/evidence`. The README has full PowerShell request examples. A FIFO crawl can be posted directly to `/api/v1/crawl`.
+The requirements files form a phase chain: `backend/requirements.txt`, then `requirements-intelligent.txt`, `requirements-research.txt`, `requirements-rag.txt`, `requirements-agent.txt`, `requirements-evidence.txt`, and `requirements-graph.txt` (no additional package). The first model run may need downloads. Start a research job, poll it, post `/index`, poll indexing, optionally post `/agent`, post `/evidence`, and then post `/graph`. The README has full PowerShell request examples. A FIFO crawl can be posted directly to `/api/v1/crawl`.
 
-**Current startup dependency:** `app/main.py` imports the agent and evidence modules at import time. As written, the full API needs the Phase 6 requirements installed even if the only requested operation is FIFO crawling. The older README suggestion to install only `requirements.txt` for a FIFO-only server does not match this startup path.
+**Current startup dependency:** `app/main.py` imports the agent, evidence, and graph modules at import time. As written, the full API needs the Phase 7 requirements chain installed even if the only requested operation is FIFO crawling. The older README suggestion to install only `requirements.txt` for a FIFO-only server does not match this startup path.
 
 ## 4. Detailed processing rules
 
@@ -146,7 +146,7 @@ The deterministic status rule counts **valid-cited independent source groups**: 
 
 `GraphBuilder` loads one finished Phase 6 evidence job and its Phase 3/4 provenance, then creates deterministic nodes and edges. SQLite graph tables are a derived, versioned view; Phase 1–6 rows remain authoritative. Node IDs have the form `research:<id>`, `subquestion:<id>`, `claim:<id>`, `citation:<id>`, `evidence_chunk:<id>`, `document:<id>`, and `source_group:<id>`. Edge IDs are SHA-256 hashes of edge type, endpoints, and source-row identity. The graph is a directed multigraph, so claim origin and verified support remain distinct even for the same claim/chunk pair. The builder maps only persisted direct support, partial support, contradiction, citation, chunk occurrence, and source-group membership relationships. It does not infer claim-to-claim relations or call an LLM.
 
-`GraphService` fingerprints authoritative rows and the uncited-relation option. An unchanged completed graph reuses its snapshot; changed evidence produces a new snapshot/content hash. `SQLiteGraphStore` writes a snapshot's nodes/edges in one transaction. `GraphValidator` checks expected entities/edges, endpoints, exact citation offsets, claim status/confidence, research-job scope, source occurrences/groups, and provenance paths. Invalid snapshots remain visible through status/consistency but cannot be queried through graph data APIs. `GraphProjection` supports bounded directional neighborhoods, shortest paths, and weak connected components without NetworkX. `GraphQueryService`, `GraphAnalytics`, and `GraphExporter` provide filters, claim/contradiction views, structural counts, and sorted JSON. Normal graph responses omit full chunk bodies; node detail can fetch authoritative text on request. GraphML and a frontend are not implemented.
+`GraphService` fingerprints authoritative rows and the uncited-relation option. An unchanged completed graph reuses its snapshot; changed evidence produces a new snapshot/content hash. `SQLiteGraphStore` writes a snapshot's nodes/edges in one transaction. `GraphValidator` checks expected entities/edges, endpoints, exact citation offsets, claim status/confidence, research-job scope, source occurrences/groups, and provenance paths. Invalid snapshots remain visible through status/consistency but cannot be queried through graph data APIs; completed graph reads also verify the stored content hash. `GraphProjection` supports bounded directional neighborhoods, shortest paths, and weak connected components without NetworkX. `GraphQueryService`, `GraphAnalytics`, and `GraphExporter` provide filters, claim/contradiction views, structural counts, and sorted JSON. Normal graph responses omit full chunk bodies; node detail can fetch authoritative text on request, and an explicit setting can add 1,200-character excerpts to export. GraphML and a frontend are not implemented.
 
 The controlled fixture records 24 nodes, 42 edges, 100% exact-set accuracy on five labeled graph queries, complete claim/citation/source-group path coverage, zero orphan edges, and zero cross-job leakage. Those are fixture properties, not factual accuracy claims. A copied live Phase 6 database produced 12 nodes and 19 edges with `VALID` integrity status. See `docs/phase7-graph-results.json` and `docs/phase7-live-smoke-results.json`.
 
@@ -178,7 +178,7 @@ SQLAlchemy's `Base.metadata.create_all` and `migrate_sqlite` create missing tabl
 | Evidence | DeBERTa base NLI, CPU, batch 2; up to 4 subquestions, 5 claims each, 8 candidates each; semantic duplicate threshold 0.88; adjudication enabled at 0.18 margin; claim retrieval K 40 dense/40 lexical/30 fused/20 rerank. Request limits may override service defaults. |
 | Graph | Max neighborhood depth 4, 200 nodes, 500 edges; max 3 shortest paths and 8 path hops; uncited relations included by default; no full chunk text in export. |
 
-`backend/requirements.txt` contains FastAPI, Uvicorn, HTTPX, BeautifulSoup, Trafilatura, Pydantic Settings, SQLAlchemy async, aiosqlite, pytest, pytest-asyncio, and Ruff. Each later requirements file includes the previous phase: intelligent adds Sentence Transformers; research adds `ddgs`; RAG adds `qdrant-client`; agent adds LangGraph and SQLite checkpointer; evidence adds Transformers, Torch, and SentencePiece. `pyproject.toml` configures pytest asyncio mode/test path and Ruff E/F/I/B/UP rules with 100-character line length. `.gitignore` excludes local environments/caches, SQLite files, Qdrant data, `.env`, and live-run stores. `.vscode/settings.json` only configures editor colors.
+`backend/requirements.txt` contains FastAPI, Uvicorn, HTTPX, BeautifulSoup, Trafilatura, Pydantic Settings, SQLAlchemy async, aiosqlite, pytest, pytest-asyncio, and Ruff. Each later requirements file includes the previous phase: intelligent adds Sentence Transformers; research adds `ddgs`; RAG adds `qdrant-client`; agent adds LangGraph and SQLite checkpointer; evidence adds Transformers, Torch, and SentencePiece; graph adds no package. `pyproject.toml` configures pytest asyncio mode/test path and Ruff E/F/I/B/UP rules with 100-character line length. `.gitignore` excludes local environments/caches, SQLite files, Qdrant data, `.env`, and live-run stores. `.vscode/settings.json` only configures editor colors.
 
 ## 7. File-by-file guide
 
@@ -305,6 +305,7 @@ This lists every Python source/test/script file and every tracked text artifact,
 | `backend/tests/test_graph_builder.py` | Stable IDs, graph materialization, migration, idempotency, changed evidence, validation. |
 | `backend/tests/test_graph_queries.py` | Filters, paths, neighborhoods, claim views, analytics and JSON round trip. |
 | `backend/tests/test_graph_api.py` | HTTP graph contract, bounds, consistency and research-job isolation. |
+| `backend/tests/test_graph_validation.py` | Changed citation spans and foreign graph node detection. |
 | `backend/tests/fixtures/phase3_benchmarks.json` | Labeled facets, seeds, and crawl-page targets. |
 | `backend/tests/fixtures/phase4_benchmark.json` | Eight controlled retrieval queries and relevant documents. |
 | `backend/tests/fixtures/research_site/index.html` | Local fixture link hub. |
@@ -363,7 +364,7 @@ For targeted development, `pytest backend/tests/test_phase2.py`, `test_phase3.py
 
 ## 10. How this context was assembled
 
-The inventory covered 165 non-cache files present in the working tree before this document was created: 93 Python files, JSON/HTML/Markdown/configuration files, SQLite snapshots, local Qdrant metadata/locks, and editor settings. All Python files parsed successfully as Python AST; JSON files parsed successfully; text files decoded as UTF-8; SQLite files were opened read-only for table inventories. The application, route, schema, service, model, test, fixture, script, and evaluation behavior above was cross-checked against the current source and recorded artifacts. This document summarizes each file's role and the important contracts; the source remains authoritative for every branch and field.
+The original Phase 1–6 inventory covered 165 non-cache files (93 Python files) before this document and the Phase 7 implementation were added. The Phase 7 source, tests, scripts, requirements, result JSON, and documentation are included in the guide above. Python files parsed successfully as Python AST; JSON files parsed successfully; text files decoded as UTF-8; SQLite files were opened read-only for table inventories. The application, route, schema, service, model, test, fixture, script, and evaluation behavior was cross-checked against the current source and recorded artifacts. This document summarizes each file's role and important contracts; the source remains authoritative for every branch and field.
 
 ## Appendix A. Complete `SPIDERMIND_` settings inventory
 
@@ -451,6 +452,13 @@ Each name below is an environment variable. Values are the code defaults; reques
 | `SPIDERMIND_NEIGHBOR_EXPANSION_ENABLED` | `True` |
 | `SPIDERMIND_NEIGHBOR_WINDOW` | `1` |
 | `SPIDERMIND_MAX_NEIGHBOR_CONTEXT_TOKENS` | `700` |
+| `SPIDERMIND_GRAPH_MAX_TRAVERSAL_DEPTH` | `4` |
+| `SPIDERMIND_GRAPH_MAX_SUBGRAPH_NODES` | `200` |
+| `SPIDERMIND_GRAPH_MAX_SUBGRAPH_EDGES` | `500` |
+| `SPIDERMIND_GRAPH_MAX_PATHS` | `3` |
+| `SPIDERMIND_GRAPH_MAX_PATH_HOPS` | `8` |
+| `SPIDERMIND_GRAPH_INCLUDE_UNCITED_RELATIONS` | `True` |
+| `SPIDERMIND_GRAPH_EXPORT_INCLUDE_CHUNK_TEXT` | `False` |
 
 ## Appendix B. Generated SQLite and Qdrant artifact paths
 

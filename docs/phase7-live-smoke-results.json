@@ -3,8 +3,8 @@
   "source_database": "data\\phase6-live-20261010-102304.db",
   "research_job_id": "38f3b146-6170-49c2-8b5c-64677210dd3f",
   "evidence_job_id": "249893a3-6887-45b0-95b0-dae6132aa62d",
-  "graph_snapshot_id": "3b15b946-bf5e-4262-ab37-49f7b0303073",
-  "graph_content_hash": "f8cedb685c4d72a3f2dc9b4c5b543570e07e7c3e83650cf47c11a64c90ae1597",
+  "graph_snapshot_id": "7d2e2582-81a3-4bc0-9b80-ae5ebf83f73d",
+  "graph_content_hash": "595ed1a4781f34c3730398e4c98cad5595cf278da6e8af753ddbee747648b832",
   "status": "COMPLETED",
   "validation_status": "VALID",
   "validation_issues": [],
@@ -57,6 +57,13 @@
       ],
       "citation_ids": [
         "citation:1"
+      ],
+      "claim_citation_chunk_document_group_node_ids": [
+        "claim:70611de2d108881e6792ade5d0ec5139a3ca",
+        "citation:1",
+        "evidence_chunk:3",
+        "document:1",
+        "source_group:a0aa27da6f2f5c373ab7e9a184c979fe23dd"
       ]
     },
     {
@@ -80,6 +87,13 @@
       "citation_ids": [
         "citation:2",
         "citation:3"
+      ],
+      "claim_citation_chunk_document_group_node_ids": [
+        "claim:cf33cf5133d0504f1b16feb117518bb25061",
+        "citation:2",
+        "evidence_chunk:8",
+        "document:1",
+        "source_group:a0aa27da6f2f5c373ab7e9a184c979fe23dd"
       ]
     }
   ],
@@ -94,13 +108,13 @@
     "cross_job_leakage_count": 0
   },
   "timings_ms": {
-    "source_load_ms": 11,
+    "source_load_ms": 10,
     "node_build_ms": 0,
     "edge_build_ms": 0,
     "materialization_ms": 0,
-    "database_write_ms": 44,
-    "projection_ms": 4,
+    "database_write_ms": 25,
+    "projection_ms": 5,
     "validation_ms": 0,
-    "total_ms": 75
+    "total_ms": 57
   }
 }

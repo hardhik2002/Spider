@@ -66,6 +66,34 @@ async def main() -> None:
                     if group_nodes
                     else []
                 )
+                citation_trace = []
+                if citation_nodes:
+                    citation = citation_nodes[0]
+                    chunk_id = f"evidence_chunk:{citation['properties']['chunk_id']}"
+                    document_id = f"document:{citation['properties']['document_id']}"
+                    groups = sorted(
+                        edge["target"]
+                        for edge in graph.outgoing[document_id]
+                        if edge["type"] == "MEMBER_OF_SOURCE_GROUP"
+                    )
+                    if (
+                        groups
+                        and any(
+                            edge["type"] == "CITES_CHUNK" and edge["target"] == chunk_id
+                            for edge in graph.outgoing[citation["id"]]
+                        )
+                        and any(
+                            edge["type"] == "PART_OF_DOCUMENT" and edge["target"] == document_id
+                            for edge in graph.outgoing[chunk_id]
+                        )
+                    ):
+                        citation_trace = [
+                            claim["id"],
+                            citation["id"],
+                            chunk_id,
+                            document_id,
+                            groups[0],
+                        ]
                 examples.append(
                     {
                         "claim_id": claim["id"],
@@ -80,6 +108,7 @@ async def main() -> None:
                         if source_path
                         else [],
                         "citation_ids": [x["id"] for x in citation_nodes],
+                        "claim_citation_chunk_document_group_node_ids": citation_trace,
                     }
                 )
             result = {

@@ -271,4 +271,4 @@ async def graph_export(
     format: Literal["json"] = "json",
 ) -> dict:
     snapshot, graph = await _graph(request, research_job_id, snapshot_id)
-    return request.app.state.graph_query_service.export(graph, snapshot)
+    return await request.app.state.graph_query_service.export_with_optional_text(graph, snapshot)

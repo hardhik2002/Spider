@@ -78,6 +78,61 @@ async def main() -> None:
             query_accuracy = sum(
                 item["expected"] == item["actual"] for item in query_checks.values()
             ) / len(query_checks)
+            contested_paths = {}
+            for edge_type, label in (
+                (EdgeType.SUPPORTED_BY, "support"),
+                (EdgeType.CONTRADICTED_BY, "contradiction"),
+            ):
+                relation_edge = next(
+                    edge for edge in contested["edges"] if edge["type"] == edge_type
+                )
+                relation_id = relation_edge["properties"]["claim_evidence_relation_id"]
+                matching_citation = next(
+                    node
+                    for node in contested["citations"]
+                    if node["properties"]["relation_id"] == relation_id
+                )
+                document_id = relation_edge["properties"]["document_id"]
+                group_id = relation_edge["properties"]["source_group_id"]
+                contested_paths[label] = {
+                    "relation_node_ids": [
+                        contested["claim"]["id"],
+                        relation_edge["target"],
+                        f"document:{document_id}",
+                        f"source_group:{group_id}",
+                    ],
+                    "citation_trace_node_ids": [
+                        contested["claim"]["id"],
+                        matching_citation["id"],
+                        relation_edge["target"],
+                        f"document:{document_id}",
+                        f"source_group:{group_id}",
+                    ],
+                }
+                for nodes, types in (
+                    (
+                        contested_paths[label]["relation_node_ids"],
+                        [edge_type, EdgeType.PART_OF_DOCUMENT, EdgeType.MEMBER_OF_SOURCE_GROUP],
+                    ),
+                    (
+                        contested_paths[label]["citation_trace_node_ids"],
+                        [
+                            EdgeType.HAS_CITATION,
+                            EdgeType.CITES_CHUNK,
+                            EdgeType.PART_OF_DOCUMENT,
+                            EdgeType.MEMBER_OF_SOURCE_GROUP,
+                        ],
+                    ),
+                ):
+                    assert all(
+                        any(
+                            edge["type"] == edge_type and edge["target"] == target
+                            for edge in graph.outgoing[source]
+                        )
+                        for source, target, edge_type in zip(
+                            nodes[:-1], nodes[1:], types, strict=True
+                        )
+                    )
             async with sessions() as session:
                 relation = (
                     await session.scalars(
@@ -126,6 +181,7 @@ async def main() -> None:
                     )
                 },
                 "query_checks": query_checks,
+                "contested_claim_example": contested_paths,
                 "graph_query_exact_set_accuracy": query_accuracy,
                 "determinism": {
                     "first_graph_hash": first_hash,

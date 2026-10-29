@@ -96,6 +96,10 @@ class GraphValidator:
                 issue("MISSING_CITATION_PATH", citation_id=row.id)
 
         cross_job = 0
+        for node in actual.nodes.values():
+            if node["properties"].get("research_job_id") != state.research.id:
+                cross_job += 1
+                issue("CROSS_JOB_GRAPH_NODE", node_id=node["id"])
         for row in state.claims:
             if row.research_job_id != state.research.id or row.evidence_job_id != state.evidence.id:
                 cross_job += 1

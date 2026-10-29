@@ -13,3 +13,4 @@ data/langgraph-checkpoints.sqlite*
 backend/data/langgraph-checkpoints.sqlite*
 data/phase5-live-*
 data/phase6-live-*
+data/phase7-*

@@ -46,6 +46,8 @@ async def test_graph_api_build_scope_queries_consistency_and_export(tmp_path):
         ids = await seed_graph_fixture(app.state.graph_service.sessions)
         base = f"/api/v1/research/{ids['research_job_id']}/graph"
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            assert (await client.get("/health")).status_code == 200
+            assert (await client.get("/ready")).status_code == 200
             created = await client.post(base, json={"evidence_job_id": ids["evidence_job_id"]})
             assert created.status_code == 202, created.text
             snapshot_id = created.json()["graph_snapshot_id"]
@@ -98,6 +100,7 @@ async def test_graph_api_build_scope_queries_consistency_and_export(tmp_path):
             assert len(path["paths"][0]["edges"]) == 2
             exported = (await client.get(f"{url}/export", params={"format": "json"})).json()
             assert len(exported["nodes"]) == 24
+            assert all("text" not in node["properties"] for node in exported["nodes"])
             assert (
                 await client.get(f"{url}/export", params={"format": "graphml"})
             ).status_code == 422

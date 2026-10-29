@@ -2,10 +2,13 @@
 
 from collections import Counter
 
+from sqlalchemy import select
+
 from app.graph.analytics import GraphAnalytics
+from app.graph.builder import digest
 from app.graph.export import GraphExporter
 from app.graph.projection import GraphProjection
-from app.graph.types import EdgeType, NodeType
+from app.graph.types import GRAPH_SCHEMA_VERSION, EdgeType, NodeType
 from app.rag.models import KnowledgeChunk
 
 
@@ -23,6 +26,15 @@ class GraphQueryService:
             await self.graph_service.store.list_nodes(snapshot_id),
             await self.graph_service.store.list_edges(snapshot_id),
         )
+        current_hash = digest(
+            {
+                "schema_version": GRAPH_SCHEMA_VERSION,
+                "nodes": [graph.nodes[key] for key in sorted(graph.nodes)],
+                "edges": [graph.edges[key] for key in sorted(graph.edges)],
+            }
+        )
+        if current_hash != snapshot.graph_content_hash:
+            raise ValueError("Graph snapshot integrity check failed")
         return snapshot, graph
 
     @staticmethod
@@ -193,3 +205,32 @@ class GraphQueryService:
             research_job_id=snapshot.research_job_id,
             evidence_job_id=snapshot.evidence_job_id,
         )
+
+    async def export_with_optional_text(self, graph: GraphProjection, snapshot) -> dict:
+        payload = self.export(graph, snapshot)
+        if not self.graph_service.settings.graph_export_include_chunk_text:
+            return payload
+        payload["nodes"] = [
+            {**node, "properties": dict(node["properties"])} for node in payload["nodes"]
+        ]
+        chunk_ids = [
+            node["properties"]["chunk_id"]
+            for node in payload["nodes"]
+            if node["type"] == NodeType.EVIDENCE_CHUNK
+        ]
+        if not chunk_ids:
+            return payload
+        async with self.graph_service.sessions() as session:
+            rows = (
+                await session.scalars(
+                    select(KnowledgeChunk).where(
+                        KnowledgeChunk.research_job_id == snapshot.research_job_id,
+                        KnowledgeChunk.id.in_(chunk_ids),
+                    )
+                )
+            ).all()
+        text_by_id = {row.id: row.text[:1200] for row in rows}
+        for node in payload["nodes"]:
+            if node["type"] == NodeType.EVIDENCE_CHUNK:
+                node["properties"]["text_excerpt"] = text_by_id.get(node["properties"]["chunk_id"])
+        return payload

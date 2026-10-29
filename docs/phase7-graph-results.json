@@ -3,7 +3,7 @@
   "fixture": "backend/tests/graph_fixture.py",
   "database_schema_version": 7,
   "graph_schema_version": 1,
-  "snapshot_id": "772aff58-ca0d-4403-b4b8-054a31d088b8",
+  "snapshot_id": "76a0c74e-37f4-42e4-9d14-e8ab284b6e72",
   "research_job_id": "85c3ccad-5207-59c4-9207-60140128dff5",
   "evidence_job_id": "73cf9ad2-73ef-544b-9085-15c11263a041",
   "node_count": 24,
@@ -90,13 +90,45 @@
       ]
     }
   },
+  "contested_claim_example": {
+    "support": {
+      "relation_node_ids": [
+        "claim:930d21e5-aa82-5d0a-b53c-a649835669a5",
+        "evidence_chunk:1",
+        "document:1",
+        "source_group:e3f35142-976b-5b20-922a-fd5e40d68aae"
+      ],
+      "citation_trace_node_ids": [
+        "claim:930d21e5-aa82-5d0a-b53c-a649835669a5",
+        "citation:4",
+        "evidence_chunk:1",
+        "document:1",
+        "source_group:e3f35142-976b-5b20-922a-fd5e40d68aae"
+      ]
+    },
+    "contradiction": {
+      "relation_node_ids": [
+        "claim:930d21e5-aa82-5d0a-b53c-a649835669a5",
+        "evidence_chunk:2",
+        "document:2",
+        "source_group:36030453-0ffe-5d43-90e7-3acccd2043ca"
+      ],
+      "citation_trace_node_ids": [
+        "claim:930d21e5-aa82-5d0a-b53c-a649835669a5",
+        "citation:5",
+        "evidence_chunk:2",
+        "document:2",
+        "source_group:36030453-0ffe-5d43-90e7-3acccd2043ca"
+      ]
+    }
+  },
   "graph_query_exact_set_accuracy": 1.0,
   "determinism": {
-    "first_graph_hash": "603c2f0a93576a1f01303a9cc119d2c9b85c417af9026a149eec7d3aea5479b2",
-    "repeated_graph_hash": "603c2f0a93576a1f01303a9cc119d2c9b85c417af9026a149eec7d3aea5479b2",
+    "first_graph_hash": "2cac1fe85a24978ea6e97023a226e7cfd01a74d9111ce31a4386da7e2642d4f8",
+    "repeated_graph_hash": "2cac1fe85a24978ea6e97023a226e7cfd01a74d9111ce31a4386da7e2642d4f8",
     "reused_snapshot": true,
     "reused_build_job": true,
-    "changed_data_graph_hash": "d7791b12e8c95c6039402af92f54e8d987d1b7b1b5820142bd79d64734d88c9c",
+    "changed_data_graph_hash": "3931313fa2a243d46910b1a9da236c526560227b12b73ec49f20b15363495b71",
     "changed_data_new_snapshot": true
   },
   "export": {
@@ -106,14 +138,14 @@
     "contains_embedding_vectors": false
   },
   "timings_ms": {
-    "source_load_ms": 17,
+    "source_load_ms": 8,
     "node_build_ms": 0,
     "edge_build_ms": 0,
     "materialization_ms": 0,
-    "database_write_ms": 30,
-    "projection_ms": 5,
+    "database_write_ms": 24,
+    "projection_ms": 3,
     "validation_ms": 0,
-    "total_ms": 68
+    "total_ms": 52
   },
   "validation_status": "VALID",
   "validation_issues": [],
