@@ -88,6 +88,13 @@ class Settings(BaseSettings):
     neighbor_expansion_enabled: bool = True
     neighbor_window: int = Field(default=1, ge=0, le=3)
     max_neighbor_context_tokens: int = Field(default=700, ge=50, le=3000)
+    graph_max_traversal_depth: int = Field(default=4, ge=1, le=4)
+    graph_max_subgraph_nodes: int = Field(default=200, ge=1, le=1000)
+    graph_max_subgraph_edges: int = Field(default=500, ge=1, le=5000)
+    graph_max_paths: int = Field(default=3, ge=1, le=10)
+    graph_max_path_hops: int = Field(default=8, ge=1, le=12)
+    graph_include_uncited_relations: bool = True
+    graph_export_include_chunk_text: bool = False
 
     @model_validator(mode="after")
     def valid_chunk_profile(self):

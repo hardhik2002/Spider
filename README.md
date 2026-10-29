@@ -1,6 +1,6 @@
 # SpiderMind — research, crawling, and evidence retrieval
 
-SpiderMind is an incremental AI research project. Phase 1 crawls, Phase 2 focuses crawling, Phase 3 plans and searches, Phase 4 indexes and retrieves, Phase 5 iterates to fill evidence gaps, and Phase 6 maps atomic claims to supporting and contradicting passages. It does not generate final research answers, build a knowledge graph, or provide a frontend.
+SpiderMind is an incremental AI research project. Phase 1 crawls, Phase 2 focuses crawling, Phase 3 plans and searches, Phase 4 indexes and retrieves, Phase 5 iterates to fill evidence gaps, Phase 6 maps atomic claims to supporting and contradicting passages, and Phase 7 materializes a deterministic knowledge/citation graph from those verified records. It does not generate final research answers or provide a frontend.
 
 ## Phase 1 foundation
 
@@ -325,6 +325,43 @@ Invoke-RestMethod "http://127.0.0.1:8000/api/v1/research/$researchJobId/evidence
 ```
 
 Run `cd backend; ..\.venv\Scripts\python.exe scripts/evaluate_phase6.py` for the controlled deterministic fixture, and `..\.venv\Scripts\python.exe scripts/evaluate_phase6_nli.py` for the small labeled real-NLI pilot. Run `..\.venv\Scripts\python.exe scripts/evaluate_phase6_hybrid.py` to adjudicate the triggered pilot pairs with local Qwen3. The [controlled results](docs/phase6-evidence-results.json) explicitly separate fake pipeline metrics from [real base-model pilot results](docs/phase6-nli-base-results.json). `scripts/live_phase6_smoke.py` uses a copy of an existing Phase 5 job and produces a separate connectivity artifact. None of these small fixtures establishes broad factual accuracy.
+
+## Phase 7 knowledge and citation graph
+
+Phase 7 projects completed or partial Phase 6 evidence jobs into versioned SQLite graph snapshots. The Phase 1–6 relational rows remain authoritative. The graph builder creates only edges justified by persisted subquestions, claims, claim origins, evidence relations, citations, chunk occurrences, and Phase 6 source groups. There is no LLM, web request, speculative claim-to-claim edge, Neo4j, or required NetworkX dependency in graph construction. The in-memory `GraphProjection` is a directed multigraph for bounded traversal, analytics, and JSON export; SQLite `graph_snapshots`, `graph_build_jobs`, `graph_nodes`, and `graph_edges` are its durable representation. Database schema version is 7; graph schema version is 1.
+
+Node types are `RESEARCH`, `SUBQUESTION`, `CLAIM`, `CITATION`, `EVIDENCE_CHUNK`, `DOCUMENT`, and `SOURCE_GROUP`. Edge types are `HAS_SUBQUESTION`, `HAS_CLAIM`, `ORIGINATED_FROM`, `SUPPORTED_BY`, `PARTIALLY_SUPPORTED_BY`, `CONTRADICTED_BY`, `HAS_CITATION`, `CITES_CHUNK`, `PART_OF_DOCUMENT`, and `MEMBER_OF_SOURCE_GROUP`. Origin and verified support can coexist between one claim and chunk. A support or contradiction edge records whether a valid Phase 6 citation exists; uncited relations never create fabricated citation nodes. Canonical chunks may point to multiple document occurrences. Source groups preserve Phase 6 independence grouping; contribution counts are structural, not credibility scores.
+
+Graph builds fingerprint the source rows and configuration. An unchanged completed build reuses its snapshot; changed evidence creates a new snapshot with a new content hash. Construction writes nodes and edges in one SQLite transaction, then checks endpoints, exact citation spans, source membership, cross-job scope, status/confidence fidelity, expected rows/edges, and provenance paths. Invalid materializations remain inspectable through status and consistency, while graph data endpoints serve only validated completed snapshots. Startup marks interrupted graph jobs partial and a new POST retries them. JSON export sorts nodes and edges by deterministic IDs and excludes full chunk bodies and vectors. GraphML is not implemented.
+
+From the repository root in PowerShell, after a Phase 6 evidence job finishes:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r backend\requirements-graph.txt
+$env:PYTHONPATH = 'backend'
+.\.venv\Scripts\python.exe -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000
+```
+
+In another PowerShell window:
+
+```powershell
+$researchJobId = '<research-job-id>'
+$evidenceJobId = '<phase6-evidence-job-id>'
+$body = @{ evidence_job_id = $evidenceJobId; include_uncited_relations = $true } | ConvertTo-Json
+$graphJob = Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/api/v1/research/$researchJobId/graph" -ContentType 'application/json' -Body $body
+$snapshotId = $graphJob.graph_snapshot_id
+$base = "http://127.0.0.1:8000/api/v1/research/$researchJobId/graph/$snapshotId"
+Invoke-RestMethod $base
+Invoke-RestMethod "$base/summary"
+Invoke-RestMethod "$base/nodes?node_type=CLAIM"
+Invoke-RestMethod "$base/claims/<claim-id>"
+Invoke-RestMethod "$base/contradictions"
+Invoke-RestMethod "$base/path?from_node_id=research:$researchJobId&to_node_id=claim:<claim-id>"
+Invoke-RestMethod "$base/consistency"
+Invoke-RestMethod "$base/export?format=json"
+```
+
+Additional graph endpoints list/filter edges, inspect node detail (chunk text is opt-in), and traverse a bounded `/subgraph` with `root_node_id`, `depth`, `direction`, `node_types`, `edge_types`, and `max_nodes`. Node/edge lists use `limit` and `offset`. The controlled [Phase 7 result](docs/phase7-graph-results.json) uses a local fixture with all six claim statuses, mirrored documents, two independent source groups, valid citations, and an uncited relation. The [live smoke](docs/phase7-live-smoke-results.json) builds from a copy of the final successful Phase 6 database; it is not a labeled graph accuracy benchmark. Reproduce them with `$env:PYTHONPATH='backend'; .\.venv\Scripts\python.exe backend/scripts/evaluate_phase7.py` and `backend/scripts/live_phase7_smoke.py` respectively.
 
 ## Tests and checks
 

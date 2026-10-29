@@ -1,0 +1,106 @@
+{
+  "kind": "offline_live_phase6_to_phase7_smoke_not_labeled_accuracy_benchmark",
+  "source_database": "data\\phase6-live-20261010-102304.db",
+  "research_job_id": "38f3b146-6170-49c2-8b5c-64677210dd3f",
+  "evidence_job_id": "249893a3-6887-45b0-95b0-dae6132aa62d",
+  "graph_snapshot_id": "3b15b946-bf5e-4262-ab37-49f7b0303073",
+  "graph_content_hash": "f8cedb685c4d72a3f2dc9b4c5b543570e07e7c3e83650cf47c11a64c90ae1597",
+  "status": "COMPLETED",
+  "validation_status": "VALID",
+  "validation_issues": [],
+  "node_count": 12,
+  "edge_count": 19,
+  "nodes_by_type": {
+    "CITATION": 3,
+    "CLAIM": 2,
+    "DOCUMENT": 1,
+    "EVIDENCE_CHUNK": 2,
+    "RESEARCH": 1,
+    "SOURCE_GROUP": 1,
+    "SUBQUESTION": 2
+  },
+  "edges_by_type": {
+    "CITES_CHUNK": 3,
+    "CONTRADICTED_BY": 1,
+    "HAS_CITATION": 3,
+    "HAS_CLAIM": 2,
+    "HAS_SUBQUESTION": 2,
+    "MEMBER_OF_SOURCE_GROUP": 1,
+    "ORIGINATED_FROM": 2,
+    "PART_OF_DOCUMENT": 2,
+    "SUPPORTED_BY": 3
+  },
+  "claims": 2,
+  "citations": 3,
+  "documents": 1,
+  "source_groups": 1,
+  "support_edges": 3,
+  "contradiction_edges": 1,
+  "path_examples": [
+    {
+      "claim_id": "claim:70611de2d108881e6792ade5d0ec5139a3ca",
+      "status": "INSUFFICIENT_EVIDENCE",
+      "research_to_claim_node_ids": [
+        "research:38f3b146-6170-49c2-8b5c-64677210dd3f",
+        "subquestion:1",
+        "claim:70611de2d108881e6792ade5d0ec5139a3ca"
+      ],
+      "claim_to_citation_node_ids": [
+        "claim:70611de2d108881e6792ade5d0ec5139a3ca",
+        "citation:1"
+      ],
+      "claim_to_source_group_node_ids": [
+        "claim:70611de2d108881e6792ade5d0ec5139a3ca",
+        "evidence_chunk:8",
+        "document:1",
+        "source_group:a0aa27da6f2f5c373ab7e9a184c979fe23dd"
+      ],
+      "citation_ids": [
+        "citation:1"
+      ]
+    },
+    {
+      "claim_id": "claim:cf33cf5133d0504f1b16feb117518bb25061",
+      "status": "SUPPORTED",
+      "research_to_claim_node_ids": [
+        "research:38f3b146-6170-49c2-8b5c-64677210dd3f",
+        "subquestion:1",
+        "claim:cf33cf5133d0504f1b16feb117518bb25061"
+      ],
+      "claim_to_citation_node_ids": [
+        "claim:cf33cf5133d0504f1b16feb117518bb25061",
+        "citation:2"
+      ],
+      "claim_to_source_group_node_ids": [
+        "claim:cf33cf5133d0504f1b16feb117518bb25061",
+        "evidence_chunk:3",
+        "document:1",
+        "source_group:a0aa27da6f2f5c373ab7e9a184c979fe23dd"
+      ],
+      "citation_ids": [
+        "citation:2",
+        "citation:3"
+      ]
+    }
+  ],
+  "integrity_metrics": {
+    "node_coverage": 1.0,
+    "edge_coverage": 1.0,
+    "claim_provenance_path_coverage": 1.0,
+    "citation_path_coverage": 1.0,
+    "source_group_path_coverage": 1.0,
+    "orphan_node_count": 0,
+    "orphan_edge_count": 0,
+    "cross_job_leakage_count": 0
+  },
+  "timings_ms": {
+    "source_load_ms": 11,
+    "node_build_ms": 0,
+    "edge_build_ms": 0,
+    "materialization_ms": 0,
+    "database_write_ms": 44,
+    "projection_ms": 4,
+    "validation_ms": 0,
+    "total_ms": 75
+  }
+}

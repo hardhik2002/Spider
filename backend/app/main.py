@@ -8,7 +8,7 @@ from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
 
 from app.agent.llm import OllamaAgentLLM
 from app.agent.service import AgentService
-from app.api.routes import agent, crawl, evidence, health, rag, research
+from app.api.routes import agent, crawl, evidence, graph, health, rag, research
 from app.core.config import Settings, get_settings
 from app.core.logging import configure_logging
 from app.crawler.embedding import EmbeddingProvider
@@ -16,6 +16,8 @@ from app.db.database import initialize_database, make_engine, make_session_facto
 from app.evidence.llm import OllamaEvidenceLLM
 from app.evidence.nli import TransformersNLIClassifier
 from app.evidence.service import EvidenceEngineService
+from app.graph.query import GraphQueryService
+from app.graph.service import GraphService
 from app.rag.chunking import Tokenizer
 from app.rag.indexing import IndexingService
 from app.rag.reranker import CrossEncoderReranker, Reranker
@@ -132,6 +134,8 @@ def create_app(
                     evidence_adjudicator or evidence_llm,
                 )
                 await evidence_service.recover_jobs()
+                graph_service = GraphService(session_factory, config)
+                await graph_service.recover_jobs()
                 app.state.db_engine = engine
                 app.state.crawl_service = service
                 app.state.research_service = research_service
@@ -139,9 +143,12 @@ def create_app(
                 app.state.retrieval_service = retrieval_service
                 app.state.agent_service = agent_service
                 app.state.evidence_service = evidence_service
+                app.state.graph_service = graph_service
+                app.state.graph_query_service = GraphQueryService(graph_service)
                 try:
                     yield
                 finally:
+                    await graph_service.shutdown()
                     await evidence_service.shutdown()
                     await agent_service.shutdown()
                     await research_service.shutdown()
@@ -150,13 +157,14 @@ def create_app(
                     await vectors.close()
                     await engine.dispose()
 
-    app = FastAPI(title="SpiderMind", version="0.6.0", lifespan=lifespan)
+    app = FastAPI(title="SpiderMind", version="0.7.0", lifespan=lifespan)
     app.include_router(health.router)
     app.include_router(crawl.router)
     app.include_router(research.router)
     app.include_router(rag.router)
     app.include_router(agent.router)
     app.include_router(evidence.router)
+    app.include_router(graph.router)
     return app
 
 

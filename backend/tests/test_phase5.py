@@ -311,7 +311,7 @@ async def test_graph_scenarios(tmp_path: Path, scenario, expected, searches):
             ).json()["gaps"]
             async with service.sessions() as session:
                 version = (await session.execute(text("PRAGMA user_version"))).scalar_one()
-                assert version == 6
+                assert version == 7
                 assessments = (
                     (
                         await session.execute(

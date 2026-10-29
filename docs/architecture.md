@@ -1,4 +1,4 @@
-# SpiderMind architecture: Phases 1 to 5
+# SpiderMind architecture: Phases 1 to 7
 
 ## Lifecycle and boundaries
 

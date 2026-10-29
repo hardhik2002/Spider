@@ -275,7 +275,7 @@ async def test_evidence_job_api_citations_groups_and_idempotency(tmp_path: Path)
     async with app.router.lifespan_context(app):
         service = app.state.evidence_service
         async with service.sessions() as session:
-            assert (await session.execute(text("PRAGMA user_version"))).scalar_one() == 6
+            assert (await session.execute(text("PRAGMA user_version"))).scalar_one() == 7
         research_id, chunks = await seed_research(service.sessions)
         await app.state.retrieval_service.vectors.upsert(
             [

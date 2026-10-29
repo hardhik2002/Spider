@@ -1,0 +1,130 @@
+{
+  "kind": "controlled_deterministic_fixture",
+  "fixture": "backend/tests/graph_fixture.py",
+  "database_schema_version": 7,
+  "graph_schema_version": 1,
+  "snapshot_id": "772aff58-ca0d-4403-b4b8-054a31d088b8",
+  "research_job_id": "85c3ccad-5207-59c4-9207-60140128dff5",
+  "evidence_job_id": "73cf9ad2-73ef-544b-9085-15c11263a041",
+  "node_count": 24,
+  "edge_count": 42,
+  "nodes_by_type": {
+    "CITATION": 6,
+    "CLAIM": 6,
+    "DOCUMENT": 4,
+    "EVIDENCE_CHUNK": 3,
+    "RESEARCH": 1,
+    "SOURCE_GROUP": 2,
+    "SUBQUESTION": 2
+  },
+  "edges_by_type": {
+    "CITES_CHUNK": 6,
+    "CONTRADICTED_BY": 2,
+    "HAS_CITATION": 6,
+    "HAS_CLAIM": 6,
+    "HAS_SUBQUESTION": 2,
+    "MEMBER_OF_SOURCE_GROUP": 4,
+    "ORIGINATED_FROM": 6,
+    "PARTIALLY_SUPPORTED_BY": 1,
+    "PART_OF_DOCUMENT": 4,
+    "SUPPORTED_BY": 5
+  },
+  "expected_node_count": 24,
+  "expected_edge_count": 42,
+  "coverage_metrics": {
+    "node_coverage": 1.0,
+    "edge_coverage": 1.0,
+    "claim_provenance_path_coverage": 1.0,
+    "citation_path_coverage": 1.0,
+    "source_group_path_coverage": 1.0
+  },
+  "integrity_metrics": {
+    "orphan_node_count": 0,
+    "orphan_edge_count": 0,
+    "cross_job_leakage_count": 0,
+    "connected_components": 1
+  },
+  "query_checks": {
+    "contested_support_chunks": {
+      "expected": [
+        "evidence_chunk:1"
+      ],
+      "actual": [
+        "evidence_chunk:1"
+      ]
+    },
+    "contested_contradiction_chunks": {
+      "expected": [
+        "evidence_chunk:2"
+      ],
+      "actual": [
+        "evidence_chunk:2"
+      ]
+    },
+    "insufficient_claims": {
+      "expected": [
+        "claim:79e68add-71bf-5c82-840f-f0b2aba4ac9c"
+      ],
+      "actual": [
+        "claim:79e68add-71bf-5c82-840f-f0b2aba4ac9c"
+      ]
+    },
+    "contradiction_source_groups": {
+      "expected": [
+        "source_group:36030453-0ffe-5d43-90e7-3acccd2043ca"
+      ],
+      "actual": [
+        "source_group:36030453-0ffe-5d43-90e7-3acccd2043ca"
+      ]
+    },
+    "research_to_citation_path": {
+      "expected": [
+        "HAS_SUBQUESTION",
+        "HAS_CLAIM",
+        "HAS_CITATION"
+      ],
+      "actual": [
+        "HAS_SUBQUESTION",
+        "HAS_CLAIM",
+        "HAS_CITATION"
+      ]
+    }
+  },
+  "graph_query_exact_set_accuracy": 1.0,
+  "determinism": {
+    "first_graph_hash": "603c2f0a93576a1f01303a9cc119d2c9b85c417af9026a149eec7d3aea5479b2",
+    "repeated_graph_hash": "603c2f0a93576a1f01303a9cc119d2c9b85c417af9026a149eec7d3aea5479b2",
+    "reused_snapshot": true,
+    "reused_build_job": true,
+    "changed_data_graph_hash": "d7791b12e8c95c6039402af92f54e8d987d1b7b1b5820142bd79d64734d88c9c",
+    "changed_data_new_snapshot": true
+  },
+  "export": {
+    "format": "json",
+    "round_trip_exact": true,
+    "deterministic_ordering": true,
+    "contains_embedding_vectors": false
+  },
+  "timings_ms": {
+    "source_load_ms": 17,
+    "node_build_ms": 0,
+    "edge_build_ms": 0,
+    "materialization_ms": 0,
+    "database_write_ms": 30,
+    "projection_ms": 5,
+    "validation_ms": 0,
+    "total_ms": 68
+  },
+  "validation_status": "VALID",
+  "validation_issues": [],
+  "high_severity_failures": {
+    "cross_job_graph_leakage": 0,
+    "edge_with_missing_endpoint": 0,
+    "wrong_subquestion": 0,
+    "invalid_citation": 0,
+    "missing_support_or_contradiction_edge": 0,
+    "claim_status_modified": 0,
+    "claim_confidence_modified": 0,
+    "graph_rebuild_nondeterminism": 0
+  }
+}
