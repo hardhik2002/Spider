@@ -1,5 +1,5 @@
 {
-  "kind": "phase8a_real_phase7_graph_ui_visual_smoke",
+  "kind": "phase8a_graph_ui_and_question_first_workflow_smoke",
   "source_database": "data/phase6-live-20261010-102304.db",
   "copied_database": "data/phase8a-ui-smoke.db",
   "research_job_id": "38f3b146-6170-49c2-8b5c-64677210dd3f",
@@ -18,7 +18,7 @@
     "absolute_windows_browser_paths": false
   },
   "backend_tests": { "passed": 88, "failed": 0 },
-  "frontend_tests": { "offline_passed": 17, "optional_live_api_passed": 18, "failed": 0 },
+  "frontend_tests": { "offline_passed": 34, "optional_live_api_passed_previous": 18, "failed": 0 },
   "lint": "PASSED",
   "build": "PASSED",
   "live_api": {
@@ -64,5 +64,37 @@
     "The transparent spider cutout preserves the source identity but reconstructs surface details, so it is not pixel-identical to the source PNG.",
     "Web lines and glow are deliberately quieter than the mockup so semantic edges and exact evidence remain readable."
   ],
-  "accuracy_scope": "Visual and interaction verification of a real copied Phase 7 graph; this does not benchmark research factual accuracy."
+  "accuracy_scope": "Visual and interaction verification of a real copied Phase 7 graph; this does not benchmark research factual accuracy.",
+  "question_first_workflow": {
+    "home_route": "/",
+    "progress_and_result_route": "/research/{researchJobId}",
+    "graph_route": "/research/{researchJobId}/graph/{snapshotId}",
+    "developer_loader_route": "/developer/open-graph",
+    "manual_uuid_required_in_normal_flow": false,
+    "mocked_frontend_integration": "Phase 3-7 ID propagation, status polling, refresh resume, partial/failure/cancel, grounded result and graph navigation",
+    "visual_report": "docs/phase8a-workflow-visual-results.json",
+    "visual_checks": 20,
+    "viewports": ["1920x1080", "1440x900", "1366x768", "1024x768"],
+    "screens": ["home", "progress", "result", "graph", "developer"],
+    "horizontal_overflow_count": 0,
+    "console_error_count": 0,
+    "live_api_report": "docs/phase8a-live-workflow-attempt3.json",
+    "live_question": "What is hybrid retrieval in RAG?",
+    "live_elapsed_seconds": 769.3,
+    "live_research_status": "partial",
+    "live_pages_crawled": 1,
+    "live_index_status": "COMPLETED",
+    "live_agent_status": "BUDGET_EXHAUSTED",
+    "live_agent_stop_reason": "TIME_BUDGET",
+    "live_evidence_status": "COMPLETED",
+    "live_claims_extracted": 2,
+    "live_citations_validated": 2,
+    "live_graph_status": "COMPLETED",
+    "live_graph_validation": "VALID",
+    "prior_live_attempts": [
+      "docs/phase8a-live-workflow-results.json",
+      "docs/phase8a-live-workflow-attempt2.json",
+      "docs/phase8a-live-workflow-resumed.json"
+    ]
+  }
 }

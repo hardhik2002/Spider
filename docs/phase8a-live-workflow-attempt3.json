@@ -1,0 +1,179 @@
+{
+  "question": "What is hybrid retrieval in RAG?",
+  "started_at": "2026-10-29T14:04:42.331859+00:00",
+  "steps": [
+    {
+      "at": "2026-10-29T14:04:42.922856+00:00",
+      "step": "research",
+      "status": "PENDING",
+      "stage": "pending",
+      "node": null
+    },
+    {
+      "at": "2026-10-29T14:04:45.929662+00:00",
+      "step": "research",
+      "status": "RUNNING",
+      "stage": "planning",
+      "node": null
+    },
+    {
+      "at": "2026-10-29T14:09:21.470309+00:00",
+      "step": "research",
+      "status": "RUNNING",
+      "stage": "searching",
+      "node": null
+    },
+    {
+      "at": "2026-10-29T14:09:24.515677+00:00",
+      "step": "research",
+      "status": "RUNNING",
+      "stage": "scoring",
+      "node": null
+    },
+    {
+      "at": "2026-10-29T14:09:45.686957+00:00",
+      "step": "research",
+      "status": "RUNNING",
+      "stage": "crawling",
+      "node": null
+    },
+    {
+      "at": "2026-10-29T14:10:23.425873+00:00",
+      "step": "research",
+      "status": "PARTIAL",
+      "stage": "completed",
+      "node": null
+    },
+    {
+      "at": "2026-10-29T14:10:24.111311+00:00",
+      "step": "index",
+      "status": "PENDING",
+      "stage": null,
+      "node": null
+    },
+    {
+      "at": "2026-10-29T14:10:36.002671+00:00",
+      "step": "index",
+      "status": "RUNNING",
+      "stage": null,
+      "node": null
+    },
+    {
+      "at": "2026-10-29T14:10:48.131563+00:00",
+      "step": "index",
+      "status": "COMPLETED",
+      "stage": null,
+      "node": null
+    },
+    {
+      "at": "2026-10-29T14:10:48.411275+00:00",
+      "step": "agent",
+      "status": "PENDING",
+      "stage": null,
+      "node": "PENDING"
+    },
+    {
+      "at": "2026-10-29T14:10:51.441771+00:00",
+      "step": "agent",
+      "status": "RETRIEVING",
+      "stage": null,
+      "node": "RETRIEVING"
+    },
+    {
+      "at": "2026-10-29T14:10:57.672308+00:00",
+      "step": "agent",
+      "status": "ASSESSING",
+      "stage": null,
+      "node": "ASSESSING"
+    },
+    {
+      "at": "2026-10-29T14:12:51.268185+00:00",
+      "step": "agent",
+      "status": "BUDGET_EXHAUSTED",
+      "stage": null,
+      "node": "FINALIZE"
+    },
+    {
+      "at": "2026-10-29T14:12:51.627937+00:00",
+      "step": "evidence",
+      "status": "PENDING",
+      "stage": "PENDING",
+      "node": null
+    },
+    {
+      "at": "2026-10-29T14:12:54.667832+00:00",
+      "step": "evidence",
+      "status": "RUNNING",
+      "stage": "EXTRACTION",
+      "node": null
+    },
+    {
+      "at": "2026-10-29T14:15:50.924096+00:00",
+      "step": "evidence",
+      "status": "RUNNING",
+      "stage": "VERIFICATION",
+      "node": null
+    },
+    {
+      "at": "2026-10-29T14:17:25.574079+00:00",
+      "step": "evidence",
+      "status": "COMPLETED",
+      "stage": "COMPLETED",
+      "node": null
+    },
+    {
+      "at": "2026-10-29T14:17:28.584879+00:00",
+      "step": "graph",
+      "status": "PENDING",
+      "stage": null,
+      "node": null
+    },
+    {
+      "at": "2026-10-29T14:17:31.618072+00:00",
+      "step": "graph",
+      "status": "COMPLETED",
+      "stage": null,
+      "node": null
+    }
+  ],
+  "outcome": "COMPLETED",
+  "research_job_id": "e674a621-1912-4933-b522-fbe72f2b7699",
+  "elapsed_seconds": 769.3,
+  "research_final": {
+    "status": "partial",
+    "stage": "completed",
+    "total_search_results": 4,
+    "selected_seed_count": 2,
+    "pages_crawled": 1,
+    "error_message": null
+  },
+  "index_job_id": "1734bcc5-0af0-48e7-913c-f4e32d0370dc",
+  "index_final": {
+    "status": "COMPLETED",
+    "documents_indexed": 1,
+    "chunks_created": 1,
+    "lexical_records": 1,
+    "error_message": null
+  },
+  "agent_run_id": "0e93a43c-876e-4261-9d9d-19bf36c17e12",
+  "agent_final": {
+    "status": "BUDGET_EXHAUSTED",
+    "stop_reason": "TIME_BUDGET",
+    "error_message": null
+  },
+  "evidence_job_id": "42ae1853-2e4a-4675-b005-4dcf60f8f78f",
+  "evidence_final": {
+    "status": "COMPLETED",
+    "claims_extracted": 2,
+    "citations_validated": 2,
+    "error": null
+  },
+  "graph_snapshot_id": "c37a35f2-0401-4e7c-a2c3-4496ab6aecc6",
+  "graph_final": {
+    "status": "COMPLETED",
+    "validation_status": "VALID",
+    "node_count": 9,
+    "edge_count": 13
+  },
+  "finished_at": "2026-10-29T14:17:31.658428+00:00"
+}

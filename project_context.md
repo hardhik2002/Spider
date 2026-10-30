@@ -1,10 +1,10 @@
 # SpiderMind project context
 
-_Updated 29 October 2026 for Phase 8A. This describes the current working tree. It is a guide to the implementation, not a replacement for the source code or the recorded result JSON._
+_Updated 29 October 2026 for the Phase 8A question-first workflow. This describes the current working tree. It is a guide to the implementation, not a replacement for the source code or the recorded result JSON._
 
 ## 1. Purpose and current boundary
 
-SpiderMind has a Python 3.11+ FastAPI research backend and a Phase 8A React/TypeScript graph client. The backend accepts a URL or research question, crawls public HTML, plans searches, indexes passages, runs a bounded research loop, produces a claim/evidence ledger, and materializes a deterministic citation graph. The frontend explores that graph without changing evidence semantics. There is no authentication or final answer writer. The API advertises version `0.7.0` in `backend/app/main.py`; `pyproject.toml` still labels the Python package `0.1.0` and describes the original Phase 1 foundation.
+SpiderMind has a Python 3.11+ FastAPI research backend and a Phase 8A React/TypeScript client. The backend accepts a URL or research question, crawls public HTML, plans searches, indexes passages, runs a bounded research loop, produces a claim/evidence ledger, and materializes a deterministic citation graph. The frontend now starts from a question, coordinates those existing jobs, displays a grounded claim overview, and opens the graph without changing evidence semantics. There is no authentication or final answer writer. The API advertises version `0.7.0` in `backend/app/main.py`; `pyproject.toml` still labels the Python package `0.1.0` and describes the original Phase 1 foundation.
 
 The phases build on one another:
 
@@ -326,7 +326,7 @@ This lists every Python source/test/script file and every tracked text artifact,
 | `frontend/package.json`, `package-lock.json` | React/TypeScript/Vite/React Flow dependencies and reproducible scripts. |
 | `frontend/vite.config.ts`, `tsconfig*.json`, `eslint.config.js` | Development proxy, TypeScript, Vitest, and lint configuration. |
 | `frontend/index.html`, `src/main.tsx` | Browser entry point and stylesheet loading. |
-| `frontend/src/app/App.tsx` | UI composition, graph selection, filters, overlays, and inspector state. |
+| `frontend/src/app/App.tsx` | Route selection for question home, progress/result, graph, and developer utility; graph composition and inspector state. |
 | `frontend/src/api/{client,graphApi}.ts` | Timed HTTP client and Phase 7 endpoint functions. |
 | `frontend/src/types/graph.ts` | Explicit node/edge/status DTO unions matching Phase 7. |
 | `frontend/src/hooks/useSpiderGraph.ts` | Build/load/poll, bounded expansion, detail/claim/path/contradiction state. |
@@ -334,14 +334,34 @@ This lists every Python source/test/script file and every tracked text artifact,
 | `frontend/src/components/layout/{TopHeader,Sidebar}.tsx` | Search, navigation, status, and graph filters. |
 | `frontend/src/components/graph/{GraphNodeCard,SemanticEdge,SpiderHub,GraphToolbar,GraphLegend,GraphWorkspace}.tsx` | Custom graph canvas, spider visual, controls, and legend. |
 | `frontend/src/components/inspector/InspectorDrawer.tsx` | Type-specific inspection and claim evidence/citation views. |
-| `frontend/src/components/research/GraphLoader.tsx` | Snapshot or evidence-job startup form. |
+| `frontend/src/components/research/ResearchHome.tsx` | Question-first landing form, validation, examples, and resume action. |
+| `frontend/src/components/research/ResearchRunView.tsx` | Honest progress, recorded counts, partial state, source list, claim ledger, and graph transition. |
+| `frontend/src/components/research/GraphLoader.tsx` | Advanced developer snapshot/evidence-job loader. |
+| `frontend/src/features/research/researchApi.ts` | Typed Phase 3–7 API calls used by the frontend workflow. |
+| `frontend/src/features/research/researchRunTypes.ts` | Persisted run and stage contracts. |
+| `frontend/src/features/research/researchRunMachine.ts` | Explicit sequential stage transitions and backend status decisions. |
+| `frontend/src/features/research/researchRunStorage.ts` | Browser local-storage save/restore of non-sensitive run state and internal IDs. |
+| `frontend/src/features/research/polling.ts` | Cancellable 2.5-second status scheduling with bounded transient-failure backoff. |
+| `frontend/src/features/research/useResearchRun.ts` | React orchestration, polling, transient GET retries, agent stop, and resume. |
 | `frontend/src/utils/safety.ts` | Safe HTTP(S) source links and short IDs. |
-| `frontend/src/styles/global.css` | Dark responsive design, web motif, reduced-motion behavior. |
+| `frontend/src/styles/global.css`, `research.css` | Dark responsive graph and research design, web motif, reduced-motion behavior. |
 | `frontend/src/tests/{fixture,setup,graphLogic,safetyAndApi,InspectorDrawer,Navigation,App.integration,liveApi}.*` | Controlled DTO fixtures, frontend behavior tests, and an optional real Phase 7 API integration test. |
+| `frontend/src/tests/{ResearchHome,researchRunMachine}.test.*` | Question-first route, developer loader, ID propagation, resume, partial/failure, and completed result tests. |
+| `frontend/src/tests/polling.test.ts` | Poll timing, bounded backoff, and timer cancellation. |
 | `frontend/src/assets/{spider-reference,spider-cutout,spidermind-ui-reference}.png`, `README.md` | Original spider and UI references, transparent runtime cutout, and asset provenance. |
 | `frontend/scripts/verify-phase8a{,-interactions}.mjs` | Local Chrome screenshots, viewport/console measurements, and real UI interaction checks. |
+| `frontend/scripts/verify-research-workflow.mjs` | Five-screen, four-viewport workflow screenshot/overflow/console check. |
 | `frontend/README.md`, `.env.example` | Setup, API origin, interaction, and quality-gate documentation. |
 | `backend/scripts/prepare_phase8a_ui_smoke.py` | Copies completed Phase 6 data and builds a real local Phase 7 snapshot for UI development. |
+| `backend/scripts/live_phase8a_workflow.py` | Bounded Phase 3–7 real API run with observed status and failure recording. |
+
+### Phase 8A question-first workflow
+
+The normal `/` route asks only for a research question and validates the Phase 3 question bounds. The frontend posts `POST /api/v1/research`, saves `research_job_id`, polls `GET /api/v1/research/{id}`, then starts and polls `/index`, `/agent`, `/evidence`, and `/graph`. `agent_run_id` is passed to Phase 6 and `evidence_job_id` to Phase 7. All IDs stay internal. `/research/{id}` shows live progress and then a grounded claim/source overview; `/research/{id}/graph/{snapshot}` opens the existing visual graph. `/developer/open-graph` retains the manual loader for debugging. The graph header searches loaded nodes, while the home input starts research.
+
+The explicit frontend stages are `CREATING_RESEARCH`, `RESEARCHING`, `INDEXING`, `RUNNING_AGENT`, `VERIFYING_EVIDENCE`, `BUILDING_GRAPH`, `COMPLETED`, `PARTIAL`, `FAILED`, and `CANCELLED`. Phase 3's planning/searching/scoring/crawling steps appear in the progress view. `spidermind.activeResearchRun` stores question, stage, timestamps, counters, warnings, and returned IDs; it omits claim text, source details, and graph payloads. A refresh resumes GET polling or fetches recorded result details from saved IDs. Transient GET failures retry; creation POSTs do not retry automatically. The Phase 5 cancel endpoint is exposed only while that agent runs. Partial statuses and valid source/claim data remain visible. Graph data is only opened after a completed, valid snapshot. The result screen uses Phase 6 claim statuses and Phase 7 counts, without generating a final answer.
+
+The browser cannot recover an initial POST response lost before local storage is written, and there is no cross-device active-run listing. Backend jobs continue independently of the page. The full synthesized answer remains Phase 8B. Controlled integration tests cover stage propagation and resume; a bounded real API run and four-viewport screenshots are recorded separately in `docs/`.
 
 ### Documentation and recorded runs
 

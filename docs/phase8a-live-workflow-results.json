@@ -1,0 +1,40 @@
+{
+  "question": "What is hybrid retrieval in RAG?",
+  "started_at": "2026-10-29T13:45:19.513454+00:00",
+  "steps": [
+    {
+      "at": "2026-10-29T13:45:20.583605+00:00",
+      "step": "research",
+      "status": "PENDING",
+      "stage": "pending",
+      "node": null
+    },
+    {
+      "at": "2026-10-29T13:45:23.614350+00:00",
+      "step": "research",
+      "status": "RUNNING",
+      "stage": "planning",
+      "node": null
+    },
+    {
+      "at": "2026-10-29T13:48:28.163964+00:00",
+      "step": "research",
+      "status": "FAILED",
+      "stage": "failed",
+      "node": null
+    }
+  ],
+  "outcome": "STOPPED",
+  "research_job_id": "0475dc67-cd81-480b-a610-8cbddbc9fd06",
+  "elapsed_seconds": 188.7,
+  "research_final": {
+    "status": "failed",
+    "stage": "failed",
+    "total_search_results": 0,
+    "selected_seed_count": 0,
+    "pages_crawled": 0,
+    "error_message": "ReadTimeout: "
+  },
+  "error": "RuntimeError: Research produced no usable crawled pages",
+  "finished_at": "2026-10-29T13:48:28.234125+00:00"
+}

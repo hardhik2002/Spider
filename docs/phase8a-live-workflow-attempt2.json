@@ -1,0 +1,32 @@
+{
+  "question": "What is hybrid retrieval in RAG?",
+  "started_at": "2026-10-29T13:53:27.055438+00:00",
+  "steps": [
+    {
+      "at": "2026-10-29T13:53:31.433449+00:00",
+      "step": "research",
+      "status": "RUNNING",
+      "stage": "planning",
+      "node": null
+    },
+    {
+      "at": "2026-10-29T13:57:43.732701+00:00",
+      "step": "research",
+      "status": "RUNNING",
+      "stage": "searching",
+      "node": null
+    },
+    {
+      "at": "2026-10-29T13:57:55.847572+00:00",
+      "step": "research",
+      "status": "RUNNING",
+      "stage": "scoring",
+      "node": null
+    }
+  ],
+  "outcome": "STOPPED",
+  "research_job_id": "860099c8-6b7f-4706-a779-c7584283f682",
+  "elapsed_seconds": 295.6,
+  "error": "RemoteProtocolError: Server disconnected without sending a response.",
+  "finished_at": "2026-10-29T13:58:22.634105+00:00"
+}

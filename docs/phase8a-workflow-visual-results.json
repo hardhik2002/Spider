@@ -1,0 +1,166 @@
+{
+  "browser": "155.0.8059.41",
+  "data": "Existing persisted Phase 7 graph and claims; progress screen uses a visual-only intercepted status",
+  "checks": [
+    {
+      "scenario": "home",
+      "viewport": "1920x1080",
+      "screenshot": "docs/phase8a/workflow-screenshots/workflow-home-1920x1080.png",
+      "horizontalOverflow": false,
+      "consoleErrors": 0,
+      "verticalScroll": false
+    },
+    {
+      "scenario": "progress",
+      "viewport": "1920x1080",
+      "screenshot": "docs/phase8a/workflow-screenshots/workflow-progress-1920x1080.png",
+      "horizontalOverflow": false,
+      "consoleErrors": 0,
+      "verticalScroll": false
+    },
+    {
+      "scenario": "result",
+      "viewport": "1920x1080",
+      "screenshot": "docs/phase8a/workflow-screenshots/workflow-result-1920x1080.png",
+      "horizontalOverflow": false,
+      "consoleErrors": 0,
+      "verticalScroll": false
+    },
+    {
+      "scenario": "graph",
+      "viewport": "1920x1080",
+      "screenshot": "docs/phase8a/workflow-screenshots/workflow-graph-1920x1080.png",
+      "horizontalOverflow": false,
+      "consoleErrors": 0,
+      "verticalScroll": false
+    },
+    {
+      "scenario": "developer",
+      "viewport": "1920x1080",
+      "screenshot": "docs/phase8a/workflow-screenshots/workflow-developer-1920x1080.png",
+      "horizontalOverflow": false,
+      "consoleErrors": 0,
+      "verticalScroll": false
+    },
+    {
+      "scenario": "home",
+      "viewport": "1440x900",
+      "screenshot": "docs/phase8a/workflow-screenshots/workflow-home-1440x900.png",
+      "horizontalOverflow": false,
+      "consoleErrors": 0,
+      "verticalScroll": false
+    },
+    {
+      "scenario": "progress",
+      "viewport": "1440x900",
+      "screenshot": "docs/phase8a/workflow-screenshots/workflow-progress-1440x900.png",
+      "horizontalOverflow": false,
+      "consoleErrors": 0,
+      "verticalScroll": false
+    },
+    {
+      "scenario": "result",
+      "viewport": "1440x900",
+      "screenshot": "docs/phase8a/workflow-screenshots/workflow-result-1440x900.png",
+      "horizontalOverflow": false,
+      "consoleErrors": 0,
+      "verticalScroll": false
+    },
+    {
+      "scenario": "graph",
+      "viewport": "1440x900",
+      "screenshot": "docs/phase8a/workflow-screenshots/workflow-graph-1440x900.png",
+      "horizontalOverflow": false,
+      "consoleErrors": 0,
+      "verticalScroll": false
+    },
+    {
+      "scenario": "developer",
+      "viewport": "1440x900",
+      "screenshot": "docs/phase8a/workflow-screenshots/workflow-developer-1440x900.png",
+      "horizontalOverflow": false,
+      "consoleErrors": 0,
+      "verticalScroll": false
+    },
+    {
+      "scenario": "home",
+      "viewport": "1366x768",
+      "screenshot": "docs/phase8a/workflow-screenshots/workflow-home-1366x768.png",
+      "horizontalOverflow": false,
+      "consoleErrors": 0,
+      "verticalScroll": false
+    },
+    {
+      "scenario": "progress",
+      "viewport": "1366x768",
+      "screenshot": "docs/phase8a/workflow-screenshots/workflow-progress-1366x768.png",
+      "horizontalOverflow": false,
+      "consoleErrors": 0,
+      "verticalScroll": false
+    },
+    {
+      "scenario": "result",
+      "viewport": "1366x768",
+      "screenshot": "docs/phase8a/workflow-screenshots/workflow-result-1366x768.png",
+      "horizontalOverflow": false,
+      "consoleErrors": 0,
+      "verticalScroll": false
+    },
+    {
+      "scenario": "graph",
+      "viewport": "1366x768",
+      "screenshot": "docs/phase8a/workflow-screenshots/workflow-graph-1366x768.png",
+      "horizontalOverflow": false,
+      "consoleErrors": 0,
+      "verticalScroll": false
+    },
+    {
+      "scenario": "developer",
+      "viewport": "1366x768",
+      "screenshot": "docs/phase8a/workflow-screenshots/workflow-developer-1366x768.png",
+      "horizontalOverflow": false,
+      "consoleErrors": 0,
+      "verticalScroll": false
+    },
+    {
+      "scenario": "home",
+      "viewport": "1024x768",
+      "screenshot": "docs/phase8a/workflow-screenshots/workflow-home-1024x768.png",
+      "horizontalOverflow": false,
+      "consoleErrors": 0,
+      "verticalScroll": false
+    },
+    {
+      "scenario": "progress",
+      "viewport": "1024x768",
+      "screenshot": "docs/phase8a/workflow-screenshots/workflow-progress-1024x768.png",
+      "horizontalOverflow": false,
+      "consoleErrors": 0,
+      "verticalScroll": false
+    },
+    {
+      "scenario": "result",
+      "viewport": "1024x768",
+      "screenshot": "docs/phase8a/workflow-screenshots/workflow-result-1024x768.png",
+      "horizontalOverflow": false,
+      "consoleErrors": 0,
+      "verticalScroll": false
+    },
+    {
+      "scenario": "graph",
+      "viewport": "1024x768",
+      "screenshot": "docs/phase8a/workflow-screenshots/workflow-graph-1024x768.png",
+      "horizontalOverflow": false,
+      "consoleErrors": 0,
+      "verticalScroll": false
+    },
+    {
+      "scenario": "developer",
+      "viewport": "1024x768",
+      "screenshot": "docs/phase8a/workflow-screenshots/workflow-developer-1024x768.png",
+      "horizontalOverflow": false,
+      "consoleErrors": 0,
+      "verticalScroll": false
+    }
+  ]
+}

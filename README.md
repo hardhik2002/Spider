@@ -375,7 +375,9 @@ npm install
 npm run dev
 ```
 
-Open `http://127.0.0.1:5173`. Enter a research-job and graph-snapshot ID, or a research-job and completed evidence-job ID to build a graph. The local Vite proxy reaches the backend on port 8000 without a CORS change. Set `VITE_API_BASE_URL` for a separately hosted API. Run `npm run lint`, `npm run test`, and `npm run build` before release.
+Open `http://127.0.0.1:5173`, enter a research question, and select **Research**. The frontend starts and polls the existing research, index, agent, evidence, and graph jobs in order. Internal IDs are saved in browser local storage and passed automatically. The result screen shows recorded claim decisions, source counts, citations, and a button to explore the graph; it does not write a synthesized answer. The former manual snapshot form is under **Developer Tools** at `/developer/open-graph`.
+
+The local Vite proxy reaches the backend on port 8000 without a CORS change. Set `VITE_API_BASE_URL` for a separately hosted API. Run `npm run lint`, `npm run test`, `npm run build`, and `npm run visual:workflow` before release. [Workflow visual results](docs/phase8a-workflow-visual-results.json) cover home, progress, result, graph, and developer views at 1920×1080, 1440×900, 1366×768, and 1024×768. [Live pipeline results](docs/phase8a-live-workflow-attempt3.json) record the bounded real API attempt separately from the deterministic frontend integration tests.
 
 ## Tests and checks
 
