@@ -16,7 +16,7 @@ export function GraphLoader({ initialResearchId = '', initialSnapshotId = '', bu
   return <div className="loader-backdrop"><section className="graph-loader" aria-label="Open research graph">
     {onClose && <button className="loader-close" aria-label="Close graph loader" onClick={onClose}>×</button>}
     <div className="loader-orbit"><Network size={34} /></div>
-    <span className="eyebrow">SPIDERMIND / PHASE 8A</span>
+    <span className="eyebrow">ADVANCED / DEVELOPER TOOLS</span>
     <h1>Enter the research web.</h1>
     <p>Load a validated graph snapshot, or build one from a completed evidence job. SpiderMind uses your real Phase 7 records.</p>
     <div className="loader-tabs" role="tablist"><button role="tab" aria-selected={mode === 'load'} className={mode === 'load' ? 'active' : ''} onClick={() => setMode('load')}><Fingerprint size={16} /> Load snapshot</button><button role="tab" aria-selected={mode === 'build'} className={mode === 'build' ? 'active' : ''} onClick={() => setMode('build')}><Database size={16} /> Build graph</button></div>

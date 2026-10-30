@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "test": "vitest run",
     "visual:verify": "node scripts/verify-phase8a.mjs",
-    "visual:interactions": "node scripts/verify-phase8a-interactions.mjs"
+    "visual:interactions": "node scripts/verify-phase8a-interactions.mjs",
+    "visual:workflow": "node scripts/verify-research-workflow.mjs"
   },
   "dependencies": {
     "@xyflow/react": "^12.12.0",

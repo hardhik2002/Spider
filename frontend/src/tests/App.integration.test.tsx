@@ -22,7 +22,7 @@ vi.mock('../components/graph/GraphWorkspace', async () => {
 beforeEach(() => {
   vi.clearAllMocks()
   localStorage.clear()
-  window.history.replaceState(null, '', '/')
+  window.history.replaceState(null, '', '/developer/open-graph')
   api.status.mockResolvedValue(status)
   api.summary.mockResolvedValue(summary)
   api.consistency.mockResolvedValue(consistency)

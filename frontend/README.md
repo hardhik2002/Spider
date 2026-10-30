@@ -1,6 +1,6 @@
-# SpiderMind interactive graph UI (Phase 8A)
+# SpiderMind research and graph UI (Phase 8A)
 
-React, TypeScript, Vite, and React Flow display the existing Phase 7 knowledge/citation graph. The client reads persisted graph records; it does not create claims, change evidence status, or generate answers.
+React, TypeScript, Vite, and React Flow provide a question-first research flow and display the existing Phase 7 knowledge/citation graph. The client orchestrates existing asynchronous APIs; it does not create claims, change evidence status, or generate answers.
 
 ## Required assets
 
@@ -26,9 +26,15 @@ npm run dev
 
 Open `http://127.0.0.1:5173`. Vite proxies `/api`, `/health`, and `/ready` to `127.0.0.1:8000`, so no backend CORS change is required for the local setup. For deployment, set `VITE_API_BASE_URL` in `.env` to the API origin, or serve the built UI and API from one origin. The production backend does not serve frontend files in this phase.
 
-## Load or build a graph
+## Research a question
 
-The startup form accepts a **Research Job ID** and **Graph Snapshot ID**. It can also build a graph from a finished **Evidence Job ID**, polling the asynchronous job until completion. There is no global research-job or snapshot listing API, so the client does not invent one. The last opened IDs are saved locally in the browser and can also be opened at `/research/{researchJobId}/graph/{snapshotId}`.
+Open `/`, type a question of at least two words and 8–2000 characters, then select **Research** (or press Ctrl/⌘ + Enter). The frontend sends `POST /api/v1/research`, polls status, then starts and polls `/index`, `/agent`, `/evidence`, and `/graph` in that order. It saves stage metadata and returned IDs in `spidermind.activeResearchRun` so a refresh resumes the current GET status check without recreating completed phases. Claim text and graph payloads are fetched again after refresh rather than saved locally. The progress page is `/research/{researchJobId}`; the result page is that same route after verification. **Explore Spider Graph** opens `/research/{researchJobId}/graph/{snapshotId}`.
+
+The result screen displays only persisted claim decisions, citation and source counts, and selected public source links. It does not synthesize a natural-language answer; that remains Phase 8B. Partial jobs retain available source and claim data, and a warning identifies incomplete stages. Only the Phase 5 agent has a backend cancellation endpoint, so **Stop research** appears during that stage. GET status checks retry transient failures. If the browser closes between the initial research POST and saving its response, the client cannot prove whether a job was created and asks for a new run rather than automatically repeating the POST. Local storage belongs to one browser; it is not cross-device synchronization.
+
+## Developer snapshot loader
+
+The former manual ID loader remains available at `/developer/open-graph` through **Developer Tools** on the home page. It accepts a research and graph snapshot ID, or a research and completed evidence job ID to build a graph. This is an advanced debugging path. The main workflow never asks users for UUIDs. There is no global research-job or snapshot listing API.
 
 For an offline local smoke using copied Phase 6 data:
 
@@ -57,9 +63,12 @@ The preparation command prints the real research and snapshot IDs. It copies an 
 npm run lint
 npm run test
 npm run build
+npm run visual:workflow
 ```
 
 Tests use controlled Phase 7 response fixtures and do not require a live backend. The live UI smoke requires a running backend. The React Flow canvas loads bounded neighborhoods and merges them on demand; very large graph exploration would benefit from server-side search and viewport-aware paging.
+
+`visual:workflow` checks home, progress, grounded result, graph, and developer screens at four desktop/tablet viewports using local Chrome. Its progress screen uses an intercepted status only for visual capture; result and graph use persisted Phase 7 records. `backend/scripts/live_phase8a_workflow.py` exercises a bounded real research question through the API and writes observed outcomes, including early failures, to `docs/`.
 
 With the copied live backend and Vite server running, local Chrome visual checks can be repeated with:
 

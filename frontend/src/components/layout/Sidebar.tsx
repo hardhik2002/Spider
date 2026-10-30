@@ -3,7 +3,6 @@ import { Activity, BookOpen, ChevronDown, CircleHelp, Database, FileSearch, File
 import type { ClaimStatus, ConfidenceTier, GraphEdgeType, GraphNodeType, GraphStatusDto, GraphSummaryDto } from '../../types/graph'
 import type { GraphFilters } from '../../features/graph/graphAdapter'
 import { edgeVisuals } from '../../features/graph/visuals'
-import { shortId } from '../../utils/safety'
 
 interface Props {
   filters: GraphFilters; onFilters: (filters: GraphFilters) => void
@@ -60,8 +59,8 @@ export function Sidebar({ filters, onFilters, status, summary, onContradictions,
       </div>
       <div className="sidebar-context">
         <span className="sidebar-caption">ACTIVE RESEARCH</span>
-        {status ? <><strong><span className="live-dot" />{status.status}</strong><p>Job {shortId(status.research_job_id, 13)}</p><div className="context-grid"><span>Nodes <b>{status.node_count}</b></span><span>Edges <b>{status.edge_count}</b></span></div><small>Graph {status.validation_status}</small></> : <p>No graph loaded</p>}
-        <button className="context-switch" onClick={onLoadAnother}><Database size={14} />{status ? 'Switch graph' : 'Load graph'}</button>
+        {status ? <><strong><span className="live-dot" />{status.status}</strong><p>Research graph</p><div className="context-grid"><span>Nodes <b>{status.node_count}</b></span><span>Edges <b>{status.edge_count}</b></span></div><small>Graph {status.validation_status}</small></> : <p>No graph loaded</p>}
+        <button className="context-switch" onClick={onLoadAnother}><Database size={14} />{status ? 'Research home' : 'Research home'}</button>
       </div>
       <div className="sidebar-footer"><Activity size={14} /> PHASE 8A · GRAPH CLIENT</div>
     </aside>
